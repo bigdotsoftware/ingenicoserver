@@ -326,7 +326,7 @@ paths:
             $ref: "#/definitions/TransactionDataInputResponse"
             
   /ingenico_report_generate:
-    get:
+    post:
       tags:
       - "terminal"
       summary: ""
