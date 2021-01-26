@@ -276,6 +276,8 @@ paths:
       responses:
         "200":
           description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionEndResponse"
     
   /ingenico_transaction_recon_info:
     get:
@@ -323,7 +325,7 @@ paths:
           schema:
             $ref: "#/definitions/TransactionDataInputResponse"
             
-  /ingenico_transaction_get_summary:
+  /ingenico_report_generate:
     get:
       tags:
       - "terminal"
@@ -338,9 +340,42 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "reset"
+        in: "query"
+        type: "boolean"
+        default: false
       responses:
         "200":
           description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionReportGenerateResponse"
+
+  /ingenico_transaction_get_summary/{cardset}:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cardset"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionReportSummaryResponse"
+          
 
 definitions:
   TransactionBeginRequest:
@@ -389,6 +424,46 @@ definitions:
       sequenceNb:
         type: "string"
   
+  TransactionReportGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          firstTransaction:
+            type: "integer"
+            format: "int32"
+          lastTransaction:
+            type: "integer"
+            format: "int32"
+  
+  TransactionReportSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          summaryTitle:
+            type: "string"
+          reportEntries:
+            type: "array"
+            description: "example: [\"SPRZEDAŻ|13|13000\",\"ZWROTY|0|0\",\"DOP.PRE-AUT.|0|0\",\"RAZEM|13|13000\",\"WYPŁATA GOTÓWKI|0|0\"]"
+            items:
+              type: "string"
+  
+  
   TransactionDataInputResponse:
     type: "object"
     allOf:
@@ -406,11 +481,52 @@ definitions:
           returnCode:
             type: "integer"
             format: "int32"
-            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
           error:
             type: "string"
+          resultsObject:
+            type: "object"
+            properties:
+              totalAmount:
+                type: "string"
+              transactionCount:
+                type: "string"
+              status:
+                description: "0 – success 1 – error 2 – success, but not completed preauthorizations were present in batch – unattended terminals only 4 – success, but TMS connection is required"
+                type: "string"
+              statusText:
+                type: "string"
+                enum:
+                  - "success"
+                  - "error"
+                  - "success_with_not_completed_preauthorizations"
+                  - "success_tms_required"
+                  - "unknown"
+              acquirerIdentifier:
+                type: "string"
+              batchNumber:
+                type: "string"
+              date:
+                type: "string"
+                description: "format: YYYY.MM.DD"
+              time:
+                type: "string"
+                description: "format: hh:mm:ss"
+              printingIndicator:
+                type: "string"
+              tid:
+                type: "string"
+              activationSequenceNb:
+                type: "string"
+              cashierIdentifier:
+                type: "string"
+              eVoucherInfo:
+                type: "string"
+              giftcardInfo:
+                type: "string"
           results:
             type: "array"
+            description: "example: [{\"arg0\":\"-17000\"},{\"arg1\":\"0\"},{\"arg2\":\"1\"},{\"arg3\":\"\"}.....]"
             items:
               type: "object"
             
