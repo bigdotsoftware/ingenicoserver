@@ -350,7 +350,7 @@ paths:
           schema:
             $ref: "#/definitions/TransactionReportGenerateResponse"
 
-  /ingenico_transaction_get_summary/{cardset}:
+  /ingenico_report_summary/{cardset}:
     get:
       tags:
       - "terminal"
@@ -374,8 +374,28 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionReportSummaryResponse"
-          
+            $ref: "#/definitions/ReportSummaryResponse"
+  
+  /ingenico_report_total_summary:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ReportTotalSummaryResponse"  
 
 definitions:
   TransactionBeginRequest:
@@ -443,7 +463,17 @@ definitions:
             type: "integer"
             format: "int32"
   
-  TransactionReportSummaryResponse:
+  ReportTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ReportSummaryCommonResponse'
+      
+  ReportSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ReportSummaryCommonResponse'
+      
+  ReportSummaryCommonResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
