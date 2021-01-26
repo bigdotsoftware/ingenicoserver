@@ -19,8 +19,8 @@ tags:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/"
 schemes:
-- "https"
 - "http"
+- "https"
 
 paths:
   /license/check:
