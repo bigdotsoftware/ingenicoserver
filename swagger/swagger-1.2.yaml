@@ -1,0 +1,678 @@
+swagger: "2.0"
+info:
+  description: "This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)"
+  version: "1.2"
+  title: "Ingenico Server"
+  contact:
+    email: "bigdotsoftware@bigdotsoftware.pl"
+host: "localhost:3020"
+basePath: "/v1"
+tags:
+- name: "license"
+  description: "Manage your license"
+  externalDocs:
+    description: "Find out more"
+    url: "https://blog.bigdotsoftware.pl/ingenico-server-licencja/"
+- name: "terminal"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/"
+schemes:
+- "https"
+- "http"
+
+paths:
+  /license/check:
+    get:
+      tags:
+      - "license"
+      summary: "Pass ?json=true/false to change the output format"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "json"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/LicenseResponse"
+            
+  /license/upgrade:
+    post:
+      tags:
+      - "license"
+      summary: "Obtain new license"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LicenseResponse"
+
+  /ingenico_status:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TerminalStatusResponse"
+
+  /ingenico_general_info:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TerminalInfoResponse"
+
+  /ingenico_async_transaction_process:
+    post:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AsyncTransactionBeginResponse"
+            
+  /ingenico_async_transaction_cancel/{uuid}:
+    post:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "uuid"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AsyncTransactionCancelResponse"
+  
+  /ingenico_async_transaction_status/{uuid}:
+    post:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "uuid"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AsyncTransactionStatusResponse"
+            
+  /ingenico_async_transaction_statuses:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/AsyncTransactionStatusResponse"
+  
+  /ingenico_transaction:
+    post:
+      tags:
+      - "terminal"
+      summary: ""
+      description: "sequenceNb is mandatory but for completion and reversal types only. Set it to '-' for other types"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionBeginResponse"
+
+  /ingenico_transaction_end:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionEndResponse"
+  
+  /ingenico_transaction_recon_data/{transactionIndex}:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+    
+  /ingenico_transaction_recon_info:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionReconInfoResponse"
+         
+  /ingenico_transaction_data_input:
+    post:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionDataInputRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionDataInputResponse"
+            
+  /ingenico_transaction_get_summary:
+    get:
+      tags:
+      - "terminal"
+      summary: ""
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+
+definitions:
+  TransactionBeginRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+         - "purchase"
+         - "preauthorization"
+         - "completion"
+         - "preauthorization_cancel"
+         - "refund"
+         - "reversal"
+         - "giftcard_activation"
+         - "giftcard_balance"
+         - "giftcard_topup"
+         - "reconciliation"
+         - "connection_test"
+         - "tms"
+      amount:
+        type: "integer"
+      title:
+        type: "string"
+      sequenceNb:
+        type: "string"
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+          posnetserver:
+            type: "object"
+
+  TransactionDataInputRequest:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      sequenceNb:
+        type: "string"
+  
+  TransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
+  TransactionReconInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+          error:
+            type: "string"
+          results:
+            type: "array"
+            items:
+              type: "object"
+            
+  
+  TransactionEndResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+          transactionType:
+            type: "integer"
+          transactionResultCode:
+            type: "integer"
+          transactionResultCodeText:
+            type: "string"
+          transactionNumber:
+            type: "integer"
+          transactionDetails:
+            type: "object"
+            properties:
+              authorizationCode:
+                type: "string"
+              serverMessage:
+                type: "string"
+              merchantID:
+                type: "string"
+                description: "example '454500000000000'"
+              maskedCardNumber:
+                type: "string"
+                description: "example '************0211'"
+              date: 
+                type: "string"
+                description: "example format 2021.01.25"
+              time:
+                type: "string"
+                description: "example format 12:59:32"
+              cardsetName:
+                type: "string"
+                description: "example 'VISA'"
+              readerUsed:
+                type: "string"
+                description: "example 'C' - possible values: B Contactless, M Manual, C Magstripe, P ICC, ? Unknown"
+              readerUsedText:
+                type: "string"
+                description: "possible values 'magstripe', 'contactless', 'manual', 'icc', 'unknown'"
+              terminalIdentifier:
+                type: "string"
+                description: "example '45450318'"
+              authorizationMessage:
+                type: "string"
+                description: "example '000180'"
+              authorizationType:
+                type: "string"
+                description: "possible values 1 - online, 3 – offline, 4 – referral"
+              authorizationTypeText:
+                type: "string"
+                description: "possible values 'online', 'offline', 'referral'"
+              transactionAmount:
+                type: "string"
+              cardholderAuthorizationMethod:
+                type: "string"
+                description: "possible values A – PIN, @ - Signature, B – PIN and Signature, ? – no authorization"
+              cardholderAuthorizationMethodText:
+                type: "string"
+                description: "possible values 'pin', 'signature', 'pin_signature', 'no authorization', 'unknown'"
+              atc:
+                type: "string"
+              ac:
+                type: "string"
+              aid:
+                type: "string"
+              tvr:
+                type: "string"
+              tsi:
+                type: "string"
+              title:
+                type: "string"
+              printingIndicator:
+                type: "string"
+              transactionCurrency: 
+                type: "string"
+                description: "example 'PLN'"
+              terminalCurrency":
+                type: "string"
+              exchangeRate:
+                type: "string"
+              dcc1:
+                type: "string"
+              dcc2:
+                type: "string"
+              cashAmount:
+                type: "string"
+              spendingAmount:
+                type: "string"
+              dcc_currencyExp:
+                type: "string"
+              additionalInformation:
+                type: "string"
+                description: "example 'DF060A534E204E722056697361DF0B0400000100' or 'DF0B0400000100' or 'DF060A534E204E722056697361DF0B0400000400DF1318343534353033313830303031323630313231323132383534'"
+              additionalInformationObject:
+                type: "object"
+            
+  TransactionBeginResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionActionResponse'
+      
+  TransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  AsyncTransactionStatusResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      state:
+        type: "string"
+        enum:
+        - "success"
+        - "error"
+        - "cancelled"
+        - "processing"
+      ts:
+        type: "integer"
+        format: "int64"
+      req:
+        type: "object"
+      result:
+        type: "object"
+  
+  AsyncTransactionCancelResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/AsyncTransactionActionResponse'
+      
+  AsyncTransactionBeginResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/AsyncTransactionActionResponse'
+      
+  AsyncTransactionActionResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      uuid:
+        type: "string"
+        
+  TerminalInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+          terminalInfoText:
+            type: "string"
+            description: "terminalInfoText is returned only when it cannot be parsed into terminalInfo object"
+          terminalInfo:
+            type: "object"
+            properties:
+              addressLine1:
+                type: "string"
+              addressLine2:
+                type: "string"
+              addressLine3:
+                type: "string"
+              merchantIdentifier:
+                type: "string"
+              terminalIdentifier:
+                type: "string"
+
+  TerminalStatusResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            enum:
+            - "Idle"
+            - "WaitCard"
+            - "WaitPIN"
+            - "WaitEMVApp"
+            - "WaitHost"
+            - "WaitSign"
+            - "WaitTrEnd"
+            - "WaitNoCard"
+            - "WaitBusy"
+            - "InProgress"
+            - "WaitCopy"
+            - "WaitAuthCode"
+            - "WaitAction"
+            - "BatchCompleted"
+            - "DCCCurrency"
+            - "CashBackAmount"
+            - "Used internaly"
+            - "Transaction accepted"
+            - "Waiting for amount"
+            - "Waiting for selection"
+            - "Asking ECR to print data"
+            - "Presenting ZenCard offer"
+            - "Waiting for fid"
+            - "Asking ECR to receive data"
+            - "Zencard continue"
+            - "Application in error state"
+            - "Reconciliation needed"
+          sequenceNb:
+            type: "string"
+  LicenseResponse:
+    type: "object"
+    required: [ "validTo", "licenseTo", "expired" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      validTo:
+        type: "string"
+      licenseTo:
+        type: "string"
+      expired:
+        type: "boolean"
+  ApiResponse:
+    type: "object"
+    required: [ "ok", "watermark" ]
+    properties:
+      ok:
+        type: "boolean"
+      error:
+        type: "string"
+      text:
+        type: "string"
+      watermark:
+        type: "string"
+externalDocs:
+  description: "Find out more about our website"
+  url: "https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/"
