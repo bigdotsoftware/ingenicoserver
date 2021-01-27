@@ -254,53 +254,6 @@ paths:
           schema:
             $ref: "#/definitions/TransactionEndResponse"
   
-  /ingenico_transaction_recon_data/{transactionIndex}:
-    get:
-      tags:
-      - "terminal"
-      summary: ""
-      description: ""
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "fulldebug"
-        in: "query"
-        type: "boolean"
-        default: false
-      - name: "transactionIndex"
-        in: "path"
-        description: ""
-        required: true
-        type: "string"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/TransactionEndResponse"
-    
-  /ingenico_transaction_recon_info:
-    get:
-      tags:
-      - "terminal"
-      summary: "Read Batch data"
-      description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'."
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "fulldebug"
-        in: "query"
-        type: "boolean"
-        default: false
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/TransactionReconInfoResponse"
-         
   /ingenico_transaction_data_input:
     post:
       tags:
@@ -325,6 +278,53 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/TransactionDataInputResponse"
+            
+  /ingenico_batch_recon_data/{transactionIndex}:
+    get:
+      tags:
+      - "terminal"
+      summary: "Read single transaction from batch"
+      description: "Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionEndResponse"
+    
+  /ingenico_batch_recon_info:
+    get:
+      tags:
+      - "terminal"
+      summary: "Read summary batch data"
+      description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'. Method clears the batch and /ingenico_transaction_recon_data don't return any data until next reconciliation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionReconInfoResponse"
             
   /ingenico_report_generate:
     post:
