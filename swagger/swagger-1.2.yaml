@@ -27,14 +27,15 @@ paths:
     get:
       tags:
       - "license"
-      summary: "Pass ?json=true/false to change the output format"
-      description: ""
+      summary: "Check the license details"
+      description: "Shows details about used license, including expiration date. We strongly suggest to execute this method periodically in local monitoring system to verify license expiration date. Method can be used as a system heartbeat as well."
       consumes:
       - "application/json"
       produces:
       - "application/json"
       parameters:
       - name: "json"
+        description: "Pass ?json=true/false to change the output format"
         in: "query"
         type: "boolean"
         default: false
@@ -49,7 +50,7 @@ paths:
       tags:
       - "license"
       summary: "Obtain new license"
-      description: ""
+      description: "Forces to download new license when available. Note that Ingenico server renew licenses automatically 10 days before expiration date. Method can be used to renew license earlier."
       consumes:
       - "application/json"
       produces:
@@ -69,8 +70,8 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Terminal status"
+      description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to finish current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal."
       consumes:
       - "application/json"
       produces:
@@ -90,8 +91,8 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Terminal information"
+      description: "Returns general info about therminal."
       consumes:
       - "application/json"
       produces:
@@ -111,8 +112,8 @@ paths:
     post:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Start new transaction (async mode)"
+      description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of async transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'."
       consumes:
       - "application/json"
       produces:
@@ -136,8 +137,8 @@ paths:
     post:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Cancel async transaction"
+      description: "Use unique task identfier ('uuid') returned by /ingenico_async_transaction_process to cancel transaction."
       consumes:
       - "application/json"
       produces:
@@ -162,8 +163,8 @@ paths:
     post:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Status of async transaction"
+      description: "Use unique task identfier ('uuid') returned by /ingenico_async_transaction_process to check status of individual async transaction."
       consumes:
       - "application/json"
       produces:
@@ -188,8 +189,8 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "List all async transactions"
+      description: "Returns list of all executed async transaction with statusses."
       consumes:
       - "application/json"
       produces:
@@ -211,8 +212,8 @@ paths:
     post:
       tags:
       - "terminal"
-      summary: ""
-      description: "sequenceNb is mandatory but for completion and reversal types only. Set it to '-' for other types"
+      summary: "Start new transaction"
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'"
       consumes:
       - "application/json"
       produces:
@@ -236,8 +237,8 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Finish current transaction"
+      description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
       consumes:
       - "application/json"
       produces:
@@ -329,8 +330,8 @@ paths:
     post:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Prepare terminal report"
+      description: "Prepares a terminal report. To access report data use /ingenico_report_summary with 'cardset' counted from 1"
       consumes:
       - "application/json"
       produces:
@@ -354,7 +355,7 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
+      summary: "Terminal report details"
       description: ""
       consumes:
       - "application/json"
@@ -380,8 +381,8 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Terminal report total details"
+      description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
       consumes:
       - "application/json"
       produces:
@@ -573,7 +574,7 @@ definitions:
           returnCode:
             type: "integer"
             format: "int32"
-            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
           transactionType:
             type: "integer"
           transactionResultCode:
@@ -729,7 +730,7 @@ definitions:
           returnCode:
             type: "integer"
             format: "int32"
-            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
           terminalInfoText:
             type: "string"
             description: "terminalInfoText is returned only when it cannot be parsed into terminalInfo object"
@@ -759,7 +760,7 @@ definitions:
           returnCode:
             type: "integer"
             format: "int32"
-            description: "0 accepted, 1 refused, 2 No connection, 7 interrupted by the user"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
           transactionStatus:
             type: "integer"
             format: "int32"
@@ -782,17 +783,17 @@ definitions:
             - "BatchCompleted"
             - "DCCCurrency"
             - "CashBackAmount"
-            - "Used internaly"
-            - "Transaction accepted"
-            - "Waiting for amount"
-            - "Waiting for selection"
-            - "Asking ECR to print data"
-            - "Presenting ZenCard offer"
-            - "Waiting for fid"
-            - "Asking ECR to receive data"
-            - "Zencard continue"
-            - "Application in error state"
-            - "Reconciliation needed"
+            - "UsedInternaly"
+            - "TransactionAccepted"
+            - "WaitingForAmount"
+            - "WaitingForSelection"
+            - "AskingEcrToPrintData"
+            - "PresentingZenCardOffer"
+            - "WaitingForFid"
+            - "AskingEcrToReceiveData"
+            - "ZencardContinue"
+            - "ApplicationInErrorState"
+            - "ReconciliationNeeded"
           sequenceNb:
             type: "string"
   LicenseResponse:
@@ -813,8 +814,10 @@ definitions:
     properties:
       ok:
         type: "boolean"
+        description: "Check the 'error' field when 'ok' is 'false'"
       error:
         type: "string"
+        description: "Filled only when 'ok' field is 'false'"
       text:
         type: "string"
       watermark:
