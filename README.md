@@ -1,6 +1,8 @@
-# IngenicoServer
+# IngenicoServer - eService RESTful API
 This is a public repository of IngenicoServer product developed by Big Dot Software. 
 https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/. Files stored here are part of every IngenicoServer release
+
+Currently our solution fully supports **eService**, however we do our best to start supporting providers like **PayU**, **Polcard**, **Evalon** etc.
 
 ## RESTful API - Download 
 https://blog.bigdotsoftware.pl/ingenico-server-instalacja/
