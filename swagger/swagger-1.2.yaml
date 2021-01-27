@@ -284,8 +284,8 @@ paths:
     get:
       tags:
       - "terminal"
-      summary: ""
-      description: ""
+      summary: "Read Batch data"
+      description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'."
       consumes:
       - "application/json"
       produces:
