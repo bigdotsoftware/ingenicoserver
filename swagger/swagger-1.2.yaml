@@ -113,7 +113,7 @@ paths:
       tags:
       - "terminal"
       summary: "Start new transaction (async mode)"
-      description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of async transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'."
+      description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of async transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
       - "application/json"
       produces:
@@ -213,7 +213,7 @@ paths:
       tags:
       - "terminal"
       summary: "Start new transaction"
-      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'"
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
       - "application/json"
       produces:
@@ -436,6 +436,7 @@ definitions:
               - "PUT"
           posnetserver:
             type: "object"
+            description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/"
 
   TransactionDataInputRequest:
     type: "object"
