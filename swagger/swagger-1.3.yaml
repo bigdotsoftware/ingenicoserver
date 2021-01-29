@@ -191,7 +191,7 @@ paths:
             $ref: "#/definitions/AsyncTransactionCancelResponse"
   
   /ingenico_async_transaction_status/{uuid}:
-    post:
+    get:
       tags:
       - "Terminal"
       summary: "Status of async transaction"
@@ -243,9 +243,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/AsyncTransactionStatusResponse"
+            $ref: "#/definitions/AsyncTransactionStatusesResponse"
   
   /ingenico_transaction:
     post:
@@ -335,8 +333,8 @@ paths:
     post:
       tags:
       - "Terminal"
-      summary: ""
-      description: ""
+      summary: "Terminal remote control"
+      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
       consumes:
       - "application/json"
       produces:
@@ -977,6 +975,55 @@ definitions:
                 description: "example 'DF060A534E204E722056697361DF0B0400000100' or 'DF0B0400000100' or 'DF060A534E204E722056697361DF0B0400000400DF1318343534353033313830303031323630313231323132383534'"
               additionalInformationObject:
                 type: "object"
+                properties:
+                  blikReferenceCode:
+                    type: "string"
+                  blikEnteredCode:
+                    type: "string"
+                  cardToken:
+                    type: "string"
+                  emv:
+                    type: "string"
+                  cardExpiryDate:
+                    type: "string"
+                  valueToPrint:
+                    type: "array"
+                    items:
+                      type: "string"
+                  transactionFlagsObject:
+                    type: "array"
+                    items:
+                      type: "string"
+                  transactionFlags:
+                    type: "string"
+                  pan:
+                    type: "string"
+                  voucherTypeName:
+                    type: "string"
+                  discountAmount:
+                    type: "string"
+                  preauthAmountTotal:
+                    type: "string"
+                  preauthAmountTotalTerminalCcy:
+                    type: "string"
+                  printout:
+                    type: "string"
+                  tipAmount:
+                    type: "string"
+                  referenceNumber:
+                    type: "string"
+                  dccValue:
+                    type: "string"
+                  dccText:
+                    type: "string"
+                  dccInfo:
+                    type: "string"
+                  dccRatesText:
+                    type: "string"
+                  variableSymbol:
+                    type: "string"
+                  specificSymbol:
+                    type: "string"
             
   TransactionBeginResponse:
     type: "object"
@@ -988,11 +1035,8 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
 
-  AsyncTransactionStatusResponse:
+  AsyncTransactionStatusCommonResponse:
     type: "object"
-    required: [ "uuid" ]
-    allOf:
-      - $ref: '#/definitions/ApiResponse'
     properties:
       state:
         type: "string"
@@ -1006,9 +1050,29 @@ definitions:
         format: "int64"
       req:
         type: "object"
+        allOf:
+          - $ref: "#/definitions/TransactionBeginRequest"
       result:
         type: "object"
+        allOf:
+          - $ref: "#/definitions/TransactionEndResponse"
+          
+  AsyncTransactionStatusResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/AsyncTransactionStatusCommonResponse'
+
   
+  AsyncTransactionStatusesResponse:
+    type: "object"
+    properties:
+      <uuid>:
+        type: "object"
+        allOf:
+          - $ref: '#/definitions/AsyncTransactionStatusCommonResponse'
+      
   AsyncTransactionCancelResponse:
     type: "object"
     allOf:
@@ -1105,6 +1169,30 @@ definitions:
             - "ApplicationInErrorState"
             - "ReconciliationNeeded"
           sequenceNb:
+            type: "string"
+          charsMin:
+            type: "string"
+          charsMax:
+            type: "string"
+          charsAllowed:
+            type: "string"
+            enum:
+            - "numeric"
+            - "alphanumeric"
+            - "ascii"
+            - "unknown"
+          specialCharsAllowed:
+            type: "string"
+            enum:
+            - "ok"
+            - "cancel"
+            - "ok_cancel"
+            - "back"
+            - "ok_back"
+            - "back_cancel"
+            - "ok_back_cancel"
+            - "other"
+          promptText:
             type: "string"
   LicenseResponse:
     type: "object"
