@@ -28,7 +28,11 @@ tags:
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-    
+- name: "DCC Analysis"
+  description: "Transaction DCC analysis"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"  
 schemes:
 - "http"
 - "https"
@@ -92,6 +96,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -113,6 +121,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -134,6 +146,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - in: "body"
         name: "body"
         schema:
@@ -159,6 +175,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "uuid"
         in: "path"
         description: ""
@@ -185,6 +205,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "uuid"
         in: "path"
         description: ""
@@ -211,6 +235,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -234,6 +262,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - in: "body"
         name: "body"
         schema:
@@ -259,6 +291,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -280,6 +316,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "transactionIndex"
         in: "path"
         description: ""
@@ -306,6 +346,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - in: "body"
         name: "body"
         schema:
@@ -331,6 +375,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "transactionIndex"
         in: "path"
         description: ""
@@ -357,6 +405,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -368,7 +420,7 @@ paths:
       tags:
       - "Reports"
       summary: "Prepare terminal report"
-      description: "Prepares a terminal report. To access report data use /ingenico_report_summary with 'cardset' counted from 1"
+      description: "Prepares a terminal report. To access report data use /ingenico_report_details with 'cardset' counted from 1"
       consumes:
       - "application/json"
       produces:
@@ -378,6 +430,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "reset"
         in: "query"
         type: "boolean"
@@ -403,6 +459,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "cardset"
         in: "path"
         description: ""
@@ -419,7 +479,7 @@ paths:
       tags:
       - "Reports"
       summary: "Terminal report total details"
-      description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
+      description: "Returns totals from all transactions prepared by /ingenico_report_generate. Method clears current report details - to access totals again, request /ingenico_report_generate again."
       consumes:
       - "application/json"
       produces:
@@ -429,6 +489,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -441,7 +505,7 @@ paths:
       tags:
       - "Analysis"
       summary: "Prepare transaction analysis"
-      description: "Prepares a terminal report. To access report data use /ingenico_analysis_summary"
+      description: "Prepares a terminal report since last EOD report. To access report data use /ingenico_analysis_summary or /ingenico_analysis_details with 'transactionIndex' counted from 1. Reconciliation erases report data."
       consumes:
       - "application/json"
       produces:
@@ -451,6 +515,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -472,6 +540,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "transactionIndex"
         in: "path"
         description: ""
@@ -488,7 +560,7 @@ paths:
       tags:
       - "Analysis"
       summary: "Analysis total summary"
-      description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
+      description: "Returns totals from all transactions prepared by /ingenico_analysis_generate. Method clears current report details - to access totals again, request /ingenico_analysis_generate again."
       consumes:
       - "application/json"
       produces:
@@ -498,6 +570,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
@@ -520,11 +596,15 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AnalysisGenerateResponse"
+            $ref: "#/definitions/DCCAnalysisGenerateResponse"
 
   /ingenico_dcc_analysis_details/{transactionIndex}:
     get:
@@ -541,6 +621,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       - name: "transactionIndex"
         in: "path"
         description: ""
@@ -550,7 +634,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AnalysisDetailsResponse"
+            $ref: "#/definitions/DCCAnalysisDetailsResponse"
   
   /ingenico_dcc_analysis_summary:
     get:
@@ -567,11 +651,15 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AnalysisTotalSummaryResponse"
+            $ref: "#/definitions/DCCAnalysisTotalSummaryResponse"
             
 definitions:
   TransactionBeginRequest:
@@ -664,7 +752,7 @@ definitions:
   AnalysisDetailsResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      - $ref: '#/definitions/TransactionEndResponse'
       
   DCCAnalysisDetailsResponse:
     type: "object"
@@ -703,7 +791,7 @@ definitions:
             type: "string"
           reportEntries:
             type: "array"
-            description: "example: [\"SPRZEDAŻ|13|13000\",\"ZWROTY|0|0\",\"DOP.PRE-AUT.|0|0\",\"RAZEM|13|13000\",\"WYPŁATA GOTÓWKI|0|0\"]"
+            description: "examples: [\"SPRZEDAŻ|13|13000\",\"ZWROTY|0|0\",\"DOP.PRE-AUT.|0|0\",\"RAZEM|13|13000\",\"WYPŁATA GOTÓWKI|0|0\"] or [\"SPRZEDAŻ|1|1000\", \"UNIEWAŻ.SPRZEDAŻY|0|0\", \"WYPŁATA GOTÓWKI|0|0\", \"W TYM NAPIWKI|0|0\", \"ZWROTY|0|0\", \"DOP.PRE-AUT.|0|0\", \"UNIE.DOP.PRE-AUT.|0|0\", \"RAZEM|1|1000\", \"PRE-AUTORYZACJA|0|0\", \"ZWIĘKSZ. PRE-AUT.|0|0\", \"Anulow. preautory.|0|0\" ]"
             items:
               type: "string"
   
@@ -870,7 +958,7 @@ definitions:
               transactionCurrency: 
                 type: "string"
                 description: "example 'PLN'"
-              terminalCurrency":
+              terminalCurrency:
                 type: "string"
               exchangeRate:
                 type: "string"
