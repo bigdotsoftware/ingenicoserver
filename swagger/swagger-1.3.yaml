@@ -378,6 +378,64 @@ paths:
           schema:
             $ref: "#/definitions/TransactionSendKeyResponse"
             
+  /ingenico_set_parameter:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Set terminal parameters"
+      description: "Set terminal parameters"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionSetParameterRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionSetParameterResponse"
+
+  /ingenico_set_standby:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Standby mode"
+      description: "Put the terminal in Standby mode (power saving)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionSetStandbyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionSetStandbyResponse"
+            
   /ingenico_batch_recon_data/{transactionIndex}:
     get:
       tags:
@@ -778,6 +836,31 @@ definitions:
       sequenceNb:
         type: "string"
   
+  TransactionSetStandbyRequest:
+    type: "object"
+    properties:
+      timeoutSeconds:
+        type: "number"
+        format: "int32"
+        
+  TransactionSetParameterRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "volatile"
+          - "permanent"
+      parameters:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            key:
+              type: "string"
+            value:
+              type: "string"
+        
   TransactionSendKeyRequest:
     type: "object"
     properties:
@@ -880,6 +963,17 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
+      
+  TransactionSetParameterResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionDataInputResponse'
+  
+  TransactionSetStandbyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionDataInputResponse'
+  
   TransactionSendKeyResponse:
     type: "object"
     allOf:
