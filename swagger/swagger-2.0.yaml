@@ -2,33 +2,33 @@ swagger: "2.0"
 info:
   description: "This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)"
   version: "2.0"
-  title: "Ingenico Server (eService)"
+  title: "Ingenico Server (eService + Polcard First Data)"
   contact:
     email: "bigdotsoftware@bigdotsoftware.pl"
 host: "localhost:3020"
-basePath: "/eservice/v1"
+basePath: "/"
 tags:
 - name: "License"
   description: "Manage your license"
   externalDocs:
     description: "Find out more"
     url: "https://blog.bigdotsoftware.pl/ingenico-server-licencja/"
-- name: "Terminal"
+- name: "Terminal (eService)"
   description: "Terminal operations"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-- name: "Reports"
+- name: "Reports (eService)"
   description: "Transaction reports"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-- name: "Analysis"
+- name: "Analysis (eService)"
   description: "Transaction analysis"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-- name: "DCC Analysis"
+- name: "DCC Analysis (eService)"
   description: "Transaction DCC analysis"
   externalDocs:
     description: "Find out more"
@@ -38,7 +38,7 @@ schemes:
 - "https"
 
 paths:
-  /license/check:
+  /license/v1/check:
     get:
       tags:
       - "License"
@@ -60,7 +60,7 @@ paths:
           schema:
             $ref: "#/definitions/LicenseResponse"
             
-  /license/upgrade:
+  /license/v1/upgrade:
     post:
       tags:
       - "License"
@@ -81,10 +81,10 @@ paths:
           schema:
             $ref: "#/definitions/LicenseResponse"
 
-  /ingenico_status:
+  /eservice/v1/ingenico_status:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Terminal status"
       description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to finish current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
       consumes:
@@ -106,10 +106,10 @@ paths:
           schema:
             $ref: "#/definitions/TerminalStatusResponse"
 
-  /ingenico_general_info:
+  /eservice/v1/ingenico_general_info:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Terminal information"
       description: "Returns general info about therminal."
       consumes:
@@ -131,10 +131,10 @@ paths:
           schema:
             $ref: "#/definitions/TerminalInfoResponse"
 
-  /ingenico_auto_transaction_process:
+  /eservice/v1/ingenico_auto_transaction_process:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Start new transaction (automatic mode)"
       description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of auto transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
@@ -160,10 +160,10 @@ paths:
           schema:
             $ref: "#/definitions/AutoTransactionBeginResponse"
             
-  /ingenico_auto_transaction_cancel/{uuid}:
+  /eservice/v1/ingenico_auto_transaction_cancel/{uuid}:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Cancel auto transaction"
       description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to cancel transaction."
       consumes:
@@ -190,10 +190,10 @@ paths:
           schema:
             $ref: "#/definitions/AutoTransactionCancelResponse"
   
-  /ingenico_auto_transaction_status/{uuid}:
+  /eservice/v1/ingenico_auto_transaction_status/{uuid}:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Status of automatic transaction"
       description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to check status of individual automatic transaction."
       consumes:
@@ -220,10 +220,10 @@ paths:
           schema:
             $ref: "#/definitions/AutoTransactionStatusResponse"
             
-  /ingenico_auto_transaction_statuses:
+  /eservice/v1/ingenico_auto_transaction_statuses:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "List all auto transactions"
       description: "Returns list of all executed automatic transactions with statuses."
       consumes:
@@ -236,10 +236,10 @@ paths:
           schema:
             $ref: "#/definitions/AutoTransactionStatusesResponse"
   
-  /ingenico_transaction:
+  /eservice/v1/ingenico_transaction:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Start new transaction"
       description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
@@ -265,10 +265,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionBeginResponse"
 
-  /ingenico_transaction_end:
+  /eservice/v1/ingenico_transaction_end:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Finish current transaction"
       description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
       consumes:
@@ -290,10 +290,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionEndResponse"
   
-  /ingenico_transaction_last/{transactionIndex}:
+  /eservice/v1/ingenico_transaction_last/{transactionIndex}:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Read last transaction data"
       description: "Parameter transactionIndex is counted from 1."
       consumes:
@@ -320,10 +320,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionLastResponse"
             
-  /ingenico_transaction_data_input:
+  /eservice/v1/ingenico_transaction_data_input:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Terminal remote control"
       description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
       consumes:
@@ -349,10 +349,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionDataInputResponse"
        
-  /ingenico_transaction_send_key:
+  /eservice/v1/ingenico_transaction_send_key:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Terminal remote control"
       description: "Send remotely control terminal, like accept/decline/back"
       consumes:
@@ -378,10 +378,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionSendKeyResponse"
             
-  /ingenico_set_parameter:
+  /eservice/v1/ingenico_set_parameter:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Set terminal parameters"
       description: "Set terminal parameters"
       consumes:
@@ -407,10 +407,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionSetParameterResponse"
 
-  /ingenico_set_standby:
+  /eservice/v1/ingenico_set_standby:
     post:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Standby mode"
       description: "Put the terminal in Standby mode (power saving)"
       consumes:
@@ -436,10 +436,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionSetStandbyResponse"
             
-  /ingenico_batch_recon_data/{transactionIndex}:
+  /eservice/v1/ingenico_batch_recon_data/{transactionIndex}:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Read single transaction from batch"
       description: "Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1."
       consumes:
@@ -466,10 +466,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionReconDataResponse"
     
-  /ingenico_batch_recon_info:
+  /eservice/v1/ingenico_batch_recon_info:
     get:
       tags:
-      - "Terminal"
+      - "Terminal (eService)"
       summary: "Read summary batch data"
       description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'. Method clears the batch and /ingenico_transaction_recon_data don't return any data until next reconciliation"
       consumes:
@@ -491,10 +491,10 @@ paths:
           schema:
             $ref: "#/definitions/TransactionReconInfoResponse"
             
-  /ingenico_report_generate:
+  /eservice/v1/ingenico_report_generate:
     post:
       tags:
-      - "Reports"
+      - "Reports (eService)"
       summary: "Prepare terminal report"
       description: "Prepares a terminal report. To access report data use /ingenico_report_details with 'cardset' counted from 1"
       consumes:
@@ -520,10 +520,10 @@ paths:
           schema:
             $ref: "#/definitions/ReportGenerateResponse"
 
-  /ingenico_report_details/{cardset}:
+  /eservice/v1/ingenico_report_details/{cardset}:
     get:
       tags:
-      - "Reports"
+      - "Reports (eService)"
       summary: "Terminal report details"
       description: ""
       consumes:
@@ -550,10 +550,10 @@ paths:
           schema:
             $ref: "#/definitions/ReportDetailsResponse"
   
-  /ingenico_report_summary:
+  /eservice/v1/ingenico_report_summary:
     get:
       tags:
-      - "Reports"
+      - "Reports (eService)"
       summary: "Terminal report total details"
       description: "Returns totals from all transactions prepared by /ingenico_report_generate. Method clears current report details - to access totals again, request /ingenico_report_generate again."
       consumes:
@@ -575,11 +575,10 @@ paths:
           schema:
             $ref: "#/definitions/ReportTotalSummaryResponse"
             
-            
-  /ingenico_analysis_generate:
+  /eservice/v1/ingenico_analysis_generate:
     post:
       tags:
-      - "Analysis"
+      - "Analysis (eService)"
       summary: "Prepare transaction analysis"
       description: "Prepares a terminal report since last EOD report. To access report data use /ingenico_analysis_summary or /ingenico_analysis_details with 'transactionIndex' counted from 1. Reconciliation erases report data."
       consumes:
@@ -601,10 +600,10 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisGenerateResponse"
 
-  /ingenico_analysis_details/{transactionIndex}:
+  /eservice/v1/ingenico_analysis_details/{transactionIndex}:
     get:
       tags:
-      - "Analysis"
+      - "Analysis (eService)"
       summary: "Analysis details"
       description: ""
       consumes:
@@ -631,10 +630,10 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisDetailsResponse"
   
-  /ingenico_analysis_summary:
+  /eservice/v1/ingenico_analysis_summary:
     get:
       tags:
-      - "Analysis"
+      - "Analysis (eService)"
       summary: "Analysis total summary"
       description: "Returns totals from all transactions prepared by /ingenico_analysis_generate. Method clears current report details - to access totals again, request /ingenico_analysis_generate again."
       consumes:
@@ -656,11 +655,10 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisTotalSummaryResponse"
             
-            
-  /ingenico_dcc_analysis_generate:
+  /eservice/v1/ingenico_dcc_analysis_generate:
     post:
       tags:
-      - "DCC Analysis"
+      - "DCC Analysis (eService)"
       summary: "Prepare transaction analysis"
       description: "Prepares a terminal report. To access report data use /ingenico_analysis_summary"
       consumes:
@@ -682,10 +680,10 @@ paths:
           schema:
             $ref: "#/definitions/DCCAnalysisGenerateResponse"
 
-  /ingenico_dcc_analysis_details/{transactionIndex}:
+  /eservice/v1/ingenico_dcc_analysis_details/{transactionIndex}:
     get:
       tags:
-      - "DCC Analysis"
+      - "DCC Analysis (eService)"
       summary: "Analysis details"
       description: ""
       consumes:
@@ -712,10 +710,10 @@ paths:
           schema:
             $ref: "#/definitions/DCCAnalysisDetailsResponse"
   
-  /ingenico_dcc_analysis_summary:
+  /eservice/v1/ingenico_dcc_analysis_summary:
     get:
       tags:
-      - "DCC Analysis"
+      - "DCC Analysis (eService)"
       summary: "Analysis total summary"
       description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
       consumes:
