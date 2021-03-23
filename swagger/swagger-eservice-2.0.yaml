@@ -1,0 +1,1406 @@
+swagger: "2.0"
+info:
+  description: "This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)"
+  version: "1.3"
+  title: "Ingenico Server"
+  contact:
+    email: "bigdotsoftware@bigdotsoftware.pl"
+host: "localhost:3020"
+basePath: "/v1"
+tags:
+- name: "License"
+  description: "Manage your license"
+  externalDocs:
+    description: "Find out more"
+    url: "https://blog.bigdotsoftware.pl/ingenico-server-licencja/"
+- name: "Terminal"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "Reports"
+  description: "Transaction reports"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "Analysis"
+  description: "Transaction analysis"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "DCC Analysis"
+  description: "Transaction DCC analysis"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"  
+schemes:
+- "http"
+- "https"
+
+paths:
+  /license/check:
+    get:
+      tags:
+      - "License"
+      summary: "Check the license details"
+      description: "Shows details about used license, including expiration date. We strongly suggest to execute this method periodically in local monitoring system to verify license expiration date. Method can be used as a system heartbeat as well."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "json"
+        description: "Pass ?json=true/false to change the output format"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/LicenseResponse"
+            
+  /license/upgrade:
+    post:
+      tags:
+      - "License"
+      summary: "Obtain new license"
+      description: "Forces to download new license when available. Note that Ingenico server renew licenses automatically 10 days before expiration date. Method can be used to renew license earlier."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LicenseResponse"
+
+  /ingenico_status:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Terminal status"
+      description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to finish current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TerminalStatusResponse"
+
+  /ingenico_general_info:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Terminal information"
+      description: "Returns general info about therminal."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TerminalInfoResponse"
+
+  /ingenico_auto_transaction_process:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Start new transaction (automatic mode)"
+      description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of auto transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/AutoTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AutoTransactionBeginResponse"
+            
+  /ingenico_auto_transaction_cancel/{uuid}:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Cancel auto transaction"
+      description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to cancel transaction."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "uuid"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AutoTransactionCancelResponse"
+  
+  /ingenico_auto_transaction_status/{uuid}:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Status of automatic transaction"
+      description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to check status of individual automatic transaction."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "uuid"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AutoTransactionStatusResponse"
+            
+  /ingenico_auto_transaction_statuses:
+    get:
+      tags:
+      - "Terminal"
+      summary: "List all auto transactions"
+      description: "Returns list of all executed automatic transactions with statuses."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AutoTransactionStatusesResponse"
+  
+  /ingenico_transaction:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Start new transaction"
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionBeginResponse"
+
+  /ingenico_transaction_end:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Finish current transaction"
+      description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionEndResponse"
+  
+  /ingenico_transaction_last/{transactionIndex}:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Read last transaction data"
+      description: "Parameter transactionIndex is counted from 1."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionLastResponse"
+            
+  /ingenico_transaction_data_input:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Terminal remote control"
+      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionDataInputRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionDataInputResponse"
+       
+  /ingenico_transaction_send_key:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Terminal remote control"
+      description: "Send remotely control terminal, like accept/decline/back"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionSendKeyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionSendKeyResponse"
+            
+  /ingenico_set_parameter:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Set terminal parameters"
+      description: "Set terminal parameters"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionSetParameterRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionSetParameterResponse"
+
+  /ingenico_set_standby:
+    post:
+      tags:
+      - "Terminal"
+      summary: "Standby mode"
+      description: "Put the terminal in Standby mode (power saving)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/TransactionSetStandbyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionSetStandbyResponse"
+            
+  /ingenico_batch_recon_data/{transactionIndex}:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Read single transaction from batch"
+      description: "Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionReconDataResponse"
+    
+  /ingenico_batch_recon_info:
+    get:
+      tags:
+      - "Terminal"
+      summary: "Read summary batch data"
+      description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'. Method clears the batch and /ingenico_transaction_recon_data don't return any data until next reconciliation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransactionReconInfoResponse"
+            
+  /ingenico_report_generate:
+    post:
+      tags:
+      - "Reports"
+      summary: "Prepare terminal report"
+      description: "Prepares a terminal report. To access report data use /ingenico_report_details with 'cardset' counted from 1"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "reset"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ReportGenerateResponse"
+
+  /ingenico_report_details/{cardset}:
+    get:
+      tags:
+      - "Reports"
+      summary: "Terminal report details"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "cardset"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ReportDetailsResponse"
+  
+  /ingenico_report_summary:
+    get:
+      tags:
+      - "Reports"
+      summary: "Terminal report total details"
+      description: "Returns totals from all transactions prepared by /ingenico_report_generate. Method clears current report details - to access totals again, request /ingenico_report_generate again."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ReportTotalSummaryResponse"
+            
+            
+  /ingenico_analysis_generate:
+    post:
+      tags:
+      - "Analysis"
+      summary: "Prepare transaction analysis"
+      description: "Prepares a terminal report since last EOD report. To access report data use /ingenico_analysis_summary or /ingenico_analysis_details with 'transactionIndex' counted from 1. Reconciliation erases report data."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AnalysisGenerateResponse"
+
+  /ingenico_analysis_details/{transactionIndex}:
+    get:
+      tags:
+      - "Analysis"
+      summary: "Analysis details"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AnalysisDetailsResponse"
+  
+  /ingenico_analysis_summary:
+    get:
+      tags:
+      - "Analysis"
+      summary: "Analysis total summary"
+      description: "Returns totals from all transactions prepared by /ingenico_analysis_generate. Method clears current report details - to access totals again, request /ingenico_analysis_generate again."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AnalysisTotalSummaryResponse"
+            
+            
+  /ingenico_dcc_analysis_generate:
+    post:
+      tags:
+      - "DCC Analysis"
+      summary: "Prepare transaction analysis"
+      description: "Prepares a terminal report. To access report data use /ingenico_analysis_summary"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/DCCAnalysisGenerateResponse"
+
+  /ingenico_dcc_analysis_details/{transactionIndex}:
+    get:
+      tags:
+      - "DCC Analysis"
+      summary: "Analysis details"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/DCCAnalysisDetailsResponse"
+  
+  /ingenico_dcc_analysis_summary:
+    get:
+      tags:
+      - "DCC Analysis"
+      summary: "Analysis total summary"
+      description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/DCCAnalysisTotalSummaryResponse"
+            
+definitions:
+
+  AutoTransactionBeginRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionBeginRequest'
+    properties:
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/"
+        
+  TransactionBeginRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+         - "purchase"
+         - "preauthorization"
+         - "completion"
+         - "preauthorization_cancel"
+         - "refund"
+         - "reversal"
+         - "giftcard_activation"
+         - "giftcard_balance"
+         - "giftcard_topup"
+         - "reconciliation"
+         - "connection_test"
+         - "tms"
+      amount:
+        type: "integer"
+      title:
+        type: "string"
+      sequenceNb:
+        type: "string"
+      arguments:
+        type: "object"
+        properties:
+          transactionFlags: 
+            type: "array"
+            items:
+              type: "string"
+              enum:
+                - "TokenGeneration"
+                - "ReferenceNumberGeneration"
+                - "TransitTransactionIndicator"
+          blikCode:
+            type: "number"
+          additionalPrintout: 
+            type: "string"
+          hints: 
+            type: "string"
+          rfu: 
+            type: "string"
+          variableSymbol: 
+            type: "string"
+          specificSymbol: 
+            type: "string"
+          saleItemList: 
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                itemId: 
+                  type: "string"
+                productCode: 
+                  type: "string"
+                amount: 
+                  type: "number"
+                  format: "int32"
+                unitMeasure: 
+                  type: "string"
+                unitPrice: 
+                  type: "number"
+                  format: "int32"
+                quantity: 
+                  type: "number"
+                taxCode: 
+                  type: "number"
+
+  TransactionDataInputRequest:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      sequenceNb:
+        type: "string"
+  
+  TransactionSetStandbyRequest:
+    type: "object"
+    properties:
+      timeoutSeconds:
+        type: "number"
+        format: "int32"
+        
+  TransactionSetParameterRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "volatile"
+          - "permanent"
+      parameters:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            key:
+              type: "string"
+            value:
+              type: "string"
+        
+  TransactionSendKeyRequest:
+    type: "object"
+    properties:
+      keycode:
+        type: "string"
+        enum:
+          - "ok"
+          - "back"
+          - "cancel"
+      sequenceNb:
+        type: "string"
+  TransactionCommonGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          firstTransaction:
+            type: "integer"
+            format: "int32"
+          lastTransaction:
+            type: "integer"
+            format: "int32"
+  
+  ReportGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGenerateResponse'
+      
+  AnalysisGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGenerateResponse'
+  
+  DCCAnalysisGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGenerateResponse'
+      
+      
+  ReportDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      
+  AnalysisDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionEndResponse'
+      
+  DCCAnalysisDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      
+
+  ReportTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+  
+  AnalysisTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+  
+  DCCAnalysisTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      
+  TransactionCommonGetDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          summaryTitle:
+            type: "string"
+          reportEntries:
+            type: "array"
+            description: "examples: [\"SPRZEDAŻ|13|13000\",\"ZWROTY|0|0\",\"DOP.PRE-AUT.|0|0\",\"RAZEM|13|13000\",\"WYPŁATA GOTÓWKI|0|0\"] or [\"SPRZEDAŻ|1|1000\", \"UNIEWAŻ.SPRZEDAŻY|0|0\", \"WYPŁATA GOTÓWKI|0|0\", \"W TYM NAPIWKI|0|0\", \"ZWROTY|0|0\", \"DOP.PRE-AUT.|0|0\", \"UNIE.DOP.PRE-AUT.|0|0\", \"RAZEM|1|1000\", \"PRE-AUTORYZACJA|0|0\", \"ZWIĘKSZ. PRE-AUT.|0|0\", \"Anulow. preautory.|0|0\" ]"
+            items:
+              type: "string"
+  
+  
+  TransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
+  TransactionSetParameterResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionDataInputResponse'
+  
+  TransactionSetStandbyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionDataInputResponse'
+  
+  TransactionSendKeyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionDataInputResponse'
+
+  TransactionReconDataResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionEndResponse'
+  TransactionLastResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionEndResponse'
+      
+  TransactionReconInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          error:
+            type: "string"
+          resultsObject:
+            type: "object"
+            properties:
+              totalAmount:
+                type: "string"
+              transactionCount:
+                type: "string"
+              status:
+                description: "0 – success 1 – error 2 – success, but not completed preauthorizations were present in batch – unattended terminals only 4 – success, but TMS connection is required"
+                type: "string"
+              statusText:
+                type: "string"
+                enum:
+                  - "success"
+                  - "error"
+                  - "success_with_not_completed_preauthorizations"
+                  - "success_tms_required"
+                  - "unknown"
+              acquirerIdentifier:
+                type: "string"
+              batchNumber:
+                type: "string"
+              date:
+                type: "string"
+                description: "format: YYYY.MM.DD"
+              time:
+                type: "string"
+                description: "format: hh:mm:ss"
+              printingIndicator:
+                type: "string"
+              tid:
+                type: "string"
+              activationSequenceNb:
+                type: "string"
+              cashierIdentifier:
+                type: "string"
+              eVoucherInfo:
+                type: "string"
+              giftcardInfo:
+                type: "string"
+          results:
+            type: "array"
+            description: "example: [{\"arg0\":\"-17000\"},{\"arg1\":\"0\"},{\"arg2\":\"1\"},{\"arg3\":\"\"}.....]"
+            items:
+              type: "object"
+            
+  
+  TransactionEndResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          transactionType:
+            type: "integer"
+          transactionResultCode:
+            type: "integer"
+          transactionResultCodeText:
+            type: "string"
+          transactionNumber:
+            type: "integer"
+          transactionDetails:
+            type: "object"
+            properties:
+              authorizationCode:
+                type: "string"
+              serverMessage:
+                type: "string"
+              merchantID:
+                type: "string"
+                description: "example '454500000000000'"
+              maskedCardNumber:
+                type: "string"
+                description: "example '************0211'"
+              date: 
+                type: "string"
+                description: "example format 2021.01.25"
+              time:
+                type: "string"
+                description: "example format 12:59:32"
+              cardsetName:
+                type: "string"
+                description: "example 'VISA'"
+              readerUsed:
+                type: "string"
+                description: "example 'C' - possible values: B Contactless, M Manual, C Magstripe, P ICC, ? Unknown"
+              readerUsedText:
+                type: "string"
+                description: "possible values 'magstripe', 'contactless', 'manual', 'icc', 'unknown'"
+              terminalIdentifier:
+                type: "string"
+                description: "example '45450318'"
+              authorizationMessage:
+                type: "string"
+                description: "example '000180'"
+              authorizationType:
+                type: "string"
+                description: "possible values 1 - online, 3 – offline, 4 – referral"
+              authorizationTypeText:
+                type: "string"
+                description: "possible values 'online', 'offline', 'referral'"
+              transactionAmount:
+                type: "string"
+              cardholderAuthorizationMethod:
+                type: "string"
+                description: "possible values A – PIN, @ - Signature, B – PIN and Signature, ? – no authorization"
+              cardholderAuthorizationMethodText:
+                type: "string"
+                description: "possible values 'pin', 'signature', 'pin_signature', 'no authorization', 'unknown'"
+              atc:
+                type: "string"
+              ac:
+                type: "string"
+              aid:
+                type: "string"
+              tvr:
+                type: "string"
+              tsi:
+                type: "string"
+              title:
+                type: "string"
+              printingIndicator:
+                type: "string"
+              transactionCurrency: 
+                type: "string"
+                description: "example 'PLN'"
+              terminalCurrency:
+                type: "string"
+              exchangeRate:
+                type: "string"
+              dcc1:
+                type: "string"
+              dcc2:
+                type: "string"
+              cashAmount:
+                type: "string"
+              spendingAmount:
+                type: "string"
+              dcc_currencyExp:
+                type: "string"
+              additionalInformation:
+                type: "string"
+                description: "example 'DF060A534E204E722056697361DF0B0400000100' or 'DF0B0400000100' or 'DF060A534E204E722056697361DF0B0400000400DF1318343534353033313830303031323630313231323132383534'"
+              additionalInformationObject:
+                type: "object"
+                properties:
+                  blikReferenceCode:
+                    type: "string"
+                  blikEnteredCode:
+                    type: "string"
+                  cardToken:
+                    type: "string"
+                  emv:
+                    type: "string"
+                  cardExpiryDate:
+                    type: "string"
+                  valueToPrint:
+                    type: "array"
+                    items:
+                      type: "string"
+                  transactionFlagsObject:
+                    type: "array"
+                    items:
+                      type: "string"
+                  transactionFlags:
+                    type: "string"
+                  pan:
+                    type: "string"
+                  voucherTypeName:
+                    type: "string"
+                  discountAmount:
+                    type: "string"
+                  preauthAmountTotal:
+                    type: "string"
+                  preauthAmountTotalTerminalCcy:
+                    type: "string"
+                  printout:
+                    type: "string"
+                  tipAmount:
+                    type: "string"
+                  referenceNumber:
+                    type: "string"
+                  dccValue:
+                    type: "string"
+                  dccText:
+                    type: "string"
+                  dccInfo:
+                    type: "string"
+                  dccRatesText:
+                    type: "string"
+                  variableSymbol:
+                    type: "string"
+                  specificSymbol:
+                    type: "string"
+            
+  TransactionBeginResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/TransactionActionResponse'
+      
+  TransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  AutoTransactionStatusCommonResponse:
+    type: "object"
+    properties:
+      state:
+        type: "string"
+        enum:
+        - "success"
+        - "error"
+        - "cancelled"
+        - "processing"
+      ts:
+        type: "integer"
+        format: "int64"
+      req:
+        type: "object"
+        allOf:
+          - $ref: "#/definitions/TransactionBeginRequest"
+      result:
+        type: "object"
+        allOf:
+          - $ref: "#/definitions/TransactionEndResponse"
+          - $ref: "#/definitions/TerminalStatusResponse"
+          
+  AutoTransactionStatusResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/AutoTransactionStatusCommonResponse'
+
+  
+  AutoTransactionStatusesResponse:
+    type: "object"
+    properties:
+      <uuid>:
+        type: "object"
+        allOf:
+          - $ref: '#/definitions/AutoTransactionStatusCommonResponse'
+      
+  AutoTransactionCancelResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/AutoTransactionActionResponse'
+      
+  AutoTransactionBeginResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/AutoTransactionActionResponse'
+      
+  AutoTransactionActionResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      uuid:
+        type: "string"
+        
+  TerminalInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          terminalInfoText:
+            type: "string"
+            description: "terminalInfoText is returned only when it cannot be parsed into terminalInfo object"
+          terminalInfo:
+            type: "object"
+            properties:
+              addressLine1:
+                type: "string"
+              addressLine2:
+                type: "string"
+              addressLine3:
+                type: "string"
+              merchantIdentifier:
+                type: "string"
+              terminalIdentifier:
+                type: "string"
+
+  TerminalStatusResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            enum:
+            - "Idle"
+            - "WaitCard"
+            - "WaitPIN"
+            - "WaitEMVApp"
+            - "WaitHost"
+            - "WaitSign"
+            - "WaitTrEnd"
+            - "WaitNoCard"
+            - "WaitBusy"
+            - "InProgress"
+            - "WaitCopy"
+            - "WaitAuthCode"
+            - "WaitAction"
+            - "BatchCompleted"
+            - "DCCCurrency"
+            - "CashBackAmount"
+            - "UsedInternaly"
+            - "TransactionAccepted"
+            - "WaitingForAmount"
+            - "WaitingForSelection"
+            - "AskingEcrToPrintData"
+            - "PresentingZenCardOffer"
+            - "WaitingForFid"
+            - "AskingEcrToReceiveData"
+            - "ZencardContinue"
+            - "ApplicationInErrorState"
+            - "ReconciliationNeeded"
+          sequenceNb:
+            type: "string"
+          charsMin:
+            type: "number"
+          charsMax:
+            type: "number"
+          charsAllowed:
+            type: "string"
+            enum:
+            - "numeric"
+            - "alphanumeric"
+            - "ascii"
+            - "unknown"
+          specialCharsAllowed:
+            type: "string"
+            enum:
+            - "ok"
+            - "cancel"
+            - "ok_cancel"
+            - "back"
+            - "ok_back"
+            - "back_cancel"
+            - "ok_back_cancel"
+            - "other"
+          promptText:
+            type: "string"
+  LicenseResponse:
+    type: "object"
+    required: [ "validTo", "licenseTo", "expired" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      validTo:
+        type: "string"
+      licenseTo:
+        type: "string"
+      expired:
+        type: "boolean"
+  ApiResponse:
+    type: "object"
+    required: [ "ok", "watermark" ]
+    properties:
+      ok:
+        type: "boolean"
+        description: "Check the 'error' field when 'ok' is 'false'"
+      error:
+        type: "string"
+        description: "Filled only when 'ok' field is 'false'"
+      text:
+        type: "string"
+      watermark:
+        type: "string"
+externalDocs:
+  description: "Find out more about our website"
+  url: "https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/"
