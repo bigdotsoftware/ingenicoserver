@@ -746,7 +746,7 @@ paths:
       tags:
       - "Polcard: Terminal"
       summary: "Start new transaction"
-      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
       - "application/json"
       produces:
@@ -756,10 +756,6 @@ paths:
         in: "query"
         type: "boolean"
         default: false
-      - name: "cashRegisterNumber"
-        in: "query"
-        type: "integer"
-        default: 1
       - in: "body"
         name: "body"
         schema:
