@@ -33,6 +33,12 @@ tags:
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"  
+- name: "Polcard: Terminal"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+    
 schemes:
 - "http"
 - "https"
@@ -104,7 +110,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TerminalStatusResponse"
+            $ref: "#/definitions/EserviceTerminalStatusResponse"
 
   /eservice/v1/ingenico_general_info:
     get:
@@ -129,7 +135,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TerminalInfoResponse"
+            $ref: "#/definitions/EserviceTerminalInfoResponse"
 
   /eservice/v1/ingenico_auto_transaction_process:
     post:
@@ -153,12 +159,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/AutoTransactionBeginRequest"
+            $ref: "#/definitions/EserviceAutoTransactionBeginRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AutoTransactionBeginResponse"
+            $ref: "#/definitions/EserviceAutoTransactionBeginResponse"
             
   /eservice/v1/ingenico_auto_transaction_cancel/{uuid}:
     post:
@@ -188,7 +194,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AutoTransactionCancelResponse"
+            $ref: "#/definitions/EserviceAutoTransactionCancelResponse"
   
   /eservice/v1/ingenico_auto_transaction_status/{uuid}:
     get:
@@ -218,7 +224,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AutoTransactionStatusResponse"
+            $ref: "#/definitions/EserviceAutoTransactionStatusResponse"
             
   /eservice/v1/ingenico_auto_transaction_statuses:
     get:
@@ -234,7 +240,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AutoTransactionStatusesResponse"
+            $ref: "#/definitions/EserviceAutoTransactionStatusesResponse"
   
   /eservice/v1/ingenico_transaction:
     post:
@@ -258,12 +264,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/TransactionBeginRequest"
+            $ref: "#/definitions/EserviceTransactionBeginRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionBeginResponse"
+            $ref: "#/definitions/EserviceTransactionBeginResponse"
 
   /eservice/v1/ingenico_transaction_end:
     get:
@@ -288,7 +294,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionEndResponse"
+            $ref: "#/definitions/EserviceTransactionEndResponse"
   
   /eservice/v1/ingenico_transaction_last/{transactionIndex}:
     get:
@@ -318,7 +324,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionLastResponse"
+            $ref: "#/definitions/EserviceTransactionLastResponse"
             
   /eservice/v1/ingenico_transaction_data_input:
     post:
@@ -342,12 +348,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/TransactionDataInputRequest"
+            $ref: "#/definitions/EserviceTransactionDataInputRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionDataInputResponse"
+            $ref: "#/definitions/EserviceTransactionDataInputResponse"
        
   /eservice/v1/ingenico_transaction_send_key:
     post:
@@ -371,12 +377,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/TransactionSendKeyRequest"
+            $ref: "#/definitions/EserviceTransactionSendKeyRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionSendKeyResponse"
+            $ref: "#/definitions/EserviceTransactionSendKeyResponse"
             
   /eservice/v1/ingenico_set_parameter:
     post:
@@ -400,12 +406,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/TransactionSetParameterRequest"
+            $ref: "#/definitions/EserviceTransactionSetParameterRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionSetParameterResponse"
+            $ref: "#/definitions/EserviceTransactionSetParameterResponse"
 
   /eservice/v1/ingenico_set_standby:
     post:
@@ -429,12 +435,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/TransactionSetStandbyRequest"
+            $ref: "#/definitions/EserviceTransactionSetStandbyRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionSetStandbyResponse"
+            $ref: "#/definitions/EserviceTransactionSetStandbyResponse"
             
   /eservice/v1/ingenico_batch_recon_data/{transactionIndex}:
     get:
@@ -464,7 +470,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionReconDataResponse"
+            $ref: "#/definitions/EserviceTransactionReconDataResponse"
     
   /eservice/v1/ingenico_batch_recon_info:
     get:
@@ -489,7 +495,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/TransactionReconInfoResponse"
+            $ref: "#/definitions/EserviceTransactionReconInfoResponse"
             
   /eservice/v1/ingenico_report_generate:
     post:
@@ -518,7 +524,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ReportGenerateResponse"
+            $ref: "#/definitions/EserviceReportGenerateResponse"
 
   /eservice/v1/ingenico_report_details/{cardset}:
     get:
@@ -548,7 +554,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ReportDetailsResponse"
+            $ref: "#/definitions/EserviceReportDetailsResponse"
   
   /eservice/v1/ingenico_report_summary:
     get:
@@ -573,7 +579,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ReportTotalSummaryResponse"
+            $ref: "#/definitions/EserviceReportTotalSummaryResponse"
             
   /eservice/v1/ingenico_analysis_generate:
     post:
@@ -598,7 +604,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AnalysisGenerateResponse"
+            $ref: "#/definitions/EserviceAnalysisGenerateResponse"
 
   /eservice/v1/ingenico_analysis_details/{transactionIndex}:
     get:
@@ -628,7 +634,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AnalysisDetailsResponse"
+            $ref: "#/definitions/EserviceAnalysisDetailsResponse"
   
   /eservice/v1/ingenico_analysis_summary:
     get:
@@ -653,7 +659,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/AnalysisTotalSummaryResponse"
+            $ref: "#/definitions/EserviceAnalysisTotalSummaryResponse"
             
   /eservice/v1/ingenico_dcc_analysis_generate:
     post:
@@ -678,7 +684,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/DCCAnalysisGenerateResponse"
+            $ref: "#/definitions/EserviceDCCAnalysisGenerateResponse"
 
   /eservice/v1/ingenico_dcc_analysis_details/{transactionIndex}:
     get:
@@ -708,7 +714,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/DCCAnalysisDetailsResponse"
+            $ref: "#/definitions/EserviceDCCAnalysisDetailsResponse"
   
   /eservice/v1/ingenico_dcc_analysis_summary:
     get:
@@ -733,14 +739,43 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/DCCAnalysisTotalSummaryResponse"
+            $ref: "#/definitions/EserviceDCCAnalysisTotalSummaryResponse"
             
+  /polcard/v1/ingenico_transaction:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Start new transaction"
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionActionResponse"
+
 definitions:
 
-  AutoTransactionBeginRequest:
+  EserviceAutoTransactionBeginRequest:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionBeginRequest'
+      - $ref: '#/definitions/EserviceTransactionBeginRequest'
     properties:
       callback:
         type: "object"
@@ -757,7 +792,7 @@ definitions:
         type: "object"
         description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/"
         
-  TransactionBeginRequest:
+  EserviceTransactionBeginRequest:
     type: "object"
     properties:
       type:
@@ -826,7 +861,7 @@ definitions:
                 taxCode: 
                   type: "number"
 
-  TransactionDataInputRequest:
+  EserviceTransactionDataInputRequest:
     type: "object"
     properties:
       text:
@@ -834,14 +869,14 @@ definitions:
       sequenceNb:
         type: "string"
   
-  TransactionSetStandbyRequest:
+  EserviceTransactionSetStandbyRequest:
     type: "object"
     properties:
       timeoutSeconds:
         type: "number"
         format: "int32"
         
-  TransactionSetParameterRequest:
+  EserviceTransactionSetParameterRequest:
     type: "object"
     properties:
       type:
@@ -859,7 +894,7 @@ definitions:
             value:
               type: "string"
         
-  TransactionSendKeyRequest:
+  EserviceTransactionSendKeyRequest:
     type: "object"
     properties:
       keycode:
@@ -870,7 +905,7 @@ definitions:
           - "cancel"
       sequenceNb:
         type: "string"
-  TransactionCommonGenerateResponse:
+  EserviceTransactionCommonGenerateResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
@@ -889,54 +924,54 @@ definitions:
             type: "integer"
             format: "int32"
   
-  ReportGenerateResponse:
+  EserviceReportGenerateResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGenerateResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGenerateResponse'
       
-  AnalysisGenerateResponse:
+  EserviceAnalysisGenerateResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGenerateResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGenerateResponse'
   
-  DCCAnalysisGenerateResponse:
+  EserviceDCCAnalysisGenerateResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGenerateResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGenerateResponse'
       
       
-  ReportDetailsResponse:
+  EserviceReportDetailsResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
       
-  AnalysisDetailsResponse:
+  EserviceAnalysisDetailsResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionEndResponse'
+      - $ref: '#/definitions/EserviceTransactionEndResponse'
       
-  DCCAnalysisDetailsResponse:
+  EserviceDCCAnalysisDetailsResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
       
 
-  ReportTotalSummaryResponse:
+  EserviceReportTotalSummaryResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
   
-  AnalysisTotalSummaryResponse:
+  EserviceAnalysisTotalSummaryResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
   
-  DCCAnalysisTotalSummaryResponse:
+  EserviceDCCAnalysisTotalSummaryResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionCommonGetDetailsResponse'
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
       
-  TransactionCommonGetDetailsResponse:
+  EserviceTransactionCommonGetDetailsResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
@@ -957,36 +992,36 @@ definitions:
               type: "string"
   
   
-  TransactionDataInputResponse:
+  EserviceTransactionDataInputResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
       
-  TransactionSetParameterResponse:
+  EserviceTransactionSetParameterResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionDataInputResponse'
+      - $ref: '#/definitions/EserviceTransactionDataInputResponse'
   
-  TransactionSetStandbyResponse:
+  EserviceTransactionSetStandbyResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionDataInputResponse'
+      - $ref: '#/definitions/EserviceTransactionDataInputResponse'
   
-  TransactionSendKeyResponse:
+  EserviceTransactionSendKeyResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionDataInputResponse'
+      - $ref: '#/definitions/EserviceTransactionDataInputResponse'
 
-  TransactionReconDataResponse:
+  EserviceTransactionReconDataResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionEndResponse'
-  TransactionLastResponse:
+      - $ref: '#/definitions/EserviceTransactionEndResponse'
+  EserviceTransactionLastResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionEndResponse'
+      - $ref: '#/definitions/EserviceTransactionEndResponse'
       
-  TransactionReconInfoResponse:
+  EserviceTransactionReconInfoResponse:
     type: "object"
     required: [ "terminal" ]
     allOf:
@@ -1048,7 +1083,7 @@ definitions:
               type: "object"
             
   
-  TransactionEndResponse:
+  EserviceTransactionEndResponse:
     type: "object"
     required: [ "terminal" ]
     allOf:
@@ -1203,17 +1238,17 @@ definitions:
                   specificSymbol:
                     type: "string"
             
-  TransactionBeginResponse:
+  EserviceTransactionBeginResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/TransactionActionResponse'
+      - $ref: '#/definitions/EserviceTransactionActionResponse'
       
-  TransactionActionResponse:
+  EserviceTransactionActionResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
 
-  AutoTransactionStatusCommonResponse:
+  EserviceAutoTransactionStatusCommonResponse:
     type: "object"
     properties:
       state:
@@ -1229,40 +1264,40 @@ definitions:
       req:
         type: "object"
         allOf:
-          - $ref: "#/definitions/TransactionBeginRequest"
+          - $ref: "#/definitions/EserviceTransactionBeginRequest"
       result:
         type: "object"
         allOf:
-          - $ref: "#/definitions/TransactionEndResponse"
-          - $ref: "#/definitions/TerminalStatusResponse"
+          - $ref: "#/definitions/EserviceTransactionEndResponse"
+          - $ref: "#/definitions/EserviceTerminalStatusResponse"
           
-  AutoTransactionStatusResponse:
+  EserviceAutoTransactionStatusResponse:
     type: "object"
     required: [ "uuid" ]
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      - $ref: '#/definitions/AutoTransactionStatusCommonResponse'
+      - $ref: '#/definitions/EserviceAutoTransactionStatusCommonResponse'
 
   
-  AutoTransactionStatusesResponse:
+  EserviceAutoTransactionStatusesResponse:
     type: "object"
     properties:
       <uuid>:
         type: "object"
         allOf:
-          - $ref: '#/definitions/AutoTransactionStatusCommonResponse'
+          - $ref: '#/definitions/EserviceAutoTransactionStatusCommonResponse'
       
-  AutoTransactionCancelResponse:
+  EserviceAutoTransactionCancelResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/AutoTransactionActionResponse'
+      - $ref: '#/definitions/EserviceAutoTransactionActionResponse'
       
-  AutoTransactionBeginResponse:
+  EserviceAutoTransactionBeginResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/AutoTransactionActionResponse'
+      - $ref: '#/definitions/EserviceAutoTransactionActionResponse'
       
-  AutoTransactionActionResponse:
+  EserviceAutoTransactionActionResponse:
     type: "object"
     required: [ "uuid" ]
     allOf:
@@ -1271,7 +1306,7 @@ definitions:
       uuid:
         type: "string"
         
-  TerminalInfoResponse:
+  EserviceTerminalInfoResponse:
     type: "object"
     required: [ "terminal" ]
     allOf:
@@ -1301,7 +1336,7 @@ definitions:
               terminalIdentifier:
                 type: "string"
 
-  TerminalStatusResponse:
+  EserviceTerminalStatusResponse:
     type: "object"
     required: [ "terminal" ]
     allOf:
@@ -1373,6 +1408,49 @@ definitions:
             - "other"
           promptText:
             type: "string"
+            
+            
+  PolcardTransactionBeginRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+        - "purchase"
+        - "purchase_cashback"
+        - "cash_from_pos"
+        - "preauthorization"
+        - "completion"
+        - "refund"
+        - "activate_service_mode"
+        - "deactivate_service_mode"
+        - "card_verification"
+        - "preauthorization_increase"
+        - "preauthorization_reduce"
+        - "preauthorization_cancel"
+        - "fleet_card_sale"
+        - "loyalty_card"
+        - "card_activation"
+        - "replenishment"
+        - "balance_inquiry"
+      amount:
+        type: "integer"
+      amount2:
+        type: "integer"
+      amount3:
+        type: "integer"
+      amount4:
+        type: "integer"
+      amount5:
+        type: "integer"
+      currencyCode:
+        type: "integer"
+      
+  PolcardTransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+                  
   LicenseResponse:
     type: "object"
     required: [ "validTo", "licenseTo", "expired" ]
