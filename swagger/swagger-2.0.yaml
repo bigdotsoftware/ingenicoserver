@@ -1429,18 +1429,26 @@ definitions:
         - "card_activation"
         - "replenishment"
         - "balance_inquiry"
-      amount:
+        - "purchase_with_registration"
+        - "card_registration"
+        - "purchase_adjustment"
+        - "cash_deposit"
+        - "no_show"
+        - "delayed_charges"
+      transactionAmount:
         type: "integer"
-      amount2:
+      cashbackAmount:
         type: "integer"
-      amount3:
+      tipAmount:
         type: "integer"
-      amount4:
+      surchargeFeeAmount:
         type: "integer"
-      amount5:
+      foreignGoodsAmount:
         type: "integer"
       currencyCode:
         type: "integer"
+        default: 985
+        description: "Must be valid ISO-4217 number (https://en.wikipedia.org/wiki/ISO_4217). PLN is a default value."
       
   PolcardTransactionActionResponse:
     type: "object"
