@@ -1409,6 +1409,23 @@ definitions:
   PolcardTransactionBeginRequest:
     type: "object"
     properties:
+      transport:
+        type: "object"
+        properties:
+          encryptSession:
+            type: "boolean"
+            default: false
+          encryptAlgorithm:
+            type: "string"
+            enum:
+            - "NONE"
+            - "DES"
+            - "3DES"
+            - "AES"
+          sessionKeyLen:
+            type: "integer"
+          publicKey:
+            type: "string"
       type:
         type: "string"
         enum:
@@ -1454,6 +1471,38 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          error:
+            type: "string"
+          display:
+            type: "string"
+            enum:
+            - "cardholder_and_clerk"
+            - "cardholder"
+            - "clerk"
+            description: "Determines where message should be displayed"
+          keyboardOptions:
+            type: "string"
+            enum:
+            - "display_only"
+            - "yes_no"
+            - "amount"
+            - "commercial_code"
+            - "authorization_code"
+            - "one_of"
+            - "merchant_profile"
+            - "any_key"
+            - "variable_options"
+          timeout:
+            type: "integer"
+            description: "Timeout for message to be displayed"
                   
   LicenseResponse:
     type: "object"
