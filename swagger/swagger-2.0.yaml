@@ -1481,6 +1481,7 @@ definitions:
             description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
           error:
             type: "string"
+            description: "Error massge from device. Filled when returnCode<>0"
           display:
             type: "string"
             enum:
@@ -1525,7 +1526,7 @@ definitions:
         description: "Check the 'error' field when 'ok' is 'false'"
       error:
         type: "string"
-        description: "Filled only when 'ok' field is 'false'"
+        description: "Error from RESTful API filled only when 'ok' field is 'false'. Errors returned by terminal (in case of successfully established connection) are returned inside the 'terminal.error' struct"
       text:
         type: "string"
       watermark:
