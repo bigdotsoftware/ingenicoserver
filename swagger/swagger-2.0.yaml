@@ -766,6 +766,28 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTransactionActionResponse"
 
+  /polcard/v1/ingenico_transaction_end:
+    get:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Mark current transaction finished"
+      description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionEndResponse"
+
+
 definitions:
 
   EserviceAutoTransactionBeginRequest:
@@ -1233,7 +1255,79 @@ definitions:
                     type: "string"
                   specificSymbol:
                     type: "string"
-            
+  
+  PolcardTransactionEndResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          messagePart:
+            type: "integer"
+          readerType:
+            type: "string"
+            enum:
+              - "ok_icc_card_contactless"
+              - "ok_magnetic_card_magstripe"
+              - "ok_magnetic_card_contactless"
+              - "ok_emv_card_magstripe"
+              - "ok_emv_card_icc"
+              - "me_card_entered_manually"
+              - "error_read_icc_fallback_allowed"
+              - "error_read_icc_fallback_not_allowed"
+              - "error_read_track2_or_carddata"
+              - "error_nocard_timeout"
+          authorizationResult:
+            type: "string"
+            enum:
+              - "base_approval"
+              - "base_partial_approval"
+              - "base_refusal"
+              - "base_transaction_not_found"
+              - "base_transaction_settled"
+              - "base_transaction_not_approved"
+              - "base_transaction_and_reverdal_amounts_dont_match"
+              - "base_acceptor_unable_to_complete"
+              - "base_multi_merchant_config_incorrect_or_profile_not_supported"
+              - "base_batch_full_upload_required"
+              - "base_rejected_card_system_dont_match_pan"
+              - "base_rejected_card_system_not_set"
+              
+              - "deposit_terminal_daily_limit_exceeded"
+              - "deposit_card_daily_limit_exceeded"
+              - "deposit_card_daily_quantity_exceeded"
+              - "deposit_customer_registration_required"
+              
+              - "loyalty_unable_to_read_card"
+              - "loyalty_not_recognized_card"
+              
+              - "fleet_not_recognized_card"
+              - "fleet_chip_error"
+              - "fleet_card_expired"
+              
+              - "preauthorization_not_found"
+              - "preauthorization_amount_too_small"
+              - "preauthorization_cannot_resolve_token"
+              
+              - "purchaseadj_amount_correction_disabled"
+              - "purchaseadj_missing_last_transaction"
+              - "purchaseadj_incorrect_transaction_or_amount"
+              - "purchaseadj_transaction_not_approved"
+              - "purchaseadj_unable_to_complete"
+              - "purchaseadj_battery_too_low"
+              - "purchaseadj_gsm_signal_too_low"
+              
+              - "unknown"
+          transactionDetails:
+            type: "object"
+                    
   EserviceTransactionBeginResponse:
     type: "object"
     allOf:
@@ -1523,7 +1617,7 @@ definitions:
     properties:
       ok:
         type: "boolean"
-        description: "Check the 'error' field when 'ok' is 'false'"
+        description: "Check the 'error' or 'terminal.error' ields when 'ok' is 'false'"
       error:
         type: "string"
         description: "Error from RESTful API filled only when 'ok' field is 'false'. Errors returned by terminal (in case of successfully established connection) are returned inside the 'terminal.error' struct"
