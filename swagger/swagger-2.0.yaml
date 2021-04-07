@@ -781,11 +781,79 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
       responses:
         "200":
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTransactionEndResponse"
+
+  /polcard/v1/ingenico_transaction_statuses:
+    get:
+      tags:
+      - "Polcard: Terminal"
+      summary: "List of all statuses from current transaction"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionStatusesResponse"
+            
+  /polcard/v1/ingenico_status:
+    get:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal status"
+      description: "The most used method. Attribute 'transactionStatus' determines application next steps. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to read results of current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalStatusResponse"
+
+  /polcard/v1/ingenico_display:
+    get:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal display information"
+      description: "Use this method to gather more detailed information about text to be displayed and availabe options. Method returns display info only when 'ingenico_status' returns 'AskingEcrToPrintData'"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalDisplayInfoResponse"
+
 
 
 definitions:
@@ -1284,6 +1352,7 @@ definitions:
               - "error_read_icc_fallback_not_allowed"
               - "error_read_track2_or_carddata"
               - "error_nocard_timeout"
+            description: "Determines overall transaction status. All statuses starting from 'ok_' means transaction succeeded. Check authorizationResult for more more detailed status."
           authorizationResult:
             type: "string"
             enum:
@@ -1325,6 +1394,7 @@ definitions:
               - "purchaseadj_gsm_signal_too_low"
               
               - "unknown"
+            description: "Authorization status. In typical, successfult scenario 'base_approval' is returned."
           transactionDetails:
             type: "object"
                     
@@ -1466,6 +1536,7 @@ definitions:
             - "WaitingForAmount"
             - "WaitingForSelection"
             - "AskingEcrToPrintData"
+            - "AskingEcrToPrintDataStop"
             - "PresentingZenCardOffer"
             - "WaitingForFid"
             - "AskingEcrToReceiveData"
@@ -1598,7 +1669,137 @@ definitions:
           timeout:
             type: "integer"
             description: "Timeout for message to be displayed"
-                  
+
+  PolcardTransactionStatusesResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      statuses:
+        type: "array"
+        items:
+          type: "object"
+          allOf:
+          - $ref: '#/definitions/PolcardTerminalStatusBaseResponse'
+          properties:
+            timestamp:
+              type: "number"
+            order:
+              type: "number"
+          
+  PolcardTerminalStatusResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PolcardTerminalStatusBaseResponse'
+      
+  PolcardTerminalStatusBaseResponse:
+    type: "object"
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            enum:
+            - "Idle"
+            - "WaitCard"
+            - "WaitPIN"
+            - "WaitEMVApp"
+            - "WaitHost"
+            - "WaitSign"
+            - "WaitTrEnd"
+            - "WaitNoCard"
+            - "WaitBusy"
+            - "InProgress"
+            - "WaitCopy"
+            - "WaitAuthCode"
+            - "WaitAction"
+            - "BatchCompleted"
+            - "DCCCurrency"
+            - "CashBackAmount"
+            - "UsedInternaly"
+            - "TransactionAccepted"
+            - "WaitingForAmount"
+            - "WaitingForSelection"
+            - "AskingEcrToPrintData"
+            - "AskingEcrToPrintDataStop"
+            - "PresentingZenCardOffer"
+            - "WaitingForFid"
+            - "AskingEcrToReceiveData"
+            - "ZencardContinue"
+            - "ApplicationInErrorState"
+            - "ReconciliationNeeded"
+          sequenceNb:
+            type: "string"
+          charsAllowed:
+            type: "string"
+            enum:
+            - "numeric"
+            - "alphanumeric"
+            - "ascii"
+            - "unknown"
+          specialCharsAllowed:
+            type: "string"
+            enum:
+            - "ok"
+            - "cancel"
+            - "ok_cancel"
+            - "back"
+            - "ok_back"
+            - "back_cancel"
+            - "ok_back_cancel"
+            - "other"
+          promptText:
+            type: "string"
+            
+
+  PolcardTerminalDisplayInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          display:
+            type: "string"
+            enum:
+            - "cardholder"
+            - "clerk"
+            - "cardholder_and_clerk"
+          keyboardOptions:
+            type: "string"
+            enum:
+            - "yes_no"
+            - "amount"
+            - "commercial_code"
+            - "authorization_code"
+            - "one_of"
+            - "merchant_profile"
+            - "any_key"
+            - "variable_options"
+            - "display_only"
+          timeout:
+            type: "integer"
+          promptText:
+            type: "string"
+            
+
   LicenseResponse:
     type: "object"
     required: [ "validTo", "licenseTo", "expired" ]
