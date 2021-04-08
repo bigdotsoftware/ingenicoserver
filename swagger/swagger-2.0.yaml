@@ -854,7 +854,55 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTerminalDisplayInfoResponse"
 
+  /polcard/v1/ingenico_transaction_data_input:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionDataInputRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionDataInputResponse"
 
+  /polcard/v1/ingenico_transaction_send_key:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Send remotely control terminal, like accept/decline/back"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendKeyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendKeyResponse"
 
 definitions:
 
@@ -1685,6 +1733,8 @@ definitions:
           properties:
             timestamp:
               type: "number"
+            timestampText:
+              type: "string"
             order:
               type: "number"
           
@@ -1762,7 +1812,6 @@ definitions:
           promptText:
             type: "string"
             
-
   PolcardTerminalDisplayInfoResponse:
     type: "object"
     required: [ "terminal" ]
@@ -1798,8 +1847,37 @@ definitions:
             type: "integer"
           promptText:
             type: "string"
-            
 
+  PolcardTransactionDataInputRequest:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      type:
+        type: "integer"
+
+  PolcardTransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
+  PolcardTransactionSendKeyRequest:
+    type: "object"
+    properties:
+      keycode:
+        type: "string"
+        enum:
+          - "ok"
+          - "no"
+          - "yes"
+          - "back"
+          - "cancel"
+  
+  PolcardTransactionSendKeyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
   LicenseResponse:
     type: "object"
     required: [ "validTo", "licenseTo", "expired" ]
