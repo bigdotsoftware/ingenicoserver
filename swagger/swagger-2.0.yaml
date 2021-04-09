@@ -858,8 +858,8 @@ paths:
     get:
       tags:
       - "Polcard: Terminal"
-      summary: "Terminal display information"
-      description: "Use this method to gather more detailed information about text to be displayed and availabe options. Method returns display info only when 'ingenico_status' returns 'AskingEcrToPrintData'"
+      summary: "Display detailed information"
+      description: "Returns more details about currently displayed message on the terminal. Use this method when 'ingenico_status' is 'AskingEcrToPrintData'"
       consumes:
       - "application/json"
       produces:
@@ -875,6 +875,31 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTerminalDisplayInfoResponse"
 
+  /polcard/v1/ingenico_print:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Print extra information on the terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTerminalPrintRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalPrintResponse"
+            
   /polcard/v1/ingenico_transaction_data_input:
     post:
       tags:
@@ -924,6 +949,56 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTransactionSendKeyResponse"
+
+  /polcard/v1/ingenico_transaction_send_code:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Send remotely code like BLIK and commercial code"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendCodeRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendCodeResponse"
+
+  /polcard/v1/ingenico_transaction_send_amount:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Send remotely code like BLIK and commercial code"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendAmountRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendAmountResponse"
 
 definitions:
 
@@ -1879,6 +1954,35 @@ definitions:
       type:
         type: "integer"
 
+
+  PolcardTerminalPrintRequest:
+    type: "object"
+    properties:
+      messageNumber:
+        type: "integer"
+      printout:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            align:
+              type: "string"
+              enum:
+                - "left"
+                - "right"
+                - "center"
+            bold:
+              type: "boolean"
+              default: false
+            high:
+              type: "boolean"
+              default: false
+            expand:
+              type: "boolean"
+              default: false
+          
+      
+        
   PolcardTransactionDataInputResponse:
     type: "object"
     allOf:
@@ -1895,11 +1999,46 @@ definitions:
           - "yes"
           - "back"
           - "cancel"
+          - "anykey"
+
+  PolcardTransactionSendCodeRequest:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+      type:
+        type: "string"
+        enum:
+          - "commercial"
+          - "authorization"
+          
+  PolcardTransactionSendAmountRequest:
+    type: "object"
+    properties:
+      amount:
+        type: "integer"
+      type:
+        type: "string"
+        enum:
+          - "cashback"
+          - "other"
+      
   
   PolcardTransactionSendKeyResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
+  PolcardTransactionSendCodeResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+      
+  PolcardTransactionSendAmountResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
   
   LicenseResponse:
     type: "object"
