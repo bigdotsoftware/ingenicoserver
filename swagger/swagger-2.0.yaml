@@ -1965,6 +1965,15 @@ definitions:
         items:
           type: "object"
           properties:
+            type:
+              type: "string"
+              enum:
+                - "header"
+                - "body"
+                - "footer"
+                - "date"
+                - "time"
+                - "logo"
             align:
               type: "string"
               enum:
@@ -1980,9 +1989,14 @@ definitions:
             expand:
               type: "boolean"
               default: false
+            text:
+              type: "string"
           
+  PolcardTerminalPrintResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'   
       
-        
   PolcardTransactionDataInputResponse:
     type: "object"
     allOf:
