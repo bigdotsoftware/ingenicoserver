@@ -810,7 +810,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/PolcardTransactionAbortResponse"
+            $ref: "#/definitions/PolcardTransactionEndResponse"
             
   /polcard/v1/ingenico_transaction_statuses:
     get:
@@ -1466,11 +1466,6 @@ definitions:
             description: "Authorization status. In typical, successfult scenario 'base_approval' is returned."
           transactionDetails:
             type: "object"
-
-  PolcardTransactionAbortResponse:
-    type: "object"
-    allOf:
-      - $ref: '#/definitions/ApiResponse'
       
   EserviceTransactionBeginResponse:
     type: "object"
@@ -1607,6 +1602,7 @@ definitions:
             - "CashBackAmount"
             - "UsedInternaly"
             - "TransactionAccepted"
+            - "TransactionAborted"
             - "WaitingForAmount"
             - "WaitingForSelection"
             - "AskingEcrToPrintData"
@@ -1805,6 +1801,7 @@ definitions:
             - "CashBackAmount"
             - "UsedInternaly"
             - "TransactionAccepted"
+            - "TransactionAborted"
             - "WaitingForAmount"
             - "WaitingForSelection"
             - "AskingEcrToPrintData"
@@ -1864,7 +1861,7 @@ definitions:
             - "amount"
             - "commercial_code"
             - "authorization_code"
-            - "one_of"
+            - "choose_options"
             - "merchant_profile"
             - "any_key"
             - "variable_options"
