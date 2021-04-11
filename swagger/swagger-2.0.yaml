@@ -2143,6 +2143,7 @@ definitions:
               - "unknown"
           content:
             type: "string"
+            description: "When requesting for 'satisfaction' then content is one of: negative/neutral/positive"
       
   PolcardTerminalPromptEndResponse:
     type: "object"
