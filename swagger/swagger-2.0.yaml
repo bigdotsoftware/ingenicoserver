@@ -899,6 +899,31 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTerminalPrintResponse"
+
+  /polcard/v1/ingenico_prompt:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Get additional data from terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTerminalPromptRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalPromptResponse"
             
   /polcard/v1/ingenico_transaction_data_input:
     post:
@@ -1668,6 +1693,7 @@ definitions:
             - "WaitTrEnd"
             - "WaitNoCard"
             - "WaitBusy"
+            - "WaitPromptEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -1715,8 +1741,7 @@ definitions:
           promptText:
             type: "string"
             
-            
-  PolcardTransactionBeginRequest:
+  PolcardTransportDef:
     type: "object"
     properties:
       transport:
@@ -1736,6 +1761,12 @@ definitions:
             type: "integer"
           publicKey:
             type: "string"
+            
+  PolcardTransactionBeginRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
       type:
         type: "string"
         enum:
@@ -1867,6 +1898,7 @@ definitions:
             - "WaitTrEnd"
             - "WaitNoCard"
             - "WaitBusy"
+            - "WaitPromptEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -1957,6 +1989,8 @@ definitions:
 
   PolcardTerminalPrintRequest:
     type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
     properties:
       messageNumber:
         type: "integer"
@@ -1996,6 +2030,47 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'   
+      
+  PolcardTerminalPromptRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "profiles"
+          - "satisfaction"
+          - "loyalty_auth"
+          - "last_upload_status"
+          - "additional_data_keypad"
+          - "barcode"
+      reqestParams:
+        type: "string"
+        default: ""
+      
+  PolcardTerminalPromptResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          status:
+            type: "string"
+            description: "When status is InProgress, use /polcard/v1/ingenico_status to determine current status or /polcard/v1/ingenico_statuses to read history of statuses"
+            enum:
+            - "WaitPromptEnd"
+            - "InProgress"
+          replyType:
+            type: "string"
+          content:
+            type: "string"
       
   PolcardTransactionDataInputResponse:
     type: "object"
