@@ -905,7 +905,7 @@ paths:
       tags:
       - "Polcard: Terminal"
       summary: "Terminal remote control"
-      description: "Get additional data from terminal"
+      description: "Get additional data from terminal. Request /polcard/v1/ingenico_transaction_abort to abort"
       consumes:
       - "application/json"
       produces:
@@ -2094,6 +2094,15 @@ definitions:
             - "InProgress"
           replyType:
             type: "string"
+            enum:
+              - "profiles"
+              - "satisfaction"
+              - "loyalty_auth"
+              - "last_upload_status"
+              - "additional_data_keypad"
+              - "barcode"
+              - "error_data_unavailable"
+              - "unknown"
           content:
             type: "string"
       
