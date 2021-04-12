@@ -1000,6 +1000,7 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTerminalPromptEndResponse"
             
+
   /polcard/v1/ingenico_transaction_data_input:
     post:
       tags:
@@ -1100,7 +1101,7 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTransactionSendAmountResponse"
 
-  /polcard/v1/ingenico_set_action:
+  /polcard/v1/ingenico_send_action:
     post:
       tags:
       - "Polcard: Terminal"
@@ -1124,6 +1125,31 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTransactionSetActionResponse"
+  
+  /polcard/v1/ingenico_send_action_end:
+    get:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Get summary of /ingenico_send_action when terminal.status=WaitActionEnd"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSetActionEndResponse"
 
 definitions:
 
@@ -1794,6 +1820,7 @@ definitions:
             - "WaitNoCard"
             - "WaitBusy"
             - "WaitPromptEnd"
+            - "WaitActionEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -1999,6 +2026,7 @@ definitions:
             - "WaitNoCard"
             - "WaitBusy"
             - "WaitPromptEnd"
+            - "WaitActionEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -2174,10 +2202,13 @@ definitions:
         
   PolcardTransactionSetActionRequest:
     type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
     properties:
       action:
         type: "string"
         enum:
+          - "close_business_day"
           - "download"
           - "restart"
   
@@ -2195,7 +2226,27 @@ definitions:
             description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
           status:
             type: "string"
-            
+            description: "one of: ok/error/missing_version/batch_not_empty"
+
+          messagePart:
+            type: "number"
+            description: "filled when action=close_business_day"
+          batchFileNb:
+            type: "number"
+            description: "filled when action=close_business_day"
+          transactionsCount:
+            type: "number"
+            description: "filled when action=close_business_day"
+          content:
+            type: "string"
+            description: "filled when action=close_business_day"
+
+
+  PolcardTransactionSetActionEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionSetActionResponse'
+      
   PolcardBarcodeResponse:
     type: "object"
     allOf:
