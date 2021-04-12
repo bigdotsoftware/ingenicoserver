@@ -949,6 +949,31 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTerminalPromptResponse"
+  
+  /polcard/v1/ingenico_barcode:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Request data from barcode reader/scanner (Verifone E355)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardBarcodeRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardBarcodeResponse"
             
   /polcard/v1/ingenico_prompt_end:
     get:
@@ -1074,6 +1099,31 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTransactionSendAmountResponse"
+
+  /polcard/v1/ingenico_set_action:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Standby mode"
+      description: "Peform action with terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSetActionRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSetActionResponse"
 
 definitions:
 
@@ -2111,7 +2161,56 @@ definitions:
         type: "string"
       time:
         type: "number"
+  
+  PolcardBarcodeRequest:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+        enum:
+          - "scan_one"
+          - "scan_many"
+          - "finish"
         
+  PolcardTransactionSetActionRequest:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+        enum:
+          - "download"
+          - "restart"
+  
+  PolcardTransactionSetActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          status:
+            type: "string"
+            
+  PolcardBarcodeResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          barcode:
+            type: "string"
+            
   PolcardTerminalPromptResponse:
     type: "object"
     allOf:
