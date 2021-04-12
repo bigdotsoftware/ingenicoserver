@@ -1126,12 +1126,37 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTransactionSetActionResponse"
   
-  /polcard/v1/ingenico_send_action_end:
+  /polcard/v1/ingenico_cutoff:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Standby mode"
+      description: "Peform action with terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardCutoffRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardCutoffResponse"
+            
+  /polcard/v1/ingenico_cutoff_end:
     get:
       tags:
       - "Polcard: Terminal"
       summary: "Terminal remote control"
-      description: "Get summary of /ingenico_send_action when terminal.status=WaitActionEnd"
+      description: "Get summary of /ingenico_cutoff when terminal.status=WaitCutoffEnd"
       consumes:
       - "application/json"
       produces:
@@ -1149,7 +1174,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/PolcardTransactionSetActionEndResponse"
+            $ref: "#/definitions/PolcardCutoffEndResponse"
 
 definitions:
 
@@ -1820,7 +1845,7 @@ definitions:
             - "WaitNoCard"
             - "WaitBusy"
             - "WaitPromptEnd"
-            - "WaitActionEnd"
+            - "WaitCutoffEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -2026,7 +2051,7 @@ definitions:
             - "WaitNoCard"
             - "WaitBusy"
             - "WaitPromptEnd"
-            - "WaitActionEnd"
+            - "WaitCutoffEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -2208,9 +2233,13 @@ definitions:
       action:
         type: "string"
         enum:
-          - "close_business_day"
           - "download"
           - "restart"
+  
+  PolcardCutoffRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
   
   PolcardTransactionSetActionResponse:
     type: "object"
@@ -2228,25 +2257,33 @@ definitions:
             type: "string"
             description: "one of: ok/error/missing_version/batch_not_empty"
 
-          messagePart:
-            type: "number"
-            description: "filled when action=close_business_day"
-          batchFileNb:
-            type: "number"
-            description: "filled when action=close_business_day"
-          transactionsCount:
-            type: "number"
-            description: "filled when action=close_business_day"
-          content:
-            type: "string"
-            description: "filled when action=close_business_day"
 
-
-  PolcardTransactionSetActionEndResponse:
+  PolcardCutoffResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/PolcardTransactionSetActionResponse'
+      - $ref: '#/definitions/ApiResponse'
       
+  PolcardCutoffEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          messagePart:
+            type: "number"
+          batchFileNb:
+            type: "number"
+          transactionsCount:
+            type: "number"
+          content:
+            type: "string"
+            
   PolcardBarcodeResponse:
     type: "object"
     allOf:
