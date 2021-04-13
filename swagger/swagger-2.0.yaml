@@ -1176,6 +1176,31 @@ paths:
           schema:
             $ref: "#/definitions/PolcardCutoffEndResponse"
 
+  /polcard/v1/ingenico_report:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Prepare terminal report"
+      description: "Peform action with terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardReportRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardReportResponse"
+            
 definitions:
 
   EserviceAutoTransactionBeginRequest:
@@ -2241,6 +2266,31 @@ definitions:
     allOf:
       - $ref: '#/definitions/PolcardTransportDef'
   
+  PolcardReportRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      reportType:
+        type: "string"
+        enum:
+          - "batch_report"
+          - "cumulative_report"
+      action:
+        type: "string"
+        enum:
+          - "batch_return"
+          - "manual_batch_then_return"
+          - "cumulative_return"
+          - "cumulative_return_reset_counters"
+      profileId:
+        type: "number"
+      timeout:
+        type: "number"
+        default: 30
+        description: "Report generation is a time consuming/blocking operation. Use timeout (in seconds) to override default timeout set in the config.yml configuration file."
+      
+      
   PolcardTransactionSetActionResponse:
     type: "object"
     allOf:
@@ -2284,6 +2334,12 @@ definitions:
           content:
             type: "string"
             
+
+  PolcardReportResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
   PolcardBarcodeResponse:
     type: "object"
     allOf:
