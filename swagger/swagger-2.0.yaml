@@ -1130,8 +1130,8 @@ paths:
     post:
       tags:
       - "Polcard: Terminal"
-      summary: "Standby mode"
-      description: "Peform action with terminal"
+      summary: "Send Transactions"
+      description: "Transfer current transactions to the external system (FDP's clearing host). To list transactions use /polcard/v1/ingenico_cutoff_report method"
       consumes:
       - "application/json"
       produces:
@@ -1150,7 +1150,32 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardCutoffResponse"
-            
+  
+  /polcard/v1/ingenico_cutoff_report:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Transactions list"
+      description: "Returns list of transactions (all transactions since previous transfer) to be transfered to the external system (FDP's clearing host). To perform transactions transfer use /polcard/v1/ingenico_cutoff method"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardCutoffReportRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardCutoffReportResponse"
+  
   /polcard/v1/ingenico_cutoff_end:
     get:
       tags:
@@ -2266,6 +2291,11 @@ definitions:
     allOf:
       - $ref: '#/definitions/PolcardTransportDef'
   
+  PolcardCutoffReportRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+      
   PolcardReportRequest:
     type: "object"
     allOf:
@@ -2312,8 +2342,149 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+  
+  PolcardCutoffCommonResponse:
+    type: "object"
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          messagePart:
+            type: "number"
+          batchFileNb:
+            type: "number"
+          transactionsCount:
+            type: "number"
+          transactions:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                time:
+                  type: "string"
+                date:
+                  type: "string"
+                cardsetName:
+                  type: "string"
+                maskedCardNumber:
+                  type: "string"
+                panSequenceNumber:
+                  type: "string"
+                authorizationCodeSource:
+                  type: "string"
+                authorizationCode:
+                  type: "string"
+                authorizationCode2:
+                  type: "string"
+                cashbackAmount:
+                  type: "number"
+                transactionCurrencyCode:
+                  type: "string"
+                dccExchangeRate:
+                  type: "string"
+                dccCurrencyCode:
+                  type: "string"
+                dccAmount:
+                  type: "number"
+                aid:
+                  type: "string"
+                transactionAmount:
+                  type: "number"
+                authorizationResponseCode:
+                  type: "string"
+                transactionType:
+                  type: "string"
+                transactionTypeText:
+                  type: "string"
+                  enum:
+                    - "reversal"
+                    - "sale_or_preauthorization"
+                    - "sale_with_cashback"
+                    - "cash_from_pos"
+                    - "refund"
+                    - "verification"
+                readerType:
+                  type: "string"
+                  enum:
+                    - "read_magstripe_contactless"
+                    - "read_magstripe"
+                    - "read_magstripe_fallback"
+                    - "card_entered_manually"
+                    - "card_icc_contactless"
+                    - "card_icc"
+                cardExpiryDate:
+                  type: "string"
+                tipAmount:
+                  type: "number"
+                surchargeFee:
+                  type: "number"
+                dccTipAmount:
+                  type: "number"
+                dccSurchargeFee:
+                  type: "number"
+                cashierId:
+                  type: "string"
+                acceptorName:
+                  type: "string"
+                acceptorStreet:
+                  type: "string"
+                acceptorPostalCityCountry:
+                  type: "string"
+                mid:
+                  type: "string"
+                tid:
+                  type: "string"
+                nip:
+                  type: "string"
+                reportName:
+                  type: "string"
+                invoiceNumber:
+                  type: "string"
+                commercialCode:
+                  type: "string"
+                transactionReferenceNumber:
+                  type: "string"
+                otc:
+                  type: "string"
+                pid:
+                  type: "string"
+                prepaidBalance:
+                  type: "string"
+                tokenValue:
+                  type: "string"
+                tokenExpiryDate:
+                  type: "string"
+                currencyUnitRelationship:
+                  type: "string"
+                eReceiptId:
+                  type: "string"
+                externalTransactionId:
+                  type: "string"
+                remainingAmount:
+                  type: "number"
+                originalTransactionAmount:
+                  type: "number"
+
+  
   PolcardCutoffEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PolcardCutoffCommonResponse'
+      
+      
+  PolcardCutoffReportResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PolcardCutoffCommonResponse'
+  
+            
+  PolcardReportResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
@@ -2331,15 +2502,47 @@ definitions:
             type: "number"
           transactionsCount:
             type: "number"
-          content:
-            type: "string"
-            
-
-  PolcardReportResponse:
-    type: "object"
-    allOf:
-      - $ref: '#/definitions/ApiResponse'
-      
+          header:
+            type: "object"
+            properties:
+              acceptorName:
+                type: "string"
+              acceptorStreet:
+                type: "string"
+              acceptorPostalCityCountry:
+                type: "string"
+              mid:
+                type: "string"
+              tid:
+                type: "string"
+              nip:
+                type: "string"
+              reportName:
+                type: "string"
+          transactions:
+            type: "array"
+            items:
+              type: "object"
+          summary:
+            type: "object"
+            properties:
+              uploadReportSumamry:
+                type: "string"
+              uploadReportTotalSummary:
+                type: "string"
+              uploadReportDCCSummary:
+                type: "string"
+              cumulativeReportData:
+                type: "string"
+              cumulativeReportSummary:
+                type: "string"
+              cumulativeReportLastReset:
+                type: "string"
+              batchTotals:
+                type: "string"
+              outOfSyncMessage:
+                type: "string"
+                  
   PolcardBarcodeResponse:
     type: "object"
     allOf:
@@ -2433,7 +2636,6 @@ definitions:
           - "cashback"
           - "other"
       
-  
   PolcardTransactionSendKeyResponse:
     type: "object"
     allOf:
