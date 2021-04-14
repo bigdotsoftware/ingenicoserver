@@ -2617,7 +2617,12 @@ definitions:
               cumulativeReportData:
                 type: "string"
               cumulativeReportSummary:
-                type: "string"
+                type: "object"
+                properties:
+                  quantity:
+                    type: "number"
+                  amount:
+                    type: "number"
               cumulativeReportLastReset:
                 type: "array"
                 items:
@@ -2625,7 +2630,19 @@ definitions:
                   allOf:
                     - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
               batchTotals:
-                type: "string"
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    label:
+                      type: "string"
+                    hostTotal:
+                      type: "string"
+                    terminalTotal:
+                      type: "string"
+                    difference:
+                      type: "string"
+
               outOfSyncMessage:
                 type: "string"
                   
