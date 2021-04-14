@@ -1006,7 +1006,7 @@ paths:
       tags:
       - "Polcard: Terminal"
       summary: "Terminal remote control"
-      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
+      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc. This is very generic method to manage transaction process. Consider using dedicated methods like: /polcard/v1/ingenico_transaction_abort /polcard/v1/ingenico_transaction_send_key /polcard/v1/ingenico_transaction_send_code /polcard/v1/ingenico_transaction_send_amount /polcard/v1/ingenico_transaction_send_option or /polcard/v1/ingenico_transaction_send_profile"
       consumes:
       - "application/json"
       produces:
@@ -1100,6 +1100,56 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTransactionSendAmountResponse"
+
+  /polcard/v1/ingenico_transaction_send_option:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Send option value"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendOptionRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendOptionResponse"
+  
+  /polcard/v1/ingenico_transaction_send_profile:
+    post:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Send option value"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendProfileRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendProfileResponse"
 
   /polcard/v1/ingenico_send_action:
     post:
@@ -2231,6 +2281,7 @@ definitions:
           properties:
             type:
               type: "string"
+              description: "Logo must be prepared by FDP before using it. Minimum logo size is 16x16 pixels and maximum 384x240 pixels"
               enum:
                 - "header"
                 - "body"
@@ -2255,6 +2306,7 @@ definitions:
               default: false
             text:
               type: "string"
+              description: "Single line contains 42 or 21 characters"
           
   PolcardTerminalPrintResponse:
     type: "object"
@@ -2693,6 +2745,17 @@ definitions:
           content:
             type: "string"
             description: "When requesting for 'satisfaction' then content is one of: negative/neutral/positive"
+          uploadStatus:
+            type: "object"
+            description: "Filled only when 'type'='last_upload_status', otherwise it is null"
+            properties:
+              code:
+                type: "string"
+                description: "Code identifier, like 'OK'"
+              datetime:
+                type: "string"
+              quantity:
+                type: "number"
       
   PolcardTerminalPromptEndResponse:
     type: "object"
@@ -2739,6 +2802,20 @@ definitions:
           - "cashback"
           - "other"
       
+  PolcardTransactionSendOptionRequest:
+    type: "object"
+    properties:
+      option:
+        type: "integer"
+        description: "maximum 1 digit"
+
+  PolcardTransactionSendProfileRequest:
+    type: "object"
+    properties:
+      profile:
+        type: "integer"
+        description: "maximum 2 digits"
+        
   PolcardTransactionSendKeyResponse:
     type: "object"
     allOf:
@@ -2754,6 +2831,15 @@ definitions:
     allOf:
       - $ref: '#/definitions/PolcardTransactionDataInputResponse'
   
+  PolcardTransactionSendOptionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
+  PolcardTransactionSendProfileResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
   
   LicenseResponse:
     type: "object"
