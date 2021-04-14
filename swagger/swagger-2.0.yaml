@@ -1225,7 +1225,32 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardReportResponse"
-            
+
+  /polcard/v1/ingenico_report_end:
+    get:
+      tags:
+      - "Polcard: Terminal"
+      summary: "Terminal remote control"
+      description: "Get summary of /ingenico_report when terminal.status=WaitReportEnd"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardReportEndResponse"
+
 definitions:
 
   EserviceAutoTransactionBeginRequest:
@@ -1896,6 +1921,7 @@ definitions:
             - "WaitBusy"
             - "WaitPromptEnd"
             - "WaitCutoffEnd"
+            - "WaitReportEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -2102,6 +2128,7 @@ definitions:
             - "WaitBusy"
             - "WaitPromptEnd"
             - "WaitCutoffEnd"
+            - "WaitReportEnd"
             - "InProgress"
             - "WaitCopy"
             - "WaitAuthCode"
@@ -2499,7 +2526,11 @@ definitions:
       - $ref: '#/definitions/ApiResponse'
       - $ref: '#/definitions/PolcardCutoffCommonResponse'
   
-       
+  PolcardReportEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardReportResponse'
+      
   PolcardReportTransactionSummaryItem:
     type: "object"
     properties:
