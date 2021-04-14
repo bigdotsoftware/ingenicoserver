@@ -2401,12 +2401,28 @@ definitions:
                 transactionTypeText:
                   type: "string"
                   enum:
-                    - "reversal"
-                    - "sale_or_preauthorization"
+                    - "sale"
                     - "sale_with_cashback"
+                    - "sale_or_preauthorization"
                     - "cash_from_pos"
                     - "refund"
                     - "verification"
+                    - "preauthorization"
+                    - "preauthorization_completion"
+                    - "increase_preauthorization"
+                    - "reduce_preauthorization"
+                    - "cancel_preauthorization"
+                    - "fleet_card_sale"
+                    - "loyalty_card"
+                    - "reversal"
+                    - "card_activation"
+                    - "replenishment"
+                    - "balance_inquiry"
+                    - "sale_with_registration"
+                    - "card_registration"
+                    - "cash_deposit"
+                    - "no_show"
+                    - "delayed_charges"
                 readerType:
                   type: "string"
                   enum:
@@ -2483,7 +2499,19 @@ definitions:
       - $ref: '#/definitions/ApiResponse'
       - $ref: '#/definitions/PolcardCutoffCommonResponse'
   
-            
+       
+  PolcardReportTransactionSummaryItem:
+    type: "object"
+    properties:
+      transactionType:
+        type: "string"
+        description: "Depends from the firmware version, values are like: SPRZEDAŻ, UZNANIE, NAPIWEK, DOPŁATA, CASHBACK, DOPEŁNIENIE PREAUT, GOTÓWKA, WPŁATA GOTÓWKI, UN. SPRZEDAŻ, UN. CASHBACK,UN. GOTÓWKA, UN. UZNANIE, RAZEM lub Sale, Refund, Cashback, Cash withdrawal, Cash deposit, Sale reversal, Refund reversal, Cashback reversal, Cash withdrawal reversal, Total"
+      quantity:
+        type: "number"
+      amount:
+        type: "number"
+        description: "Field is optional. For instance in PolcardReportResponse.summary.uploadReport may contain items with 'transactionType' and 'quantity' only."
+        
   PolcardReportResponse:
     type: "object"
     allOf:
@@ -2526,18 +2554,45 @@ definitions:
           summary:
             type: "object"
             properties:
-              uploadReportSumamry:
-                type: "string"
-              uploadReportTotalSummary:
-                type: "string"
-              uploadReportDCCSummary:
-                type: "string"
+              uploadReport:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                    - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
+              uploadReportTotals:
+                type: "object"
+                properties:
+                  cardSystem:
+                    type: "string"
+                    description: "card system identifier like POLCARD, VISA etc."
+                  items:
+                    type: "array"
+                    items:
+                      type: "object"
+                      allOf:
+                        - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
+              uploadReportDCC:
+                type: "object"
+                properties:
+                  label:
+                    type: "string"
+                  items:
+                    type: "array"
+                    items:
+                      type: "object"
+                      allOf:
+                        - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
               cumulativeReportData:
                 type: "string"
               cumulativeReportSummary:
                 type: "string"
               cumulativeReportLastReset:
-                type: "string"
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                    - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
               batchTotals:
                 type: "string"
               outOfSyncMessage:
