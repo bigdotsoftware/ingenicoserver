@@ -13,27 +13,44 @@ tags:
   externalDocs:
     description: "Find out more"
     url: "https://blog.bigdotsoftware.pl/ingenico-server-licencja/"
-- name: "Terminal (eService)"
+    
+- name: "eService: General info"
   description: "Terminal operations"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-- name: "Reports (eService)"
+- name: "eService: Transactions"
+  description: "Terminal transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: Extras"
+  description: "Terminal transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: Reports"
   description: "Transaction reports"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-- name: "Analysis (eService)"
+- name: "eService: Analysis"
   description: "Transaction analysis"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
-- name: "DCC Analysis (eService)"
+- name: "eService: DCC Analysis"
   description: "Transaction DCC analysis"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"  
-- name: "Polcard: Terminal"
+    
+- name: "Polcard: Transactions"
+  description: "Terminal transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "Polcard: Extras"
   description: "Terminal operations"
   externalDocs:
     description: "Find out more"
@@ -90,7 +107,7 @@ paths:
   /eservice/v1/ingenico_status:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: General info"
       summary: "Terminal status"
       description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to finish current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
       consumes:
@@ -115,7 +132,7 @@ paths:
   /eservice/v1/ingenico_general_info:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: General info"
       summary: "Terminal information"
       description: "Returns general info about therminal."
       consumes:
@@ -140,7 +157,7 @@ paths:
   /eservice/v1/ingenico_auto_transaction_process:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Start new transaction (automatic mode)"
       description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of auto transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
@@ -169,7 +186,7 @@ paths:
   /eservice/v1/ingenico_auto_transaction_cancel/{uuid}:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Cancel auto transaction"
       description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to cancel transaction."
       consumes:
@@ -199,7 +216,7 @@ paths:
   /eservice/v1/ingenico_auto_transaction_status/{uuid}:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Status of automatic transaction"
       description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to check status of individual automatic transaction."
       consumes:
@@ -229,7 +246,7 @@ paths:
   /eservice/v1/ingenico_auto_transaction_statuses:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "List all auto transactions"
       description: "Returns list of all executed automatic transactions with statuses."
       consumes:
@@ -245,7 +262,7 @@ paths:
   /eservice/v1/ingenico_transaction:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Start new transaction"
       description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
@@ -274,7 +291,7 @@ paths:
   /eservice/v1/ingenico_transaction_end:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Finish current transaction"
       description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
       consumes:
@@ -299,7 +316,7 @@ paths:
   /eservice/v1/ingenico_transaction_last/{transactionIndex}:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Read last transaction data"
       description: "Parameter transactionIndex is counted from 1."
       consumes:
@@ -329,7 +346,7 @@ paths:
   /eservice/v1/ingenico_transaction_data_input:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Terminal remote control"
       description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
       consumes:
@@ -358,7 +375,7 @@ paths:
   /eservice/v1/ingenico_transaction_send_key:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Terminal remote control"
       description: "Send remotely control terminal, like accept/decline/back"
       consumes:
@@ -387,7 +404,7 @@ paths:
   /eservice/v1/ingenico_set_parameter:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Extras"
       summary: "Set terminal parameters"
       description: "Set terminal parameters"
       consumes:
@@ -416,7 +433,7 @@ paths:
   /eservice/v1/ingenico_set_standby:
     post:
       tags:
-      - "Terminal (eService)"
+      - "eService: Extras"
       summary: "Standby mode"
       description: "Put the terminal in Standby mode (power saving)"
       consumes:
@@ -445,7 +462,7 @@ paths:
   /eservice/v1/ingenico_batch_recon_data/{transactionIndex}:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Read single transaction from batch"
       description: "Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1."
       consumes:
@@ -475,7 +492,7 @@ paths:
   /eservice/v1/ingenico_batch_recon_info:
     get:
       tags:
-      - "Terminal (eService)"
+      - "eService: Transactions"
       summary: "Read summary batch data"
       description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'. Method clears the batch and /ingenico_transaction_recon_data don't return any data until next reconciliation"
       consumes:
@@ -500,7 +517,7 @@ paths:
   /eservice/v1/ingenico_report_generate:
     post:
       tags:
-      - "Reports (eService)"
+      - "eService: Reports"
       summary: "Prepare terminal report"
       description: "Prepares a terminal report. To access report data use /ingenico_report_details with 'cardset' counted from 1"
       consumes:
@@ -529,7 +546,7 @@ paths:
   /eservice/v1/ingenico_report_details/{cardset}:
     get:
       tags:
-      - "Reports (eService)"
+      - "eService: Reports"
       summary: "Terminal report details"
       description: ""
       consumes:
@@ -559,7 +576,7 @@ paths:
   /eservice/v1/ingenico_report_summary:
     get:
       tags:
-      - "Reports (eService)"
+      - "eService: Reports"
       summary: "Terminal report total details"
       description: "Returns totals from all transactions prepared by /ingenico_report_generate. Method clears current report details - to access totals again, request /ingenico_report_generate again."
       consumes:
@@ -584,7 +601,7 @@ paths:
   /eservice/v1/ingenico_analysis_generate:
     post:
       tags:
-      - "Analysis (eService)"
+      - "eService: Analysis"
       summary: "Prepare transaction analysis"
       description: "Prepares a terminal report since last EOD report. To access report data use /ingenico_analysis_summary or /ingenico_analysis_details with 'transactionIndex' counted from 1. Reconciliation erases report data."
       consumes:
@@ -609,7 +626,7 @@ paths:
   /eservice/v1/ingenico_analysis_details/{transactionIndex}:
     get:
       tags:
-      - "Analysis (eService)"
+      - "eService: Analysis"
       summary: "Analysis details"
       description: ""
       consumes:
@@ -639,7 +656,7 @@ paths:
   /eservice/v1/ingenico_analysis_summary:
     get:
       tags:
-      - "Analysis (eService)"
+      - "eService: Analysis"
       summary: "Analysis total summary"
       description: "Returns totals from all transactions prepared by /ingenico_analysis_generate. Method clears current report details - to access totals again, request /ingenico_analysis_generate again."
       consumes:
@@ -664,7 +681,7 @@ paths:
   /eservice/v1/ingenico_dcc_analysis_generate:
     post:
       tags:
-      - "DCC Analysis (eService)"
+      - "eService: DCC Analysis"
       summary: "Prepare transaction analysis"
       description: "Prepares a terminal report. To access report data use /ingenico_analysis_summary"
       consumes:
@@ -689,7 +706,7 @@ paths:
   /eservice/v1/ingenico_dcc_analysis_details/{transactionIndex}:
     get:
       tags:
-      - "DCC Analysis (eService)"
+      - "eService: DCC Analysis"
       summary: "Analysis details"
       description: ""
       consumes:
@@ -719,7 +736,7 @@ paths:
   /eservice/v1/ingenico_dcc_analysis_summary:
     get:
       tags:
-      - "DCC Analysis (eService)"
+      - "eService: DCC Analysis"
       summary: "Analysis total summary"
       description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
       consumes:
@@ -744,7 +761,7 @@ paths:
   /polcard/v1/ingenico_transaction:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Start new transaction"
       description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
       consumes:
@@ -769,7 +786,7 @@ paths:
   /polcard/v1/ingenico_transaction_end:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Mark current transaction finished"
       description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
       consumes:
@@ -794,7 +811,7 @@ paths:
   /polcard/v1/ingenico_transaction_abort:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Abort current transaction"
       description: ""
       consumes:
@@ -815,7 +832,7 @@ paths:
   /polcard/v1/ingenico_statuses:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "List of all statuses from current transaction"
       description: ""
       consumes:
@@ -836,7 +853,7 @@ paths:
   /polcard/v1/ingenico_status:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal status"
       description: "The most used method. Attribute 'transactionStatus' determines application next steps. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to read results of current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
       consumes:
@@ -857,7 +874,7 @@ paths:
   /polcard/v1/ingenico_display:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Display detailed information"
       description: "Returns more details about currently displayed message on the terminal. Use this method when 'ingenico_status' is 'AskingEcrToPrintData'"
       consumes:
@@ -878,7 +895,7 @@ paths:
   /polcard/v1/ingenico_print:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Extras"
       summary: "Terminal remote control"
       description: "Print extra information on the terminal"
       consumes:
@@ -903,7 +920,7 @@ paths:
   /polcard/v1/ingenico_prompt:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Get additional data from terminal. Request /polcard/v1/ingenico_transaction_abort to abort"
       consumes:
@@ -928,7 +945,7 @@ paths:
   /polcard/v1/ingenico_prompt_barcode:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Get additional data from terminal. Request /polcard/v1/ingenico_transaction_abort to abort"
       consumes:
@@ -953,7 +970,7 @@ paths:
   /polcard/v1/ingenico_barcode:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Request data from barcode reader/scanner (Verifone E355)"
       consumes:
@@ -978,7 +995,7 @@ paths:
   /polcard/v1/ingenico_prompt_end:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Get summary of /ingenico_prompt when terminal.status=WaitPromptEnd"
       consumes:
@@ -1000,11 +1017,10 @@ paths:
           schema:
             $ref: "#/definitions/PolcardTerminalPromptEndResponse"
             
-
   /polcard/v1/ingenico_transaction_data_input:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc. This is very generic method to manage transaction process. Consider using dedicated methods like: /polcard/v1/ingenico_transaction_abort /polcard/v1/ingenico_transaction_send_key /polcard/v1/ingenico_transaction_send_code /polcard/v1/ingenico_transaction_send_amount /polcard/v1/ingenico_transaction_send_option or /polcard/v1/ingenico_transaction_send_profile"
       consumes:
@@ -1029,7 +1045,7 @@ paths:
   /polcard/v1/ingenico_transaction_send_key:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Send remotely control terminal, like accept/decline/back"
       consumes:
@@ -1054,7 +1070,7 @@ paths:
   /polcard/v1/ingenico_transaction_send_code:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Send remotely code like BLIK and commercial code"
       consumes:
@@ -1079,7 +1095,7 @@ paths:
   /polcard/v1/ingenico_transaction_send_amount:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Send remotely code like BLIK and commercial code"
       consumes:
@@ -1104,7 +1120,7 @@ paths:
   /polcard/v1/ingenico_transaction_send_option:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Send option value"
       consumes:
@@ -1129,7 +1145,7 @@ paths:
   /polcard/v1/ingenico_transaction_send_profile:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Terminal remote control"
       description: "Send option value"
       consumes:
@@ -1154,7 +1170,7 @@ paths:
   /polcard/v1/ingenico_send_action:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Transactions"
       summary: "Standby mode"
       description: "Peform action with terminal"
       consumes:
@@ -1179,7 +1195,7 @@ paths:
   /polcard/v1/ingenico_cutoff:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Extras"
       summary: "Send Transactions"
       description: "Transfer current transactions to the external system (FDP's clearing host). To list transactions use /polcard/v1/ingenico_cutoff_report method"
       consumes:
@@ -1204,7 +1220,7 @@ paths:
   /polcard/v1/ingenico_cutoff_report:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Extras"
       summary: "Transactions list"
       description: "Returns list of transactions (all transactions since previous transfer) to be transfered to the external system (FDP's clearing host). To perform transactions transfer use /polcard/v1/ingenico_cutoff method"
       consumes:
@@ -1229,7 +1245,7 @@ paths:
   /polcard/v1/ingenico_cutoff_end:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Extras"
       summary: "Terminal remote control"
       description: "Get summary of /ingenico_cutoff when terminal.status=WaitCutoffEnd"
       consumes:
@@ -1254,7 +1270,7 @@ paths:
   /polcard/v1/ingenico_report:
     post:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Reports"
       summary: "Prepare terminal report"
       description: "Peform action with terminal"
       consumes:
@@ -1279,7 +1295,7 @@ paths:
   /polcard/v1/ingenico_report_end:
     get:
       tags:
-      - "Polcard: Terminal"
+      - "Polcard: Reports"
       summary: "Terminal remote control"
       description: "Get summary of /ingenico_report when terminal.status=WaitReportEnd"
       consumes:
