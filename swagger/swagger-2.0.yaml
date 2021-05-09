@@ -1196,7 +1196,7 @@ paths:
     post:
       tags:
       - "Polcard: Extras"
-      summary: "Send Transactions"
+      summary: "Send Transactions - closing business day"
       description: "Transfer current transactions to the external system (FDP's clearing host). To list transactions use /polcard/v1/ingenico_cutoff_report method"
       consumes:
       - "application/json"
@@ -1221,7 +1221,7 @@ paths:
     post:
       tags:
       - "Polcard: Extras"
-      summary: "Transactions list"
+      summary: "List of transactions"
       description: "Returns list of transactions (all transactions since previous transfer) to be transfered to the external system (FDP's clearing host). To perform transactions transfer use /polcard/v1/ingenico_cutoff method"
       consumes:
       - "application/json"
@@ -1246,7 +1246,7 @@ paths:
     get:
       tags:
       - "Polcard: Extras"
-      summary: "Terminal remote control"
+      summary: "Status of closing business day process"
       description: "Get summary of /ingenico_cutoff when terminal.status=WaitCutoffEnd"
       consumes:
       - "application/json"
@@ -1270,9 +1270,9 @@ paths:
   /polcard/v1/ingenico_report:
     post:
       tags:
-      - "Polcard: Reports"
-      summary: "Prepare terminal report"
-      description: "Peform action with terminal"
+      - "Polcard: Extras"
+      summary: "Send report and/or Transactions"
+      description: "Transfer report and/or current transactions to the external system (FDP's clearing host)"
       consumes:
       - "application/json"
       produces:
@@ -1295,9 +1295,9 @@ paths:
   /polcard/v1/ingenico_report_end:
     get:
       tags:
-      - "Polcard: Reports"
-      summary: "Terminal remote control"
-      description: "Get summary of /ingenico_report when terminal.status=WaitReportEnd"
+      - "Polcard: Extras"
+      summary: "Status of report/transaction file transmission"
+      description: "Get summary of /ingenico_report when terminal.status=WaitReportEnd. Method /ingenico_report returns 200OK response immediately for some reports like action=manual_batch_then_return. In such case report data is available after some time and can be read only when terminal.status=WaitReportEnd (see examples)"
       consumes:
       - "application/json"
       produces:
@@ -2055,11 +2055,36 @@ definitions:
             type: "integer"
           publicKey:
             type: "string"
-            
+  
+  PolcardTransportExtrasDef:
+    type: "object"
+    properties:
+      extras:
+        type: "object"
+        properties:
+          responseType:
+            type: "string"
+            enum:
+            - "simple"
+            - "extended_full"
+            - "extended_short"
+          date:
+            type: "string"
+            description: "Last modification date of the ECR system (YYYY/MM/DD hh:mm:ss)"
+          version:
+            type: "string"
+            description: "Version of ECR system"
+          manufacturerName:
+            type: "string"
+            description: "Name and Manufacturer of ECR system"
+          protocolVersion:
+            type: "string"
+            description: "Version of used ECR-POS protocol (NNNmmpp, e.g. 0046001 - version 4.60.1, 0046010 - version 4.60.10)"
   PolcardTransactionBeginRequest:
     type: "object"
     allOf:
       - $ref: '#/definitions/PolcardTransportDef'
+      - $ref: '#/definitions/PolcardTransportExtrasDef'
     properties:
       type:
         type: "string"
@@ -2237,6 +2262,9 @@ definitions:
             - "other"
           promptText:
             type: "string"
+          timeout:
+            type: "integer"
+            description: "Timeout in seconds"
             
   PolcardTerminalDisplayInfoResponse:
     type: "object"
