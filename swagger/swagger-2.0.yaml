@@ -807,7 +807,27 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/PolcardTransactionEndResponse"
-
+            
+  /polcard/v1/ingenico_transaction_last:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Read from terminal information about last transaction"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionLastResponse"
+            
   /polcard/v1/ingenico_transaction_abort:
     get:
       tags:
@@ -1197,7 +1217,7 @@ paths:
       tags:
       - "Polcard: Extras"
       summary: "Send Transactions - closing business day"
-      description: "Transfer current transactions to the external system (FDP's clearing host). To list transactions use /polcard/v1/ingenico_cutoff_report method"
+      description: "Transfer current transactions to the external system (FDP's clearing host). To list transactions use /polcard/v1/ingenico_cutoff_report method. To see summary of what was sent use /polcard/v1/ingenico_cutoff_end"
       consumes:
       - "application/json"
       produces:
@@ -1222,7 +1242,7 @@ paths:
       tags:
       - "Polcard: Extras"
       summary: "List of transactions"
-      description: "Returns list of transactions (all transactions since previous transfer) to be transfered to the external system (FDP's clearing host). To perform transactions transfer use /polcard/v1/ingenico_cutoff method"
+      description: "Returns list of transactions (all transactions since previous transfer) to be transfered to the external system (FDP's clearing host). To perform transactions transfer use /polcard/v1/ingenico_cutoff method. It's long running/blocking method"
       consumes:
       - "application/json"
       produces:
@@ -1272,7 +1292,7 @@ paths:
       tags:
       - "Polcard: Extras"
       summary: "Send report and/or Transactions"
-      description: "Transfer report and/or current transactions to the external system (FDP's clearing host)"
+      description: "Transfer report and/or current transactions to the external system (FDP's clearing host). All reports except 'manual_batch_then_return' are long running/blocking methods"
       consumes:
       - "application/json"
       produces:
@@ -1784,7 +1804,6 @@ definitions:
                     type: "string"
   
   
-  
   PolcardTransactionEndResponse:
     type: "object"
     required: [ "terminal" ]
@@ -1800,6 +1819,7 @@ definitions:
             description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
           messagePart:
             type: "integer"
+            description: "If communication with terminal succeeded, messagePart is 0. If messagePart>0 then communication with terminal has been interrupted and response may not be complete." 
           readerType:
             type: "string"
             enum:
@@ -1813,6 +1833,7 @@ definitions:
               - "error_read_icc_fallback_not_allowed"
               - "error_read_track2_or_carddata"
               - "error_nocard_timeout"
+              - "unavailable"
             description: "Determines overall transaction status. All statuses starting from 'ok_' means transaction succeeded. Check authorizationResult for more more detailed status."
           authorizationResult:
             type: "string"
@@ -1853,12 +1874,17 @@ definitions:
               - "purchaseadj_unable_to_complete"
               - "purchaseadj_battery_too_low"
               - "purchaseadj_gsm_signal_too_low"
-              
+              - "unavailable"
               - "unknown"
             description: "Authorization status. In typical, successfult scenario 'base_approval' is returned."
           transactionDetails:
             type: "object"
       
+  PolcardTransactionLastResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionEndResponse'
+  
   EserviceTransactionBeginResponse:
     type: "object"
     allOf:
@@ -2080,11 +2106,80 @@ definitions:
           protocolVersion:
             type: "string"
             description: "Version of used ECR-POS protocol (NNNmmpp, e.g. 0046001 - version 4.60.1, 0046010 - version 4.60.10)"
+  
+  PolcardTransactionExtendedDef:
+    type: "object"
+    properties:
+      extend:
+        type: "object"
+        properties:
+          cardData:
+            type: "string"
+          cardType:
+            type: "string"
+            enum:
+            - "fleet_card"
+            - "loyalty_card"
+          cardOrderType:
+            type: "string"
+            example: "amx"
+          trackData:
+            type: "string"
+          reversal:
+            type: "boolean"
+            example: false
+          commercialCode:
+            type: "string"
+          caldholderId:
+            type: "string"
+          clerkId:
+            type: "string"
+          profileId:
+            type: "integer"
+          maxCashbackAmount:
+            type: "integer"
+          authorizationCode:
+            type: "string"
+          ecrTransactionId:
+            type: "string"
+          privateCardName:
+            type: "string"
+          externalTransactionId:
+            type: "string"
+          caldholderPhone:
+            type: "string"
+          caldholderEmail:
+            type: "string"
+          partialApprovalFlag:
+            type: "boolean"
+          voidTransactionId:
+            type: "integer"
+          saleItemList:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                itemId:
+                  type: "string"
+                quantity:
+                  type: "number"
+                amount:
+                  type: "number"
+                  format: "int32"
+                settlementIdentifier:
+                  type: "string"
+              example:
+                itemId: "itemA"
+                quantity: 1
+                amount: 500
+                settlementIdentifier: ""
+              
   PolcardTransactionBeginRequest:
     type: "object"
     allOf:
       - $ref: '#/definitions/PolcardTransportDef'
       - $ref: '#/definitions/PolcardTransportExtrasDef'
+      - $ref: '#/definitions/PolcardTransactionExtendedDef'
     properties:
       type:
         type: "string"
@@ -2164,6 +2259,91 @@ definitions:
           timeout:
             type: "integer"
             description: "Timeout for message to be displayed"
+          extras:
+            type: "object"
+            description: "Terminal information, retuned information depends from the 'extras' parameter passed in the request"
+            properties:
+              returnCode:
+                type: "integer"
+                format: "int32"
+                description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+              error:
+                type: "string"
+                description: "Error massge from device. Filled when extras.returnCode<>0"
+              diagnosticStatus:
+                type: "integer"
+                format: "int32"
+              sessionKey:
+                type: "string"
+              terminalIdentifier:
+                type: "string"
+              services:
+                type: "object"
+                description: "services enabled on POS terminal"
+                properties:
+                  purchase:
+                    type: "string"
+                  purchase_cashback:
+                    type: "string"
+                  cash_from_pos:
+                    type: "string"
+                  preauthorization:
+                    type: "string"
+                  completion:
+                    type: "string"
+                  refund:
+                    type: "string"
+                  activate_service_mode:
+                    type: "string"
+                  deactivate_service_mode:
+                    type: "string"
+                  card_verification:
+                    type: "string"
+                  preauthorization_increase:
+                    type: "string"
+                  preauthorization_reduce:
+                    type: "string"
+                  preauthorization_cancel:
+                    type: "string"
+                  fleet_card_sale:
+                    type: "string"
+                  loyalty_card:
+                    type: "string"
+                  card_activation:
+                    type: "string"
+                  replenishment:
+                    type: "string"
+                  balance_inquiry:
+                    type: "string"
+                  purchase_with_registration:
+                    type: "string"
+                  card_registration:
+                    type: "string"
+                  purchase_adjustment:
+                    type: "string"
+                  cash_deposit:
+                    type: "string"
+                  no_show:
+                    type: "string"
+                  delayed_charges:
+                    type: "string"
+              info:
+                type: "object"
+                properties:
+                  acceptorName:
+                    type: "string"
+                  acceptorStreet:
+                    type: "string"
+                  acceptorPostalCityCountry:
+                    type: "string"
+                  mid:
+                    type: "string"
+                  tid:
+                    type: "string"
+                  nip:
+                    type: "string"
+                  initiator:
+                    type: "string"
 
   PolcardTransactionStatusesResponse:
     type: "object"
@@ -2478,6 +2658,7 @@ definitions:
             description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
           messagePart:
             type: "number"
+            description: "If communication with terminal succeeded, messagePart is 0. If messagePart>0 then communication with terminal has been interrupted and response may not be complete." 
           batchFileNb:
             type: "number"
           transactionsCount:
@@ -2653,6 +2834,7 @@ definitions:
             description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
           messagePart:
             type: "number"
+            description: "If communication with terminal succeeded, messagePart is 0. If messagePart>0 then communication with terminal has been interrupted and response may not be complete." 
           batchFileNb:
             type: "number"
           transactionsCount:
