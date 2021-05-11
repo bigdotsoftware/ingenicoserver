@@ -2857,11 +2857,23 @@ definitions:
         type: "string"
       prepaidBalance:
         type: "string"
+        
+      ean:
+        type: "string"
+      protocolVersion:
+        type: "string"
+        
       tokenValue:
         type: "string"
       tokenExpiryDate:
         type: "string"
         
+      track2Data:
+        type: "string"
+      fleetCardProductCode:
+        type: "string"
+      fleetCardTransactionId:
+        type: "string"
       authorizationResponseText:
         type: "string"
       cdcVerificationText:
@@ -2871,9 +2883,21 @@ definitions:
       currencyUnitRelationship:
         type: "string"
         example: "2"
+      currencyConversionFactor:
+        type: "string"
       eReceiptId:
         type: "string"
+      foreignGoodsAmount:
+        type: "string"
       externalTransactionId:
+        type: "string"
+      batteryLevel:
+        type: "string"
+      gsmSignalStrength:
+        type: "string"
+      installmentOfferAcceptedPrintoutText:
+        type: "string"
+      installmentOfferAcceptedAdditionalText:
         type: "string"
       remainingAmount:
         type: "number"
@@ -3208,6 +3232,7 @@ definitions:
         type: "string"
       watermark:
         type: "string"
+        example: "Wersja licencjonowana dla Firma Testowa wazna do 2028-07-07T19:19:51.000Z"
 externalDocs:
   description: "Find out more about our website"
   url: "https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/"
