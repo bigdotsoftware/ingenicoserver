@@ -1879,6 +1879,8 @@ definitions:
             description: "Authorization status. In typical, successfult scenario 'base_approval' is returned."
           transactionDetails:
             type: "object"
+            allOf:
+            - $ref: '#/definitions/PolcardTransactionDetails'
       
   PolcardTransactionLastResponse:
     type: "object"
@@ -2682,6 +2684,202 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
   
+  PolcardTransactionDetails:
+    type: "object"
+    properties:
+      time:
+        type: "string"
+        example: "22:18:38"
+      date:
+        type: "string"
+        example: "2021-05-11"
+      cardsetName:
+        type: "string"
+        example: "VISA"
+      maskedCardNumber:
+        type: "string"
+        example: "**** **** **** 0853"
+      panSequenceNumber:
+        type: "string"
+      authorizationCodeSource:
+        type: "string"
+        example: "1"
+      authorizationCode:
+        type: "string"
+        example: "191609"
+      authorizationCode2:
+        type: "string"
+      cashbackAmount:
+        type: "number"
+      transactionCurrencyCode:
+        type: "string"
+        example: "PLN"
+      dccExchangeRate:
+        type: "string"
+        example: "0.239360"
+      dccCurrencyCode:
+        type: "string"
+        example: "EUR"
+      dccAmount:
+        type: "number"
+        example: 32
+      aid:
+        type: "string"
+      transactionAmount:
+        type: "number"
+        example: 10
+      authorizationResponseCode:
+        type: "string"
+        example: "00"
+      transactionType:
+        type: "string"
+        example: "00"
+      transactionTypeText:
+        type: "string"
+        enum:
+          - "sale"
+          - "sale_with_cashback"
+          - "sale_or_preauthorization"
+          - "cash_from_pos"
+          - "refund"
+          - "verification"
+          - "preauthorization"
+          - "preauthorization_completion"
+          - "increase_preauthorization"
+          - "reduce_preauthorization"
+          - "cancel_preauthorization"
+          - "fleet_card_sale"
+          - "loyalty_card"
+          - "reversal"
+          - "card_activation"
+          - "replenishment"
+          - "balance_inquiry"
+          - "sale_with_registration"
+          - "card_registration"
+          - "cash_deposit"
+          - "no_show"
+          - "delayed_charges"
+        example: "sale_or_preauthorization"
+      readerType:
+        type: "string"
+        enum:
+          - "read_magstripe_contactless"
+          - "read_magstripe"
+          - "read_magstripe_fallback"
+          - "card_entered_manually"
+          - "card_icc_contactless"
+          - "card_icc"
+      cardExpiryDate:
+        type: "string"
+        example: "**/**"
+      unmaskedCardNumber:
+        type: "string"
+      unmaskedCardExpiryDate:
+        type: "string"
+      tipAmount:
+        type: "number"
+      surchargeFee:
+        type: "number"
+      dccTransactionAmount:
+        type: "number"
+        example: 32
+      dccTipAmount:
+        type: "number"
+      dccSurchargeFee:
+        type: "number"
+      appTransactionCounter:
+        type: "string"
+      dccDisclaimer:
+        type: "string"
+        example: "I have been offered a choice of currencies to be applied for my payment as specified above. I choose the transaction currency and agree to pay in EUR applying for my payment the rate of exchange presented above. Dynamic Currency Conversion (DCC) is provided by First Data Polska S.A. "
+      currencyConversionStatement:
+        type: "string"
+      messageFromParameter:
+        type: "string"
+        example: "PŁAĆ ZBLIŻENIOWO - WYGODNIE I BEZPIECZNIE! Informacje dotyczące przetwarzania danych osobowych posiadaczy kart przez First Data Polska S.A. znajdują się na: www.polcard.pl/RODO"
+      cashbackMessageFromParameter:
+        type: "string"
+      dccMessageFromParameter:
+        type: "string"
+      cashierId:
+        type: "string"
+      acceptorName:
+        type: "string"
+        example: "BIG DOT SOFTWARE"
+      acceptorStreet:
+        type: "string"
+        example: "UL. STRZELCÓW 42"
+      acceptorPostalCityCountry:
+        type: "string"
+        example: "81-586 GDYNIA PL"
+      mid:
+        type: "string"
+        example: "78336804"
+      tid:
+        type: "string"
+        example: "23891151"
+      nip:
+        type: "string"
+      reportName:
+        type: "string"
+      invoiceNumber:
+        type: "string"
+        example: "80"
+        
+      maskingRulesForPrintouts:
+        type: "string"
+        example: "050100000"
+      transactionDenialFromHost:
+        type: "string"
+      offlinePendingAmount:
+        type: "string"
+      commercialCode:
+        type: "string"
+        
+      cvmList:
+        type: "string"
+        example: "0010000"
+      cryptInfoData:
+        type: "string"
+      dccMarkup:
+        type: "string"
+        example: "8,44"
+      dccExchangeRateSource:
+        type: "string"
+        
+      transactionReferenceNumber:
+        type: "string"
+      otcValue:
+        type: "string"
+      otc:
+        type: "string"
+      pid:
+        type: "string"
+      prepaidBalance:
+        type: "string"
+      tokenValue:
+        type: "string"
+      tokenExpiryDate:
+        type: "string"
+        
+      authorizationResponseText:
+        type: "string"
+      cdcVerificationText:
+        type: "string"
+      transactionId:
+        type: "string"
+      currencyUnitRelationship:
+        type: "string"
+        example: "2"
+      eReceiptId:
+        type: "string"
+      externalTransactionId:
+        type: "string"
+      remainingAmount:
+        type: "number"
+      originalTransactionAmount:
+        type: "number"
+
   PolcardCutoffCommonResponse:
     type: "object"
     properties:
@@ -2703,172 +2901,9 @@ definitions:
             type: "array"
             items:
               type: "object"
-              properties:
-                time:
-                  type: "string"
-                date:
-                  type: "string"
-                cardsetName:
-                  type: "string"
-                maskedCardNumber:
-                  type: "string"
-                panSequenceNumber:
-                  type: "string"
-                authorizationCodeSource:
-                  type: "string"
-                authorizationCode:
-                  type: "string"
-                authorizationCode2:
-                  type: "string"
-                cashbackAmount:
-                  type: "number"
-                transactionCurrencyCode:
-                  type: "string"
-                dccExchangeRate:
-                  type: "string"
-                dccCurrencyCode:
-                  type: "string"
-                dccAmount:
-                  type: "number"
-                aid:
-                  type: "string"
-                transactionAmount:
-                  type: "number"
-                authorizationResponseCode:
-                  type: "string"
-                transactionType:
-                  type: "string"
-                transactionTypeText:
-                  type: "string"
-                  enum:
-                    - "sale"
-                    - "sale_with_cashback"
-                    - "sale_or_preauthorization"
-                    - "cash_from_pos"
-                    - "refund"
-                    - "verification"
-                    - "preauthorization"
-                    - "preauthorization_completion"
-                    - "increase_preauthorization"
-                    - "reduce_preauthorization"
-                    - "cancel_preauthorization"
-                    - "fleet_card_sale"
-                    - "loyalty_card"
-                    - "reversal"
-                    - "card_activation"
-                    - "replenishment"
-                    - "balance_inquiry"
-                    - "sale_with_registration"
-                    - "card_registration"
-                    - "cash_deposit"
-                    - "no_show"
-                    - "delayed_charges"
-                readerType:
-                  type: "string"
-                  enum:
-                    - "read_magstripe_contactless"
-                    - "read_magstripe"
-                    - "read_magstripe_fallback"
-                    - "card_entered_manually"
-                    - "card_icc_contactless"
-                    - "card_icc"
-                cardExpiryDate:
-                  type: "string"
-                cardNumberUnmasked:
-                  type: "string"
-                cardExpiryDateUnmasked:
-                  type: "string"
-                tipAmount:
-                  type: "number"
-                surchargeFee:
-                  type: "number"
-                dccTransactionAmount:
-                  type: "number"
-                dccTipAmount:
-                  type: "number"
-                dccSurchargeFee:
-                  type: "number"
-                appTransactionCounter:
-                  type: "string"
-                dccDisclaimer:
-                  type: "string"
-                currencyConversionStatement:
-                  type: "string"
-                messageFromParameter:
-                  type: "string"
-                cashbackMessageFromParameter:
-                  type: "string"
-                dccMessageFromParameter:
-                  type: "string"
-                cashierId:
-                  type: "string"
-                acceptorName:
-                  type: "string"
-                acceptorStreet:
-                  type: "string"
-                acceptorPostalCityCountry:
-                  type: "string"
-                mid:
-                  type: "string"
-                tid:
-                  type: "string"
-                nip:
-                  type: "string"
-                reportName:
-                  type: "string"
-                invoiceNumber:
-                  type: "string"
-                  
-                maskingRulesForPrintouts:
-                  type: "string"
-                transactionDenialFromHost:
-                  type: "string"
-                offlinePendingAmount:
-                  type: "string"
-                commercialCode:
-                  type: "string"
-                  
-                cvmList:
-                  type: "string"
-                cryptInfoData:
-                  type: "string"
-                dccMarkup:
-                  type: "string"
-                dccExchangeRateSource:
-                  type: "string"
-                  
-                transactionReferenceNumber:
-                  type: "string"
-                otcValue:
-                  type: "string"
-                otc:
-                  type: "string"
-                pid:
-                  type: "string"
-                prepaidBalance:
-                  type: "string"
-                tokenValue:
-                  type: "string"
-                tokenExpiryDate:
-                  type: "string"
-                  
-                authorizationResponseText:
-                  type: "string"
-                cdcVerificationText:
-                  type: "string"
-                transactionId:
-                  type: "string"
-                currencyUnitRelationship:
-                  type: "string"
-                eReceiptId:
-                  type: "string"
-                externalTransactionId:
-                  type: "string"
-                remainingAmount:
-                  type: "number"
-                originalTransactionAmount:
-                  type: "number"
-
+              allOf:
+              - $ref: '#/definitions/PolcardTransactionDetails'
+              
   
   PolcardCutoffEndResponse:
     type: "object"
