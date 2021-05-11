@@ -2081,6 +2081,7 @@ definitions:
             type: "integer"
           publicKey:
             type: "string"
+            example: ""
   
   PolcardTransportExtrasDef:
     type: "object"
@@ -2094,17 +2095,22 @@ definitions:
             - "simple"
             - "extended_full"
             - "extended_short"
+            example: "extended_full"
           date:
             type: "string"
+            example: "2021/04/28 13:23:15"
             description: "Last modification date of the ECR system (YYYY/MM/DD hh:mm:ss)"
           version:
             type: "string"
+            example: "v2.0"
             description: "Version of ECR system"
           manufacturerName:
             type: "string"
+            example: "Big Dot Software"
             description: "Name and Manufacturer of ECR system"
           protocolVersion:
             type: "string"
+            example: "0046600"
             description: "Version of used ECR-POS protocol (NNNmmpp, e.g. 0046001 - version 4.60.1, 0046010 - version 4.60.10)"
   
   PolcardTransactionExtendedDef:
@@ -2115,6 +2121,7 @@ definitions:
         properties:
           cardData:
             type: "string"
+            example: ""
           cardType:
             type: "string"
             enum:
@@ -2125,33 +2132,43 @@ definitions:
             example: "amx"
           trackData:
             type: "string"
-          reversal:
-            type: "boolean"
-            example: false
+            example: ""
           commercialCode:
             type: "string"
+            example: "456"
           caldholderId:
             type: "string"
+            example: "PersonX"
           clerkId:
             type: "string"
+            example: "Kasjer2"
           profileId:
             type: "integer"
+            example: 1
           maxCashbackAmount:
             type: "integer"
           authorizationCode:
             type: "string"
+            example: ""
+            description: "code must for preauthorization increase/decrease/cancel/completion. Authorization code is retunred by 'preauthorization'"
           ecrTransactionId:
             type: "string"
+            example: "123456"
           privateCardName:
             type: "string"
+            example: ""
           externalTransactionId:
             type: "string"
+            example: "Transaction123"
           caldholderPhone:
             type: "string"
+            example: "555-555-555"
           caldholderEmail:
             type: "string"
+            example: "user@yahoo.com"
           partialApprovalFlag:
             type: "boolean"
+            example: false
           voidTransactionId:
             type: "integer"
           saleItemList:
@@ -2172,7 +2189,7 @@ definitions:
                 itemId: "itemA"
                 quantity: 1
                 amount: 500
-                settlementIdentifier: ""
+                settlementIdentifier: "identX"
               
   PolcardTransactionBeginRequest:
     type: "object"
@@ -2220,7 +2237,26 @@ definitions:
       currencyCode:
         type: "integer"
         default: 985
-        description: "Must be valid ISO-4217 number (https://en.wikipedia.org/wiki/ISO_4217). PLN is a default value."
+        example: 985
+        description: "Must be valid ISO-4217 number (https://en.wikipedia.org/wiki/ISO_4217). PLN is a default value. Value 985 means PLN."
+      reversal:
+        type: "boolean"
+        default: false
+        example: false
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
       
   PolcardTransactionActionResponse:
     type: "object"
@@ -2738,14 +2774,32 @@ definitions:
                     - "card_icc"
                 cardExpiryDate:
                   type: "string"
+                cardNumberUnmasked:
+                  type: "string"
+                cardExpiryDateUnmasked:
+                  type: "string"
                 tipAmount:
                   type: "number"
                 surchargeFee:
+                  type: "number"
+                dccTransactionAmount:
                   type: "number"
                 dccTipAmount:
                   type: "number"
                 dccSurchargeFee:
                   type: "number"
+                appTransactionCounter:
+                  type: "string"
+                dccDisclaimer:
+                  type: "string"
+                currencyConversionStatement:
+                  type: "string"
+                messageFromParameter:
+                  type: "string"
+                cashbackMessageFromParameter:
+                  type: "string"
+                dccMessageFromParameter:
+                  type: "string"
                 cashierId:
                   type: "string"
                 acceptorName:
@@ -2764,9 +2818,28 @@ definitions:
                   type: "string"
                 invoiceNumber:
                   type: "string"
+                  
+                maskingRulesForPrintouts:
+                  type: "string"
+                transactionDenialFromHost:
+                  type: "string"
+                offlinePendingAmount:
+                  type: "string"
                 commercialCode:
                   type: "string"
+                  
+                cvmList:
+                  type: "string"
+                cryptInfoData:
+                  type: "string"
+                dccMarkup:
+                  type: "string"
+                dccExchangeRateSource:
+                  type: "string"
+                  
                 transactionReferenceNumber:
+                  type: "string"
+                otcValue:
                   type: "string"
                 otc:
                   type: "string"
@@ -2777,6 +2850,13 @@ definitions:
                 tokenValue:
                   type: "string"
                 tokenExpiryDate:
+                  type: "string"
+                  
+                authorizationResponseText:
+                  type: "string"
+                cdcVerificationText:
+                  type: "string"
+                transactionId:
                   type: "string"
                 currencyUnitRelationship:
                   type: "string"
