@@ -2132,9 +2132,6 @@ definitions:
           cardOrderType:
             type: "string"
             example: "amx"
-          trackData:
-            type: "string"
-            example: ""
           commercialCode:
             type: "string"
             example: "456"
@@ -2245,17 +2242,22 @@ definitions:
         type: "boolean"
         default: false
         example: false
+      trackData:
+        type: "string"
+        example: ""
       callback:
         type: "object"
         properties:
           uri:
             type: "string"
+            example: "http://host:777/results"
           method:
             type: "string"
             enum:
               - "POST"
               - "GET"
               - "PUT"
+            example: "POST"
       posnetserver:
         type: "object"
         description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
