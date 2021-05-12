@@ -1879,6 +1879,7 @@ definitions:
             description: "Authorization status. In typical, successfult scenario 'base_approval' is returned."
           transactionDetails:
             type: "object"
+            description: "Value depends on terminal configuration. When terminal is configured to print transaction confirmations automatically, then transactionDetails can be empty. To read transaction details in such case use /polcard/v1/ingenico_transaction_last"
             allOf:
             - $ref: '#/definitions/PolcardTransactionDetails'
       
@@ -2225,14 +2226,20 @@ definitions:
         - "delayed_charges"
       transactionAmount:
         type: "integer"
+        description: "Total transaction amount (cashback inclusive)"
+        example: 900
       cashbackAmount:
         type: "integer"
+        example: 0
       tipAmount:
         type: "integer"
+        example: 0
       surchargeFeeAmount:
         type: "integer"
+        example: 0
       foreignGoodsAmount:
         type: "integer"
+        example: 0
       currencyCode:
         type: "integer"
         default: 985
@@ -2702,7 +2709,8 @@ definitions:
         type: "string"
         example: "**** **** **** 0853"
       panSequenceNumber:
-        type: "string"
+        type: "number"
+        example: 0
       authorizationCodeSource:
         type: "string"
         example: "1"
@@ -2727,6 +2735,12 @@ definitions:
         example: 32
       aid:
         type: "string"
+        example: "A000000003"
+        description: "https://blog.ingenico.us/blog/what-is-common-debit-aid-and-why-does-it-matter"
+      aidDfName:
+        type: "string"
+        example: "A000000003"
+        description: "https://blog.ingenico.us/blog/what-is-common-debit-aid-and-why-does-it-matter"
       transactionAmount:
         type: "number"
         example: 10
@@ -2890,7 +2904,7 @@ definitions:
       eReceiptId:
         type: "string"
       foreignGoodsAmount:
-        type: "string"
+        type: "integer"
       externalTransactionId:
         type: "string"
       batteryLevel:
