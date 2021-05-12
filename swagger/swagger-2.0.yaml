@@ -2886,6 +2886,7 @@ definitions:
         
       track2Data:
         type: "string"
+        example: "5900000030144216=61623045011489204390"
       fleetCardProductCode:
         type: "string"
       fleetCardTransactionId:
