@@ -1667,6 +1667,11 @@ definitions:
             type: "integer"
           transactionResultCodeText:
             type: "string"
+            enum:
+              - "accepted"
+              - "refused"
+              - "no_connection"
+              - "interrupted"
           transactionNumber:
             type: "integer"
           transactionDetails:
