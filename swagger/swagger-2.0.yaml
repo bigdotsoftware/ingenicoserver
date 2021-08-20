@@ -1849,7 +1849,7 @@ definitions:
               - "base_transaction_not_found"
               - "base_transaction_settled"
               - "base_transaction_not_approved"
-              - "base_transaction_and_reverdal_amounts_dont_match"
+              - "base_transaction_and_reversal_amounts_dont_match"
               - "base_acceptor_unable_to_complete"
               - "base_multi_merchant_config_incorrect_or_profile_not_supported"
               - "base_batch_full_upload_required"
