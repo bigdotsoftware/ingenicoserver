@@ -2189,12 +2189,13 @@ definitions:
                   type: "number"
                   format: "int32"
                 settlementIdentifier:
-                  type: "string"
+                  type: "number"
+                  format: "int32"
               example:
                 itemId: "itemA"
                 quantity: 1
                 amount: 500
-                settlementIdentifier: "identX"
+                settlementIdentifier: 1122
               
   PolcardTransactionBeginRequest:
     type: "object"
