@@ -2133,8 +2133,10 @@ definitions:
           cardType:
             type: "string"
             enum:
+            - ""
             - "fleet_card"
             - "loyalty_card"
+            example: ""
           cardOrderType:
             type: "string"
             example: "amx"
@@ -2149,7 +2151,7 @@ definitions:
             example: "Kasjer2"
           profileId:
             type: "integer"
-            example: 1
+            example: 0
           maxCashbackAmount:
             type: "integer"
           authorizationCode:
