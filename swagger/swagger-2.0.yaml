@@ -2555,6 +2555,25 @@ definitions:
         type: "integer"
       printout:
         type: "array"
+        example:
+          - type: "header"
+            align: "center"
+            bold: false
+            high: true
+            expand: false
+            text: "Promo coupon"
+          - type: "logo"
+            align: "center"
+            bold: false
+            high: false
+            expand: false
+            text: "logo123.lgo"
+          - type: "body"
+            align: "left"
+            bold: false
+            high: false
+            expand: false
+            text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
         items:
           type: "object"
           properties:
@@ -2590,7 +2609,17 @@ definitions:
   PolcardTerminalPrintResponse:
     type: "object"
     allOf:
-      - $ref: '#/definitions/ApiResponse'   
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          error:
+            type: "string"
       
   PolcardTerminalPromptRequest:
     type: "object"
