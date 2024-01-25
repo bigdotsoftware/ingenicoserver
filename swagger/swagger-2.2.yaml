@@ -464,7 +464,7 @@ paths:
       tags:
       - "eService: Transactions"
       summary: "Read single transaction from batch"
-      description: "Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1."
+      description: "Using this method you can read transaction data which were sent to acquirer. Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1. Metod returns data until the 'clear batch' -  'ingenico_batch_recon_info?flag=0' is exectuted."
       consumes:
       - "application/json"
       produces:
@@ -480,7 +480,7 @@ paths:
         default: 1
       - name: "transactionIndex"
         in: "path"
-        description: ""
+        description: "Parameter transactionIndex is counted from 1."
         required: true
         type: "string"
       responses:
