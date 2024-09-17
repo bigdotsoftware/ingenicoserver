@@ -818,7 +818,7 @@ paths:
     get:
       tags:
       - "Elavon: Transactions"
-      summary: "Start new transaction"
+      summary: "Get result of transaction"
       description: "Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /elavon/v1/ingenico_transaction_last"
       consumes:
       - "application/json"
@@ -839,7 +839,7 @@ paths:
     get:
       tags:
       - "Elavon: Transactions"
-      summary: "Start new transaction"
+      summary: "Read last transaction details from the terminal"
       description: "Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /elavon/v1/ingenico_transaction_last"
       consumes:
       - "application/json"
