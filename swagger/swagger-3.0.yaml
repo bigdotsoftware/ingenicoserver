@@ -813,6 +813,48 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/ElavonTransactionActionResponse"
+  
+  /elavon/v1/ingenico_transaction_end:
+    get:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Start new transaction"
+      description: "Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /elavon/v1/ingenico_transaction_last"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionEndActionResponse"
+            
+  /elavon/v1/ingenico_transaction_last:
+    get:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Start new transaction"
+      description: "Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /elavon/v1/ingenico_transaction_last"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionLastActionResponse"
             
             
   /polcard/v1/ingenico_transaction:
@@ -2773,6 +2815,11 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
+      
+  ElavonTransactionEndActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
     properties:
       terminal:
         type: "object"
@@ -2786,6 +2833,63 @@ definitions:
           error:
             type: "string"
             description: "Error massge from device. Filled when returnCode<>0"
+  
+  ElavonTransactionLastActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonTransactionActionCommonResponse'
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          error:
+            type: "string"
+            description: "Error massge from device. Filled when returnCode<>0"
+          transactionRequest:
+            type: "object"
+            properties:
+              messageNumber:
+                type: "string"
+              amount1:
+                type: "number"
+              amount2:
+                type: "number"
+              amount3:
+                type: "number"
+              amount4:
+                type: "number"
+              label1:
+                type: "string"
+              label2:
+                type: "string"
+              label3:
+                type: "string"
+              label4:
+                type: "string"
+              transactionType:
+                type: "string"
+              transactionTypeText:
+                type: "string"
+              isSuspectedFraud:
+                type: "boolean"
+              tokenValue:
+                type: "string"
+              commercialCode:
+                type: "string"
+              tokenExpiryDate:
+                type: "string"
+              currentTokenType:
+                type: "string"
+              requestedTokenType:
+                type: "string"
+              cardBrand:
+                type: "string"
             
   PolcardTransactionActionResponse:
     type: "object"
