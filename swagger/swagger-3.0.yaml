@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   description: "This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)"
   version: "2.0"
-  title: "Ingenico Server (eService + Polcard First Data)"
+  title: "Ingenico Server API (eService, Polcard First Data, Elavon)"
   contact:
     email: "bigdotsoftware@bigdotsoftware.pl"
 host: "localhost:3020"
@@ -20,7 +20,7 @@ tags:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
 - name: "eService: Transactions"
-  description: "Terminal transactions"
+  description: "eService transactions"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
@@ -44,9 +44,13 @@ tags:
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"  
-    
+- name: "Elavon: Transactions"
+  description: "Elavon transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"    
 - name: "Polcard: Transactions"
-  description: "Terminal transactions"
+  description: "Polcard First Data transactions"
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"
@@ -762,6 +766,54 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/EserviceDCCAnalysisTotalSummaryResponse"
+  
+  
+  /elavon/v1/ingenico_status:
+    get:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Terminal status"
+      description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatusText is different than 'idle' then new transaction cannot be started, becuase terminal is processing another request."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTerminalStatusResponse"
+  
+  /elavon/v1/ingenico_transaction:
+    post:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Start new transaction"
+      description: "Starts new transaction. Method returns response immediately. To read transaction status use /elavon/v1/ingenico_status. Once status back to 'idle', read transaction result by /elavon/v1/ingenico_transaction_end. Alternatively use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionActionResponse"
+            
             
   /polcard/v1/ingenico_transaction:
     post:
@@ -2003,6 +2055,62 @@ definitions:
               terminalIdentifier:
                 type: "string"
 
+
+  ElavonTerminalStatusResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            example: "idle"
+            enum:
+            - "unknown"
+            - "idle"
+            - "busy"
+            - "card_insert"
+            - "pin_first_attempt"
+            - "pin_second_attempt"
+            - "pin_third_attempt"
+            - "pin_entry_failed"
+            - "gratuity_entry"
+            - "authorizing"
+            - "completion"
+            - "cancelled"
+            - "amount_confirmation"
+            - "sending"
+            - "receiving"
+            - "unspecified_input"
+            - "processing"
+            - "card_removal"
+            - "printing_merchant_copy"
+            - "printing_customer_copy"
+            - "no_more_paper"
+            - "loyalty_option_selection"
+            - "phone_entry"
+            - "promo_code_entry"
+            - "loyalty_member_selection"
+            - "reward_offer"
+            - "existing_account"
+            - "invalid_account"
+            - "link_card_payment"
+            - "add_card_payment"
+            - "cashback_entry"
+            - "commercial_code_entry"
+            - "waiting_card"
+            - "waiting_dcc_acceptance"
+          
+  
   EserviceTerminalStatusResponse:
     type: "object"
     required: [ "terminal" ]
@@ -2133,6 +2241,54 @@ definitions:
             example: "0046600"
             description: "Version of used ECR-POS protocol (NNNmmpp, e.g. 0046001 - version 4.60.1, 0046010 - version 4.60.10)"
   
+  ElavonTransactionExtendedDef:
+    type: "object"
+    properties:
+      extend:
+        type: "object"
+        properties:
+          customLine:
+            type: "string"
+          invoiceNumber:
+            type: "string"
+          cashierId:
+            type: "string"
+          tableId:
+            type: "string"
+          commercialCode:
+            type: "string"
+          authorizationCode:
+            type: "string"
+          preAuthorizationCode:
+            type: "string"
+          isSuspectedFraud:
+            type: "boolean"
+          returnCardResponseValue:
+            type: "boolean"
+          returnSignatureRequiredValue:
+            type: "boolean"
+          enableBLIK:
+            type: "boolean"
+          enableTokenisation:
+            type: "boolean"
+          token:
+            type: "string"
+          tokenExpiryDate:
+            type: "string"
+          currentTokenType:
+            type: "string"
+          requestedTokenType:
+            type: "string"
+          tokenCardBrand:
+            type: "string"
+          returnMarkupText:
+            type: "boolean"
+          returnAPMdata:
+            type: "boolean"
+          returnInstalmentData:
+            type: "boolean"
+        
+        
   PolcardTransactionExtendedDef:
     type: "object"
     properties:
@@ -2211,6 +2367,63 @@ definitions:
                 amount: 500
                 settlementIdentifier: 1122
               
+  ElavonTransactionBeginRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ElavonTransactionExtendedDef'
+    properties:
+      type:
+        type: "string"
+        enum:
+        - "purchase"
+        - "purchase_cashback"
+        - "cash_from_pos"   
+        - "preauthorization"
+        - "completion"      
+        - "refund"          
+        - "reversal"        
+        - "card_verification"
+        - "preauthorization_increase"
+        - "preauthorization_reversal"
+        - "cancel"          
+        - "force"           
+        - "moto_sale"       
+        - "moto_refund"     
+        - "duplicata"       
+        - "last_apm_sale_status"
+        - "last_apm_refund_status"
+        - "tokenisation"    
+        - "no_show"         
+        - "delayed_charges"
+      transactionAmount:
+        type: "integer"
+        description: "Total transaction amount (cashback inclusive)"
+        example: 900
+      transactionAmountLabel:
+        type: "string"
+      cashbackAmount:
+        type: "integer"
+        example: 0
+      cashbackAmountLabel:
+        type: "string"
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+            example: "http://host:777/results"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+            example: "POST"
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
+  
+  
   PolcardTransactionBeginRequest:
     type: "object"
     allOf:
@@ -2289,6 +2502,291 @@ definitions:
         type: "object"
         description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
       
+  ElavonTransactionActionCommonResponse:
+    type: "object"
+    properties:
+      transactionResultCode:
+        type: "number"
+      transactionResultCodeText:
+        type: "string"
+        example: "base_approval"
+        enum:
+        - "base_approval"
+        - "base_refusal"
+        - "not_processed"
+        - "unable_to_authorise"
+        - "unable_to_process"
+        - "no_connection"
+        - "other_error"
+        - "interrupted"
+        - "invalid_password"
+        - "amount_exceed_maximum_limit"
+        - "connection_failure"
+        - "timeout_reached"
+        - "invoice_not_found"
+        - "cashback_exceed_maximum_limit"
+        - "cashback_not_allowed"
+        - "base_acceptor_unable_to_complete"
+      acquirerResponseCode:
+        type: "number"
+        
+      acquirerResponseCodeText:
+        type: "string"
+        example: "approval"
+        enum:
+        - "approval"
+        - "decline"
+        - "referral"
+        - "partial_auth"
+        - "unknown"
+      transactionDetails:
+        type: "object"
+        properties:
+          merchantID:
+            type: "string"
+          merchantName:
+            type: "string"
+          merchantAddress:
+            type: "string"
+          readerUsed:
+            type: "string"
+            enum:
+              - "?"
+              - "K"
+              - "C"
+              - "P"
+              - "B"
+              - "Z"
+              - "F"
+              - "R"
+              - "O"
+              - "T"
+          readerUsedText:
+            type: "string"
+            enum:
+              - "?"
+              - "manual"
+              - "magstripe"
+              - "icc"
+              - "contactless"
+              - "manual_not_present"
+              - "magstripe_fallback"
+              - "pa_ref_num_cnp"
+              - "other"
+              - "tok"
+          authorizationCode:
+            type: "string"
+          date:
+            type: "string"
+          time:
+            type: "string"
+          cardsetName:
+            type: "string"
+          maskedCardNumber:
+            type: "string"
+          cardStartDate:
+            type: "string"
+          cardExpiryDate:
+            type: "string"
+          transactionCurrency:
+            type: "string"
+          dcc_currencyExp:
+            type: "number"
+          cardCurrencyCode:
+            type: "string"
+          cardCurrencyExponent:
+            type: "number"
+          emvCardExpiryDate:
+            type: "string"
+          transactionAmount:
+            type: "string"
+          additionalAmount:
+            type: "string"
+          appEffectiveDate:
+            type: "string"
+          aid:
+            type: "string"
+          appPreferredName:
+            type: "string"
+          appLabel:
+            type: "string"
+          terminalIdentifier:
+            type: "string"
+          terminalCountryCode:
+            type: "string"
+          terminalCurrency:
+            type: "string"
+          terminalCurrencyExponent:
+            type: "number"
+          authorizationMessage:
+            type: "string"
+          customLines:
+            type: "string"
+          invoiceNumber:
+            type: "string"
+          tokenValue:
+            type: "string"
+          tokenExpiryDate:
+            type: "string"
+          cardholderName:
+            type: "string"
+          isTaxFreeRequired:
+            type: "boolean"
+          isExchRateUpdateRequired:
+            type: "boolean"
+          isDCC:
+            type: "boolean"
+          isSignatureRequired:
+            type: "boolean"
+          spanishOpNumber:
+            type: "string"
+          tableIdentifier:
+            type: "string"
+          cashierIdentifier:
+            type: "string"
+          commission:
+            type: "string"
+          fxMarkUp:
+            type: "string"
+          panSequenceNumber:
+            type: "string"
+          prepaidBalance:
+            type: "string"
+          hostAVSresponse:
+            type: "string"
+          applicationCryptogram:
+            type: "string"
+          retrievalReferenceNumber:
+            type: "string"
+          batchNumber:
+            type: "string"
+          donationAmount:
+            type: "string"
+          markupTextIndicator:
+            type: "string"
+          cardSchemeDataResponse:
+            type: "string"
+          cardResponseValue:
+            type: "string"
+          commercialCodeData:
+            type: "string"
+          mealVoucherStatus:
+            type: "string"
+          cardBrandResponse:
+            type: "string"
+          paymentAccountReferenceNumber:
+            type: "string"
+          acquirerName: 
+            type: "string"
+          cardholderCurrencyAmount:
+            type: "string"
+          dccExchangeRate:
+            type: "string"
+          currentTokenType:
+            type: "string"
+          exponentOfAppliedRate:
+            type: "number"
+          tokenisationStatus:
+            type: "string"
+          partialAuthorizationAmount:
+            type: "string"
+          preauthorizationReferenceNumber:
+            type: "string"
+      
+          additionalInformationObject:
+            type: "object"
+            properties:
+              blikReferenceCode:
+                type: "string"
+              blikEnteredCode:
+                type: "string"
+              emv:
+                type: "string"
+              panFourLastDigits:
+                type: "string"
+              unitApplicationId:
+                type: "string"
+
+          apm:
+            type: "object"
+            properties:
+              transactionIdentifier:
+                type: "string"
+              merchantTransactionIdentifier:
+                type: "string"
+              shortCode:
+                type: "string"
+              transactionStatus:
+                type: "string"
+
+          instalment:
+            type: "object"
+            properties:
+              paymentsCount:
+                type: "string"
+              applicableInterestRate:
+                type: "string"
+              firstAmount:
+                type: "string"
+              totalAmountDue:
+                type: "string"
+
+          gla:
+            type: "object"
+            properties:
+              balanceDetailsRecordNumber:
+                type: "string"
+              balanceAmount:
+                type: "string"
+              balanceDifference:
+                type: "string"
+              promotionCodeAssignmentRecordNumber:
+                type: "string"
+              promotionCode:
+                type: "string"
+              promotionCodeDescription:
+                type: "string"
+              discountAmount:
+                type: "string"
+              loyaltyProgramName:
+                type: "string"
+              loyaltyAccessCodeValue:
+                type: "string"
+              loyaltyMemberStatus:
+                type: "string"
+              loyaltyTransactionInfo:
+                type: "string"
+              fanfareTransactionCode:
+                type: "string"
+              fanfareAuthorizationCode:
+                type: "string"
+              isFanfareTransaction:
+                type: "boolean"
+              fanfareInfoURL:
+                type: "string"
+              fanfareID:
+                type: "string"
+
+
+
+  ElavonTransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonTransactionActionCommonResponse'
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          error:
+            type: "string"
+            description: "Error massge from device. Filled when returnCode<>0"
+            
   PolcardTransactionActionResponse:
     type: "object"
     allOf:
