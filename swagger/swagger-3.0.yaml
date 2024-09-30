@@ -3093,38 +3093,54 @@ definitions:
         - unknown
       date:
         type: "string"
+        example: "2024-09-30"
       time:
         type: "string"
+        example: "13:48:52"
       settleResponse:
         type: "string"
+        example: "GBOK 01009301234"
       helpDeskNumber:
         type: "string"
+        example: "223060316"
       merchantID:
         type: "string"
+        example: "2102134567"
       merchantName:
         type: "string"
+        example: "TEST SP. Z O.O."
       merchantAddress:
         type: "string"
+        example: "Morska 19 02-501 Warsaw"
       terminalIdentifier:
         type: "string"
+        example: "39398765"
       terminalCountryCode:
         type: "string"
+        example: "616"
       terminalCurrency:
         type: "string"
+        example: "985"
       terminalCurrencyExponent:
         type: "integer"
+        example: 2
       batchNumber:
         type: "string"
+        example: "010"
       acquirerName:
         type: "string"
       cashbackCount:
         type: "integer"
+        example: 5
       cashbackAmount:
         type: "string"
+        example: "00000090500"
       debitCount:
         type: "integer"
+        example: 3
       debitAmount:
         type: "string"
+        example: "00000175000"
       creditCount:
         type: "integer"
       creditAmount:
@@ -3151,6 +3167,7 @@ definitions:
         type: "integer"
       reportTypeText:
         type: "string"
+        example: "detailed"
         enum:
           - summary
           - detailed
@@ -3162,16 +3179,21 @@ definitions:
           properties:
             date:
               type: "string"
+              example: "2024-09-30"
             time:
               type: "string"
+              example: "13:48:52"
             invoiceNumber:
               type: "string"
             shiftNumber:
               type: "string"
+              example: "0"
             transactionType:
               type: "integer"
+              example: 0
             transactionTypeText:
               type: "string"
+              example: "purchase"
               enum:
                 - purchase
                 - refund
@@ -3196,26 +3218,34 @@ definitions:
                 - last_apm_refund_status
             voidedTransactionType:
               type: "string"
+              example: "0"
             authorizationCode:
               type: "string"
+              example: "454150"
             hostAVSresponse:
               type: "string"
             bankType:
               type: "integer"
+              example: 1
             bankTypeText:
               type: "string"
+              example: "bank_funded"
               enum:
                 - bank_funded
                 - non_bank_funded
                 - unknown
             cardsetName:
               type: "string"
+              example: "Visa"
             cardType:
               type: "string"
+              example: "VI"
             maskedCardNumber:
               type: "string"
+              example: "************9200"
             readerUsed:
               type: "string"
+              example: "B"
               enum:
               - "?"
               - "K"
@@ -3229,6 +3259,7 @@ definitions:
               - "T"
             readerUsedText:
               type: "string"
+              example: "contactless"
               enum:
               - "?"
               - "manual"
@@ -3242,8 +3273,10 @@ definitions:
               - "tok"
             transactionCurrency:
               type: "string"
+              example: "985"
             transactionAmount:
               type: "string"
+              example: "1900"
             additionalAmount:
               type: "string"
             isDCC:
