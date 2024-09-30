@@ -2443,11 +2443,15 @@ definitions:
         example: 900
       transactionAmountLabel:
         type: "string"
+        example: "Kwota"
+        description: "Custom prefix for amount"
       cashbackAmount:
         type: "integer"
         example: 0
       cashbackAmountLabel:
         type: "string"
+        example: "Wypłata"
+        description: "Custom prefix for amount"
       callback:
         type: "object"
         properties:
@@ -2586,10 +2590,13 @@ definitions:
         properties:
           merchantID:
             type: "string"
+            example: "2102135438"
           merchantName:
             type: "string"
+            example: "TEST Sp. Z O.O."
           merchantAddress:
             type: "string"
+            example: "Mazowiecka 99 00-515 Warsaw"
           readerUsed:
             type: "string"
             enum:
@@ -2618,54 +2625,76 @@ definitions:
               - "tok"
           authorizationCode:
             type: "string"
+            example: "410953"
           date:
             type: "string"
+            example: "2024-09-17"
           time:
             type: "string"
+            example: "13:06:34"
           cardsetName:
             type: "string"
+            example: "Visa"
           maskedCardNumber:
             type: "string"
+            example: "************4953"
           cardStartDate:
             type: "string"
           cardExpiryDate:
             type: "string"
+            example: "****"
           transactionCurrency:
             type: "string"
+            example: "985"
           dcc_currencyExp:
             type: "number"
+            example: 1
           cardCurrencyCode:
             type: "string"
+            example: "978"
           cardCurrencyExponent:
             type: "number"
+            example: 1
           emvCardExpiryDate:
             type: "string"
           transactionAmount:
             type: "string"
+            example: "1800"
           additionalAmount:
             type: "string"
+            example: "500"
           appEffectiveDate:
             type: "string"
           aid:
             type: "string"
+            example: "A0000000022010"
           appPreferredName:
             type: "string"
+            example: "Revolut"
           appLabel:
             type: "string"
+            example: "Visa Debit"
           terminalIdentifier:
             type: "string"
+            example: "39394880"
           terminalCountryCode:
             type: "string"
           terminalCurrency:
             type: "string"
+            example: "985"
           terminalCurrencyExponent:
             type: "number"
+            example: 2
           authorizationMessage:
             type: "string"
+            example: "AUTORYZACJA"
           customLines:
             type: "string"
+            example: "Hello"
+            description: "Additional line with any text printed on the recipe"
           invoiceNumber:
             type: "string"
+            example: "29"
           tokenValue:
             type: "string"
           tokenExpiryDate:
@@ -2690,18 +2719,23 @@ definitions:
             type: "string"
           fxMarkUp:
             type: "string"
+            example: "383"
           panSequenceNumber:
             type: "string"
+            example: "00"
           prepaidBalance:
             type: "string"
           hostAVSresponse:
             type: "string"
           applicationCryptogram:
             type: "string"
+            example: "ABA1086D2D518E27"
           retrievalReferenceNumber:
             type: "string"
+            example: "426113415266"
           batchNumber:
             type: "string"
+            example: "007"
           donationAmount:
             type: "string"
           markupTextIndicator:
@@ -2724,10 +2758,12 @@ definitions:
             type: "string"
           dccExchangeRate:
             type: "string"
+            example: "239499"
           currentTokenType:
             type: "string"
           exponentOfAppliedRate:
             type: "number"
+            example: 6
           tokenisationStatus:
             type: "string"
           partialAuthorizationAmount:
@@ -2744,10 +2780,12 @@ definitions:
                 type: "string"
               emv:
                 type: "string"
+                example: "09"
               panFourLastDigits:
                 type: "string"
               unitApplicationId:
                 type: "string"
+                example: "245NIGHT"
 
           apm:
             type: "object"
