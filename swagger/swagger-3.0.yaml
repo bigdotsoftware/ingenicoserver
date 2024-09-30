@@ -49,6 +49,11 @@ tags:
   externalDocs:
     description: "Find out more"
     url: "https://bigdotsoftware.pl/short_link/ingenico"    
+- name: "Elavon: Extras"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"    
 - name: "Polcard: Transactions"
   description: "Polcard First Data transactions"
   externalDocs:
@@ -856,6 +861,80 @@ paths:
           schema:
             $ref: "#/definitions/ElavonTransactionLastActionResponse"
             
+  /elavon/v1/ingenico_settlement:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Send Transactions - closing business day"
+      description: "Transfer current transactions to the external system (FDP's clearing host). To get result of previous settlement or list current transactions use /elavon/v1/ingenico_settlement_data or /elavon/v1/ingenico_report_summary"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonSettlementRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonSettlementResponse"
+  
+  /elavon/v1/ingenico_settlement_data:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Get status of previous settlement"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonSettlementDataRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonSettlementDataResponse"
+  
+  /elavon/v1/ingenico_report_summary:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Get list of transactions"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonReportRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonReportResponse"
             
   /polcard/v1/ingenico_transaction:
     post:
@@ -2469,7 +2548,43 @@ definitions:
         type: "object"
         description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
   
+  ElavonReportRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "summary"
+        enum:
+        - "audit"
+        - "summary"
+        - "offline_auth"
+      shiftNumber:
+        type: "integer"
+        example: 3
+      returnAPMdata:
+        type: "boolean"
+        example: true
+        
+  ElavonSettlementRequest:
+    type: "object"
+    properties:
+      returnAPMdata:
+        type: "boolean"
+        example: true
   
+  ElavonSettlementDataRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "current"
+        enum:
+        - "current"
+        - "last"
+      returnAPMdata:
+        type: "boolean"
+        example: true
+        
   PolcardTransactionBeginRequest:
     type: "object"
     allOf:
@@ -2872,6 +2987,7 @@ definitions:
             type: "string"
             description: "Error massge from device. Filled when returnCode<>0"
   
+            
   ElavonTransactionLastActionResponse:
     type: "object"
     allOf:
@@ -2929,6 +3045,226 @@ definitions:
               cardBrand:
                 type: "string"
             
+  ElavonSettlementResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonReportCommonResponse'
+
+  ElavonSettlementDataResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonReportCommonResponse'
+  
+  ElavonReportResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonReportCommonResponse'
+        
+  ElavonReportCommonResponse:
+    type: "object"
+    properties:
+      messageNumber:
+        type: "integer"
+      settlementStatus:
+        type: "integer"
+      settlementStatusText:
+        type: "string"
+        enum:
+        - authorized
+        - not_authorized
+        - unable_to_connect
+        - cancelled
+        - no_transaction
+        - unknown
+      date:
+        type: "string"
+      time:
+        type: "string"
+      settleResponse:
+        type: "string"
+      helpDeskNumber:
+        type: "string"
+      merchantID:
+        type: "string"
+      merchantName:
+        type: "string"
+      merchantAddress:
+        type: "string"
+      terminalIdentifier:
+        type: "string"
+      terminalCountryCode:
+        type: "string"
+      terminalCurrency:
+        type: "string"
+      terminalCurrencyExponent:
+        type: "integer"
+      batchNumber:
+        type: "string"
+      acquirerName:
+        type: "string"
+      cashbackCount:
+        type: "integer"
+      cashbackAmount:
+        type: "string"
+      debitCount:
+        type: "integer"
+      debitAmount:
+        type: "string"
+      creditCount:
+        type: "integer"
+      creditAmount:
+        type: "string"
+      salesVoidCount:
+        type: "integer"
+      salesVoidAmount:
+        type: "string"
+      refundsVoidCount:
+        type: "integer"
+      refundsVoidAmount:
+        type: "string"
+      autoRefundsCount:
+        type: "integer"
+      autoRefundsAmount:
+        type: "string"
+      isGratuityEnabled:
+        type: "boolean"
+      gratuityAmount:
+        type: "string"
+      isShiftProcessingEnabled:
+        type: "boolean"
+      reportType:
+        type: "integer"
+      reportTypeText:
+        type: "string"
+        enum:
+          - summary
+          - detailed
+          - unknown
+      records:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            date:
+              type: "string"
+            time:
+              type: "string"
+            invoiceNumber:
+              type: "string"
+            shiftNumber:
+              type: "string"
+            transactionType:
+              type: "integer"
+            transactionTypeText:
+              type: "string"
+              enum:
+                - purchase
+                - refund
+                - void
+                - duplicata
+                - cash_from_pos
+                - purchase_cashback
+                - preauthorization
+                - completion
+                - card_verification
+                - reversal
+                - force
+                - moto_sale
+                - moto_refund
+                - preauthorization_reversal
+                - cancel
+                - preauthorization_increase
+                - tokenisation
+                - no_show
+                - delayed_charges
+                - last_apm_sale_status
+                - last_apm_refund_status
+            voidedTransactionType:
+              type: "string"
+            authorizationCode:
+              type: "string"
+            hostAVSresponse:
+              type: "string"
+            bankType:
+              type: "integer"
+            bankTypeText:
+              type: "string"
+              enum:
+                - bank_funded
+                - non_bank_funded
+                - unknown
+            cardsetName:
+              type: "string"
+            cardType:
+              type: "string"
+            maskedCardNumber:
+              type: "string"
+            readerUsed:
+              type: "string"
+              enum:
+              - "?"
+              - "K"
+              - "C"
+              - "P"
+              - "B"
+              - "Z"
+              - "F"
+              - "R"
+              - "O"
+              - "T"
+            readerUsedText:
+              type: "string"
+              enum:
+              - "?"
+              - "manual"
+              - "magstripe"
+              - "icc"
+              - "contactless"
+              - "manual_not_present"
+              - "magstripe_fallback"
+              - "pa_ref_num_cnp"
+              - "other"
+              - "tok"
+            transactionCurrency:
+              type: "string"
+            transactionAmount:
+              type: "string"
+            additionalAmount:
+              type: "string"
+            isDCC:
+              type: "boolean"
+            dccTransactionCurrency:
+              type: "string"
+            isDCCTxnAccepted:
+              type: "boolean"
+            cardholderCurrencyAmount:
+              type: "string"
+            isDCCTxnEligible:
+              type: "boolean"
+            dccTipAmount:
+              type: "string"
+            dccExchangeRate:
+              type: "string"
+            exponentOfAppliedRate:
+              type: "integer"
+                
+    
+    
   PolcardTransactionActionResponse:
     type: "object"
     allOf:
