@@ -2199,6 +2199,7 @@ definitions:
             - "unknown"
             - "idle"
             - "busy"
+            - "transaction_finished"
             - "card_insert"
             - "pin_first_attempt"
             - "pin_second_attempt"
