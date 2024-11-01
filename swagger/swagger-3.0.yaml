@@ -940,7 +940,52 @@ paths:
           schema:
             $ref: "#/definitions/ElavonReportResponse"
   
-  
+  /elavon/v1/ingenico_appserver_is_running:
+    get:
+      tags:
+      - "Elavon: Extras"
+      summary: "Get the state of connection initiated by Terminal with IngenicoServer"
+      description: "Intention of this method is to be used only when terminal is set in the full-integration mode (interactive)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonAppServerIsRunningResponse"
+            
+  /elavon/v1/ingenico_appserver_close:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Close the connection initiated by Terminal with IngenicoServer"
+      description: "Intention of this method is to be used only when terminal is set in the full-integration mode (interactive)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonAppServerCloseRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonAppServerCloseResponse"
+            
   /elavon/v1/ingenico_transaction_data_input:
     post:
       tags:
