@@ -941,10 +941,10 @@ paths:
             $ref: "#/definitions/ElavonReportResponse"
   
   
-  /elavon/v1/ingenico_transaction_send_key:
+  /elavon/v1/ingenico_transaction_data_input:
     post:
       tags:
-      - "eService: Transactions"
+      - "Elavon: Transactions"
       summary: "Terminal remote control"
       description: "Remotely control terminal"
       consumes:
@@ -959,12 +959,12 @@ paths:
       - in: "body"
         name: "body"
         schema:
-            $ref: "#/definitions/ElavonTransactionSendKeyRequest"
+            $ref: "#/definitions/ElavonTransactionDataInputRequest"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ElavonTransactionSendKeyResponse"
+            $ref: "#/definitions/ElavonTransactionDataInputResponse"
   
   /polcard/v1/ingenico_transaction:
     post:
@@ -1644,6 +1644,30 @@ definitions:
       sequenceNb:
         type: "string"
   
+  ElavonTransactionDataInputRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "receipt_request"
+          - "report_request"
+        example: "receipt_request"
+      receipt_request:
+        type: "object"
+        properties:
+          tearReceiptStatus:
+            type: "string"
+            enum:
+              - "ok"
+              - "reprint"
+              - "omit_customer_copy"
+          printReceiptStatus:
+            type: "string"
+            enum:
+              - "OK"
+              - "KO"
+  
   EserviceTransactionSetStandbyRequest:
     type: "object"
     properties:
@@ -1766,6 +1790,11 @@ definitions:
               type: "string"
   
   EserviceTransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+  
+  ElavonTransactionDataInputResponse:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
@@ -2229,7 +2258,10 @@ definitions:
             - "unknown"
             - "idle"
             - "busy"
+            - "transaction_starting"
             - "transaction_result_ready"
+            - "receipt_request"
+            - "report_request"
             - "card_insert"
             - "pin_first_attempt"
             - "pin_second_attempt"
@@ -2261,6 +2293,7 @@ definitions:
             - "commercial_code_entry"
             - "waiting_card"
             - "waiting_dcc_acceptance"
+            description: "Elavon provides two types of integrations: simple and full (interactive). The full integration allows complete control over terminal behavior directly from the application, whereas the simple integration requires manual actions from the cashier, such as confirming the customer copy by clicking a button on the terminal. In the full integration mode, certain statuses, like receipt_request and report_request, necessitate actions from the application side. For more detailed information, refer to the script located at /ingenicoserver/docs/elavon/transaction_1_interactive.sh."
           
   
   EserviceTerminalStatusResponse:
