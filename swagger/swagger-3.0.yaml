@@ -976,10 +976,6 @@ paths:
         in: "query"
         type: "boolean"
         default: false
-      - in: "body"
-        name: "body"
-        schema:
-            $ref: "#/definitions/ElavonAppServerCloseRequest"
       responses:
         "200":
           description: "successful operation"
@@ -1843,7 +1839,27 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+  
+  ElavonAppServerIsRunningResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          appserver:
+            type: "object"
+            properties:
+              running:
+                type: "boolean"
+                example: "false"
+  
+  ElavonAppServerCloseResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+  
   EserviceTransactionSetParameterResponse:
     type: "object"
     allOf:
