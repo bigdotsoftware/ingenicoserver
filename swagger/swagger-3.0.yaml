@@ -982,6 +982,31 @@ paths:
           schema:
             $ref: "#/definitions/ElavonAppServerCloseResponse"
             
+  /elavon/v1/ingenico_appserver_start:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Initiate server to accept communication initiated by the Terminal"
+      description: "Intention of this method is to be used only when terminal is set in the full-integration mode (interactive) or when working with terminals without printer"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonAppServerStartRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonAppServerStartResponse"
+            
   /elavon/v1/ingenico_transaction_data_input:
     post:
       tags:
@@ -1846,9 +1871,22 @@ definitions:
       - $ref: '#/definitions/ApiResponse'
     properties:
       terminal:
+        allOf:
+        - $ref: '#/definitions/ElavonAppServerIsRunningDef'
+            
+  ElavonAppServerIsRunningDef:
+    type: "object"
+    properties:
+      appserver:
         type: "object"
         properties:
-          appserver:
+          printer:
+            type: "object"
+            properties:
+              running:
+                type: "boolean"
+                example: "false"
+          interactive:
             type: "object"
             properties:
               running:
@@ -1860,6 +1898,15 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
   
+  ElavonAppServerStartResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        allOf:
+        - $ref: '#/definitions/ElavonAppServerIsRunningDef'
+      
   EserviceTransactionSetParameterResponse:
     type: "object"
     allOf:
@@ -2673,6 +2720,19 @@ definitions:
         type: "object"
         description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
   
+  
+  ElavonAppServerStartRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "both"
+        enum:
+        - "printer"
+        - "interactive"
+        - "both"
+        description: "Elavon terminals may initiate a connection with the IngenicoServer in two scenarios: Full Integration Mode (Interactive): This mode allows the Ingenico Server to instruct the terminal about actions to be taken, such as omitting the customer receipt. Terminals with no internal printer: If the terminal has no internal printer, it will also initiate a connection to IngenicoServer, treating it as a printer. In both situations, to accept communication initiated by the terminal, the IngenicoServer must start listening on additional ports configured in the config.ingenico.connection.eth.port settings."
+
   ElavonReportRequest:
     type: "object"
     properties:
