@@ -813,6 +813,10 @@ paths:
         in: "query"
         type: "boolean"
         default: false
+      - name: "externalPrinterMode"
+        in: "query"
+        type: "boolean"
+        default: false
       - in: "body"
         name: "body"
         schema:
