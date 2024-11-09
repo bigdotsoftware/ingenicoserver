@@ -3263,6 +3263,12 @@ definitions:
               properties:
                 line:
                   type: "string"
+                type:
+                  type: "string"
+                  enum:
+                    - ""
+                    - "merchant_copy"
+                    - "customer_copy"
                 bold:
                   type: "boolean"
                 doubleWidth:
