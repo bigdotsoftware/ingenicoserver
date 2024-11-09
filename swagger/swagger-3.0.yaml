@@ -2382,7 +2382,8 @@ definitions:
             - "unknown"
             - "idle"
             - "busy"
-            - "transaction_starting"
+            - "transaction_running"
+            - "transaction_printing_wait"
             - "transaction_result_ready"
             - "receipt_request"
             - "report_request"
@@ -3174,6 +3175,7 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/ElavonConfirmationLines'
     properties:
       terminal:
         type: "object"
@@ -3245,7 +3247,37 @@ definitions:
                 type: "string"
               cardBrand:
                 type: "string"
-            
+      
+                  
+  ElavonConfirmationLines:
+    type: "object"
+    properties:
+      confirmation:
+        type: "object"
+        properties:
+          ready:
+            type: "boolean"
+          lines:
+            type: "array"
+            items:
+              properties:
+                line:
+                  type: "string"
+                bold:
+                  type: "boolean"
+                doubleWidth:
+                  type: "boolean"
+                doubleHeight:
+                  type: "boolean"
+                doubleSize:
+                  type: "boolean"
+                halfSize:
+                  type: "boolean"
+                center:
+                  type: "boolean"
+                right:
+                  type: "boolean"
+                
   ElavonSettlementResponse:
     type: "object"
     allOf:
