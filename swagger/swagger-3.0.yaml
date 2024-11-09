@@ -2740,6 +2740,10 @@ definitions:
               - posnetserver
               - response
             description: "All collected printable lines from the terminal are: default - logged into log file only, posnetserver - send to PosnetServer (see the posnetserver section in the config.yml file), response - returned in the response when transaction is ended"
+          checkState:
+            type: "boolean"
+            default: "false"
+            description: "Determine each line type by checking terminal state. Setting to true may cause longer transactions processing."
       interactive:
         type: "object"
         properties:
