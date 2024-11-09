@@ -1005,14 +1005,6 @@ paths:
         in: "query"
         type: "boolean"
         default: false
-      - name: "externalPrinterMode"
-        in: "query"
-        type: "string"
-        default: "none"
-        enum:
-          - none
-          - posnetserver
-          - response
       - in: "body"
         name: "body"
         schema:
@@ -2748,7 +2740,27 @@ definitions:
         - "printer"
         - "interactive"
         - "both"
-        description: "Elavon terminals may initiate a connection with the IngenicoServer in two scenarios: Full Integration Mode (Interactive): This mode allows the Ingenico Server to instruct the terminal about actions to be taken, such as omitting the customer receipt. Terminals with no internal printer: If the terminal has no internal printer, it will also initiate a connection to IngenicoServer, treating it as a printer. In both situations, to accept communication initiated by the terminal, the IngenicoServer must start listening on additional ports configured in the config.ingenico.connection.eth.port settings."
+        description: "Elavon terminals may initiate a connection with the IngenicoServer in two scenarios: Full Integration Mode (Smartlink Pro also called an Interactive mode): This mode allows the Ingenico Server to instruct the terminal about actions to be taken, such as omitting the customer receipt. Terminals with no internal printer: If the terminal has no internal printer, it will also initiate a connection to IngenicoServer, treating it as a printer. In both situations, to accept communication initiated by the terminal, the IngenicoServer must start listening on additional ports configured in the config.ingenico.connection.eth.port settings."
+      printer:
+        type: "object"
+        properties:
+          mode:
+            type: "string"
+            default: "default"
+            enum:
+              - default
+              - posnetserver
+              - response
+            description: "All collected printable lines from the terminal are: default - logged into log file only, posnetserver - send to PosnetServer (see the posnetserver section in the config.yml file), response - returned in the response when transaction is ended"
+      interactive:
+        type: "object"
+        properties:
+          mode:
+            type: "string"
+            default: "default"
+            enum:
+              - default
+              - loggingonly
 
   ElavonReportRequest:
     type: "object"
