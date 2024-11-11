@@ -1801,8 +1801,6 @@ definitions:
         type: "string"
         enum:
           - "cancel"
-      sequenceNb:
-        type: "string"
         
   EserviceTransactionCommonGenerateResponse:
     type: "object"
@@ -3235,6 +3233,8 @@ definitions:
           error:
             type: "string"
             description: "Error massge from device. Filled when returnCode<>0"
+      stats:
+        type: "object"
   
             
   ElavonTransactionLastActionResponse:
