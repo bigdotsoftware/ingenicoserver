@@ -1028,6 +1028,32 @@ paths:
           schema:
             $ref: "#/definitions/ElavonTransactionDataInputResponse"
   
+  /elavon/v1/ingenico_transaction_send_key:
+    post:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Terminal remote control"
+      description: "Send remotely control terminal, like decline"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonTransactionSendKeyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionSendKeyResponse"
+  
+  
   /polcard/v1/ingenico_transaction:
     post:
       tags:
@@ -1767,6 +1793,17 @@ definitions:
       sequenceNb:
         type: "string"
   
+  
+  ElavonTransactionSendKeyRequest:
+    type: "object"
+    properties:
+      keycode:
+        type: "string"
+        enum:
+          - "cancel"
+      sequenceNb:
+        type: "string"
+        
   EserviceTransactionCommonGenerateResponse:
     type: "object"
     allOf:
@@ -1855,7 +1892,7 @@ definitions:
     type: "object"
     allOf:
       - $ref: '#/definitions/ApiResponse'
-  
+      
   ElavonTransactionDataInputResponse:
     type: "object"
     allOf:
@@ -1918,6 +1955,11 @@ definitions:
     allOf:
       - $ref: '#/definitions/EserviceTransactionDataInputResponse'
 
+  ElavonTransactionSendKeyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ElavonTransactionDataInputResponse'
+      
   EserviceTransactionReconDataResponse:
     type: "object"
     allOf:
