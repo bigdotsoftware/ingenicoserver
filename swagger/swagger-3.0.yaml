@@ -936,7 +936,7 @@ paths:
           schema:
             $ref: "#/definitions/ElavonReportResponse"
   
-  /elavon/v1/ingenico_appserver_is_running:
+  /elavon/v1/ingenico_appserver_status:
     get:
       tags:
       - "Elavon: Extras"
@@ -1917,12 +1917,20 @@ definitions:
               running:
                 type: "boolean"
                 example: "false"
+              mode:
+                type: "string"
+                example: "default"
+              checkState:
+                type: "boolean"
           interactive:
             type: "object"
             properties:
               running:
                 type: "boolean"
                 example: "false"
+              mode:
+                type: "string"
+                example: "default"
   
   ElavonAppServerCloseResponse:
     type: "object"
