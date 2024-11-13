@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   description: "This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)"
   version: "2.0"
-  title: "Ingenico Server API (eService, Polcard First Data, Elavon)"
+  title: "Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon)"
   contact:
     email: "bigdotsoftware@bigdotsoftware.pl"
 host: "localhost:3020"
