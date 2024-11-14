@@ -1634,27 +1634,34 @@ paths:
             $ref: "#/definitions/PolcardReportEndResponse"
 
 definitions:
-
+      
   EserviceAutoTransactionBeginRequest:
     type: "object"
     allOf:
       - $ref: '#/definitions/EserviceTransactionBeginRequest'
+      - $ref: '#/definitions/EserviceTransactionBeginCallbackDef'
+    properties:
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/"
+  
+  EserviceTransactionBeginCallbackDef:
+    type: "object"
     properties:
       callback:
         type: "object"
         properties:
           uri:
             type: "string"
+          clientdata:
+            type: "object"
           method:
             type: "string"
             enum:
               - "POST"
               - "GET"
               - "PUT"
-      posnetserver:
-        type: "object"
-        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/"
-        
+              
   EserviceTransactionBeginRequest:
     type: "object"
     properties:
