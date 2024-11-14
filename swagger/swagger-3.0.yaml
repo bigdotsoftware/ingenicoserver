@@ -3330,6 +3330,8 @@ definitions:
                     - ""
                     - "merchant_copy"
                     - "customer_copy"
+                ts:
+                  type: "number"
                 bold:
                   type: "boolean"
                 doubleWidth:
