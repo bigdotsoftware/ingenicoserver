@@ -2817,7 +2817,7 @@ definitions:
             enum:
               - timeout
               - prefix_or_timeout
-            description: "Select how to determine the end of printable lines. By default, if no new incoming lines are detected after 2 seconds, it means that all printable lines have been collected from the terminal. Alternatively, to reduce overall processing time, identifying a specific prefix can also serve as a suggestion to stop listening for new lines. Most transactions (except BLIK and magstripe) end with a line prefixed by the 'TC:' identifier"
+            description: "Select how to determine the end of printable lines. By default, if no new incoming lines are detected after 2 seconds, it means that all printable lines have been collected from the terminal. Alternatively, to reduce overall processing time, identifying a specific prefix can also serve as a suggestion to stop listening for new lines. Most transactions (except BLIK and magstripe) end with a line prefixed by the 'TC:' identifier. Be cautious when using the 'prefix_or_timeout' setting while listening for multiple printouts per transaction (such as merchant copy and customer copy). The first line found that starts with the specified prefix will cause the Ingenico server to stop listening for other lines, even if they are still being sent by the terminal."
           endOfLinesTimeout:
             type: "number"
             default: "2000"
