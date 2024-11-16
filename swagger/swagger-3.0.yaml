@@ -1934,7 +1934,7 @@ definitions:
                 example: "timeout"
                 enum:
                   - timeout
-                  - prefix
+                  - prefix_or_timeout
               endOfLinesTimeout:
                 type: "number"
                 example: 2000
@@ -2816,18 +2816,17 @@ definitions:
             default: "timeout"
             enum:
               - timeout
-              - prefix
+              - prefix_or_timeout
             description: "Select how to determine the end of printable lines. By default, if no new incoming lines are detected after 2 seconds, it means that all printable lines have been collected from the terminal. Alternatively, to reduce overall processing time, identifying a specific prefix can also serve as a suggestion to stop listening for new lines. Most transactions (except BLIK and magstripe) end with a line prefixed by the 'TC:' identifier"
           endOfLinesTimeout:
             type: "number"
             default: "2000"
             example: 2000
-            description: "Used when endOfLinesDetection=timeout"
           endOfLinesPrefix:
             type: "string"
             default: "TC:"
             example: "TC:"
-            description: "Used when endOfLinesDetection=prefix"
+            description: "Used only when endOfLinesDetection=prefix_then_timeout"
       interactive:
         type: "object"
         properties:
