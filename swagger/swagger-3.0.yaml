@@ -2799,6 +2799,23 @@ definitions:
             type: "boolean"
             default: "false"
             description: "Determine each line type by checking terminal state. Setting to true may cause longer transactions processing."
+          endOfLinesDetection:
+            type: "string"
+            default: "timeout"
+            enum:
+              - timeout
+              - prefix
+            description: "Select how to determine the end of printable lines. By default, if no new incoming lines are detected after 2 seconds, it means that all printable lines have been collected from the terminal. Alternatively, to reduce overall processing time, identifying a specific prefix can also serve as a suggestion to stop listening for new lines. Most transactions (except BLIK and magstripe) end with a line prefixed by the 'TC' identifier"
+          endOfLinesTimeout:
+            type: "number"
+            default: "2000"
+            example: 2000
+            description: "Used when endOfLinesDetection=timeout"
+          endOfLinesPrefix:
+            type: "string"
+            default: "TC"
+            example: "TC"
+            description: "Used when endOfLinesDetection=prefix"
       interactive:
         type: "object"
         properties:
