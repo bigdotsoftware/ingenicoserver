@@ -2773,6 +2773,8 @@ definitions:
           uri:
             type: "string"
             example: "http://host:777/results"
+          clientdata:
+            type: "object"
           method:
             type: "string"
             enum:
