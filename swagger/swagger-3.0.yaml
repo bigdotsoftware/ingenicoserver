@@ -2806,6 +2806,7 @@ definitions:
               - default
               - posnetserver
               - response
+              - posnetserver_and_response
             description: "All collected printable lines from the terminal are: default - logged into log file only, posnetserver - send to PosnetServer (see the posnetserver section in the config.yml file), response - returned in the response when transaction is ended"
           checkState:
             type: "boolean"
