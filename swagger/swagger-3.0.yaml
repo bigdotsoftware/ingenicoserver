@@ -1747,6 +1747,7 @@ definitions:
         enum:
           - "receipt_request"
           - "report_request"
+          - "host_declined_request"
         example: "receipt_request"
       receipt_request:
         type: "object"
@@ -2434,6 +2435,7 @@ definitions:
             - "transaction_result_ready"
             - "receipt_request"
             - "report_request"
+            - "host_declined_request"
             - "card_insert"
             - "pin_first_attempt"
             - "pin_second_attempt"
