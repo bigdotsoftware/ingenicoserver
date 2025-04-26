@@ -1,0 +1,4648 @@
+swagger: "2.0"
+info:
+  description: "This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)"
+  version: "2.0"
+  title: "Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon)"
+  contact:
+    email: "bigdotsoftware@bigdotsoftware.pl"
+host: "localhost:3020"
+basePath: "/"
+tags:
+- name: "License"
+  description: "Manage your license"
+  externalDocs:
+    description: "Find out more"
+    url: "https://blog.bigdotsoftware.pl/ingenico-server-licencja/"
+    
+- name: "eService: General info"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: Transactions"
+  description: "eService transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: Extras"
+  description: "Terminal transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: Reports"
+  description: "Transaction reports"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: Analysis"
+  description: "Transaction analysis"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "eService: DCC Analysis"
+  description: "Transaction DCC analysis"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"  
+- name: "Elavon: Transactions"
+  description: "Elavon transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"    
+- name: "Elavon: Extras"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"    
+- name: "Polcard: Transactions"
+  description: "Polcard First Data transactions"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+- name: "Polcard: Extras"
+  description: "Terminal operations"
+  externalDocs:
+    description: "Find out more"
+    url: "https://bigdotsoftware.pl/short_link/ingenico"
+    
+schemes:
+- "http"
+- "https"
+
+paths:
+  /license/v1/check:
+    get:
+      tags:
+      - "License"
+      summary: "Check the license details"
+      description: "Shows details about used license, including expiration date. We strongly suggest to execute this method periodically in local monitoring system to verify license expiration date. Method can be used as a system heartbeat as well."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "json"
+        description: "Pass ?json=true/false to change the output format"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/LicenseResponse"
+            
+  /license/v1/upgrade:
+    post:
+      tags:
+      - "License"
+      summary: "Obtain new license"
+      description: "Forces to download new license when available. Note that Ingenico server renew licenses automatically 10 days before expiration date. Method can be used to renew license earlier."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LicenseResponse"
+
+  /eservice/v1/ingenico_status:
+    get:
+      tags:
+      - "eService: General info"
+      summary: "Terminal status"
+      description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to finish current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTerminalStatusResponse"
+
+  /eservice/v1/ingenico_general_info:
+    get:
+      tags:
+      - "eService: General info"
+      summary: "Terminal information"
+      description: "Returns general info about therminal."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTerminalInfoResponse"
+
+  /eservice/v1/ingenico_auto_transaction_process:
+    post:
+      tags:
+      - "eService: Transactions"
+      summary: "Start new transaction (automatic mode)"
+      description: "Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of auto transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/EserviceAutoTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAutoTransactionBeginResponse"
+            
+  /eservice/v1/ingenico_auto_transaction_cancel/{uuid}:
+    post:
+      tags:
+      - "eService: Transactions"
+      summary: "Cancel auto transaction"
+      description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to cancel transaction."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "uuid"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAutoTransactionCancelResponse"
+  
+  /eservice/v1/ingenico_auto_transaction_status/{uuid}:
+    get:
+      tags:
+      - "eService: Transactions"
+      summary: "Status of automatic transaction"
+      description: "Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to check status of individual automatic transaction."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "uuid"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAutoTransactionStatusResponse"
+            
+  /eservice/v1/ingenico_auto_transaction_statuses:
+    get:
+      tags:
+      - "eService: Transactions"
+      summary: "List all auto transactions"
+      description: "Returns list of all executed automatic transactions with statuses."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAutoTransactionStatusesResponse"
+  
+  /eservice/v1/ingenico_transaction:
+    post:
+      tags:
+      - "eService: Transactions"
+      summary: "Start new transaction"
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Field 'sequenceNb' is mandatory but for 'completion' and 'reversal' types only. Set it to '-' for other types. New transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/EserviceTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionBeginResponse"
+
+  /eservice/v1/ingenico_transaction_end:
+    get:
+      tags:
+      - "eService: Transactions"
+      summary: "Finish current transaction"
+      description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionEndResponse"
+  
+  /eservice/v1/ingenico_transaction_last/{transactionIndex}:
+    get:
+      tags:
+      - "eService: Transactions"
+      summary: "Read last transaction data"
+      description: "Parameter transactionIndex is counted from 1."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionLastResponse"
+            
+  /eservice/v1/ingenico_transaction_data_input:
+    post:
+      tags:
+      - "eService: Transactions"
+      summary: "Terminal remote control"
+      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/EserviceTransactionDataInputRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionDataInputResponse"
+       
+  /eservice/v1/ingenico_transaction_send_key:
+    post:
+      tags:
+      - "eService: Transactions"
+      summary: "Terminal remote control"
+      description: "Send remotely control terminal, like accept/decline/back"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/EserviceTransactionSendKeyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionSendKeyResponse"
+            
+  /eservice/v1/ingenico_set_parameter:
+    post:
+      tags:
+      - "eService: Extras"
+      summary: "Set terminal parameters"
+      description: "Set terminal parameters"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/EserviceTransactionSetParameterRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionSetParameterResponse"
+
+  /eservice/v1/ingenico_set_standby:
+    post:
+      tags:
+      - "eService: Extras"
+      summary: "Standby mode"
+      description: "Put the terminal in Standby mode (power saving)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/EserviceTransactionSetStandbyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionSetStandbyResponse"
+            
+  /eservice/v1/ingenico_batch_recon_data/{transactionIndex}:
+    get:
+      tags:
+      - "eService: Transactions"
+      summary: "Read single transaction from batch"
+      description: "Using this method you can read transaction data which were sent to acquirer. Terminal must be in 'BatchCompleted' state. Parameter transactionIndex is counted from 1. Metod returns data until the 'clear batch' -  'ingenico_batch_recon_info?flag=0' is exectuted."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: "Parameter transactionIndex is counted from 1."
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionReconDataResponse"
+    
+  /eservice/v1/ingenico_batch_recon_info:
+    get:
+      tags:
+      - "eService: Transactions"
+      summary: "Read summary batch data"
+      description: "Batch data can be read when value of transactionStatus retunred by /ingenico_status is 'BatchCompleted'. Method clears the batch and /ingenico_transaction_recon_data don't return any data until next reconciliation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "flags"
+        in: "query"
+        type: "integer"
+        default: 0
+        description: "bitmask: 0x01 - repeat last response, 0x02 - send file with batch transaction, 0x04 - multicurrency report"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceTransactionReconInfoResponse"
+            
+  /eservice/v1/ingenico_report_generate:
+    post:
+      tags:
+      - "eService: Reports"
+      summary: "Prepare terminal report"
+      description: "Prepares a terminal report. To access report data use /ingenico_report_details with 'cardset' counted from 1"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "reset"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceReportGenerateResponse"
+
+  /eservice/v1/ingenico_report_details/{cardset}:
+    get:
+      tags:
+      - "eService: Reports"
+      summary: "Terminal report details"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "cardset"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceReportDetailsResponse"
+  
+  /eservice/v1/ingenico_report_summary:
+    get:
+      tags:
+      - "eService: Reports"
+      summary: "Terminal report total details"
+      description: "Returns totals from all transactions prepared by /ingenico_report_generate. Method clears current report details - to access totals again, request /ingenico_report_generate again."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceReportTotalSummaryResponse"
+            
+  /eservice/v1/ingenico_analysis_generate:
+    post:
+      tags:
+      - "eService: Analysis"
+      summary: "Prepare transaction analysis"
+      description: "Prepares a terminal report since last EOD report. To access report data use /ingenico_analysis_summary or /ingenico_analysis_details with 'transactionIndex' counted from 1. Reconciliation erases report data."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAnalysisGenerateResponse"
+
+  /eservice/v1/ingenico_analysis_details/{transactionIndex}:
+    get:
+      tags:
+      - "eService: Analysis"
+      summary: "Analysis details"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAnalysisDetailsResponse"
+  
+  /eservice/v1/ingenico_analysis_summary:
+    get:
+      tags:
+      - "eService: Analysis"
+      summary: "Analysis total summary"
+      description: "Returns totals from all transactions prepared by /ingenico_analysis_generate. Method clears current report details - to access totals again, request /ingenico_analysis_generate again."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceAnalysisTotalSummaryResponse"
+            
+  /eservice/v1/ingenico_dcc_analysis_generate:
+    post:
+      tags:
+      - "eService: DCC Analysis"
+      summary: "Prepare transaction analysis"
+      description: "Prepares a terminal report. To access report data use /ingenico_analysis_summary"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceDCCAnalysisGenerateResponse"
+
+  /eservice/v1/ingenico_dcc_analysis_details/{transactionIndex}:
+    get:
+      tags:
+      - "eService: DCC Analysis"
+      summary: "Analysis details"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      - name: "transactionIndex"
+        in: "path"
+        description: ""
+        required: true
+        type: "number"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceDCCAnalysisDetailsResponse"
+  
+  /eservice/v1/ingenico_dcc_analysis_summary:
+    get:
+      tags:
+      - "eService: DCC Analysis"
+      summary: "Analysis total summary"
+      description: "Returns totals from all transactions prepared by /ingenico_report_summary. Method clears current report details - to access totals again, request /ingenico_report_generate again."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "cashRegisterNumber"
+        in: "query"
+        type: "integer"
+        default: 1
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EserviceDCCAnalysisTotalSummaryResponse"
+  
+  
+  /elavon/v1/ingenico_status:
+    get:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Terminal status"
+      description: "The most used method. Depends from transactionStatus application need to act differently. When transactionStatusText is different than 'idle' then new transaction cannot be started, becuase terminal is processing another request."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTerminalStatusResponse"
+  
+  /elavon/v1/ingenico_transaction:
+    post:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Start new transaction"
+      description: "Starts new transaction. Method returns response immediately. To read transaction status use /elavon/v1/ingenico_status. Once status back to 'idle', read transaction result by /elavon/v1/ingenico_transaction_end. Alternatively use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionActionResponse"
+  
+  /elavon/v1/ingenico_transaction_end:
+    get:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Get result of transaction"
+      description: "Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /elavon/v1/ingenico_transaction_last"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionEndActionResponse"
+            
+  /elavon/v1/ingenico_transaction_last:
+    get:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Read last transaction details from the terminal"
+      description: "Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /elavon/v1/ingenico_transaction_last"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionLastActionResponse"
+            
+  /elavon/v1/ingenico_settlement:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Send Transactions - closing business day"
+      description: "Transfer current transactions to the external system (FDP's clearing host). To get result of previous settlement or list current transactions use /elavon/v1/ingenico_settlement_data or /elavon/v1/ingenico_report_summary"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonSettlementRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonSettlementResponse"
+  
+  /elavon/v1/ingenico_settlement_data:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Get status of previous settlement"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonSettlementDataRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonSettlementDataResponse"
+  
+  /elavon/v1/ingenico_report_summary:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Get list of transactions"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonReportRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonReportResponse"
+  
+  /elavon/v1/ingenico_appserver_status:
+    get:
+      tags:
+      - "Elavon: Extras"
+      summary: "Get the state of connection initiated by Terminal with IngenicoServer"
+      description: "Intention of this method is to be used only when terminal is set in the full-integration mode (interactive)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonAppServerIsRunningResponse"
+            
+  /elavon/v1/ingenico_appserver_close:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Close the connection initiated by Terminal with IngenicoServer"
+      description: "Intention of this method is to be used only when terminal is set in the full-integration mode (interactive)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonAppServerCloseResponse"
+            
+  /elavon/v1/ingenico_appserver_start:
+    post:
+      tags:
+      - "Elavon: Extras"
+      summary: "Initiate server to accept communication initiated by the Terminal"
+      description: "Intention of this method is to be used only when terminal is set in the full-integration mode (interactive) or when working with terminals without printer"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonAppServerStartRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonAppServerStartResponse"
+            
+  /elavon/v1/ingenico_transaction_data_input:
+    post:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Terminal remote control"
+      description: "Remotely control terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonTransactionDataInputRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionDataInputResponse"
+  
+  /elavon/v1/ingenico_transaction_send_key:
+    post:
+      tags:
+      - "Elavon: Transactions"
+      summary: "Terminal remote control"
+      description: "Send remotely control terminal, like decline"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/ElavonTransactionSendKeyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ElavonTransactionSendKeyResponse"
+  
+  
+  /polcard/v1/ingenico_transaction:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Start new transaction"
+      description: "Starts new transaction and wait for transaction message to be consumed by the terminal. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true)."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionBeginRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionActionResponse"
+
+  /polcard/v1/ingenico_transaction_end:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Mark current transaction finished"
+      description: "Transaction can be finished when value of transactionStatus retunred by /ingenico_status is 'WaitTrEnd'."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionEndResponse"
+            
+  /polcard/v1/ingenico_transaction_last:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Read from terminal information about last transaction"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionLastResponse"
+            
+  /polcard/v1/ingenico_transaction_abort:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Abort current transaction"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionEndResponse"
+            
+  /polcard/v1/ingenico_statuses:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "List of all statuses from current transaction"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionStatusesResponse"
+            
+  /polcard/v1/ingenico_status:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal status"
+      description: "The most used method. Attribute 'transactionStatus' determines application next steps. When transactionStatus is 'WaitTrEnd' new transaction cannot be started, becuase terminal is waiting to read results of current one. When transactionStatus is 'ReconciliationNeeded' - close the day from terminal (perform Reconciliation), but when 'BatchCompleted' - read the batch data first. Use this method periodically to test connection with terminal. When using /ingenico_auto_transaction_process - check result by calling /ingenico_auto_transaction_status/{uuid}"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalStatusResponse"
+
+  /polcard/v1/ingenico_display:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Display detailed information"
+      description: "Returns more details about currently displayed message on the terminal. Use this method when 'ingenico_status' is 'AskingEcrToPrintData'"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalDisplayInfoResponse"
+
+  /polcard/v1/ingenico_print:
+    post:
+      tags:
+      - "Polcard: Extras"
+      summary: "Terminal remote control"
+      description: "Print extra information on the terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTerminalPrintRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalPrintResponse"
+
+  /polcard/v1/ingenico_prompt:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Get additional data from terminal. Request /polcard/v1/ingenico_transaction_abort to abort"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTerminalPromptRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalPromptResponse"
+            
+  /polcard/v1/ingenico_prompt_barcode:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Get additional data from terminal. Request /polcard/v1/ingenico_transaction_abort to abort"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTerminalPromptBarcodeRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalPromptResponse"
+  
+  /polcard/v1/ingenico_barcode:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Request data from barcode reader/scanner (Verifone E355)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardBarcodeRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardBarcodeResponse"
+            
+  /polcard/v1/ingenico_prompt_end:
+    get:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Get summary of /ingenico_prompt when terminal.status=WaitPromptEnd"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTerminalPromptEndResponse"
+            
+  /polcard/v1/ingenico_transaction_data_input:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Provide details during transaction processing. Send characters to remotely control terminal, like accept/decline signature, enter authorization code etc. This is very generic method to manage transaction process. Consider using dedicated methods like: /polcard/v1/ingenico_transaction_abort /polcard/v1/ingenico_transaction_send_key /polcard/v1/ingenico_transaction_send_code /polcard/v1/ingenico_transaction_send_amount /polcard/v1/ingenico_transaction_send_option or /polcard/v1/ingenico_transaction_send_profile"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionDataInputRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionDataInputResponse"
+
+  /polcard/v1/ingenico_transaction_send_key:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Send remotely control terminal, like accept/decline/back"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendKeyRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendKeyResponse"
+
+  /polcard/v1/ingenico_transaction_send_code:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Send remotely code like BLIK and commercial code"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendCodeRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendCodeResponse"
+
+  /polcard/v1/ingenico_transaction_send_amount:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Send remotely code like BLIK and commercial code"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendAmountRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendAmountResponse"
+
+  /polcard/v1/ingenico_transaction_send_option:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Send option value"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendOptionRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendOptionResponse"
+  
+  /polcard/v1/ingenico_transaction_send_profile:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Terminal remote control"
+      description: "Send option value"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSendProfileRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSendProfileResponse"
+
+  /polcard/v1/ingenico_send_action:
+    post:
+      tags:
+      - "Polcard: Transactions"
+      summary: "Standby mode"
+      description: "Peform action with terminal"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardTransactionSetActionRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardTransactionSetActionResponse"
+  
+  /polcard/v1/ingenico_cutoff:
+    post:
+      tags:
+      - "Polcard: Extras"
+      summary: "Send Transactions - closing business day"
+      description: "Transfer current transactions to the external system (FDP's clearing host). To list transactions use /polcard/v1/ingenico_cutoff_report method. To see summary of what was sent use /polcard/v1/ingenico_cutoff_end"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardCutoffRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardCutoffResponse"
+  
+  /polcard/v1/ingenico_cutoff_report:
+    post:
+      tags:
+      - "Polcard: Extras"
+      summary: "List of transactions"
+      description: "Returns list of transactions (all transactions since previous transfer) to be transfered to the external system (FDP's clearing host). To perform transactions transfer use /polcard/v1/ingenico_cutoff method. It's long running/blocking method"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardCutoffReportRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardCutoffReportResponse"
+  
+  /polcard/v1/ingenico_cutoff_end:
+    get:
+      tags:
+      - "Polcard: Extras"
+      summary: "Status of closing business day process"
+      description: "Get summary of /ingenico_cutoff when terminal.status=WaitCutoffEnd"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardCutoffEndResponse"
+
+  /polcard/v1/ingenico_report:
+    post:
+      tags:
+      - "Polcard: Extras"
+      summary: "Send report and/or Transactions"
+      description: "Transfer report and/or current transactions to the external system (FDP's clearing host). All reports except 'manual_batch_then_return' are long running/blocking methods"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - in: "body"
+        name: "body"
+        schema:
+            $ref: "#/definitions/PolcardReportRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardReportResponse"
+
+  /polcard/v1/ingenico_report_end:
+    get:
+      tags:
+      - "Polcard: Extras"
+      summary: "Status of report/transaction file transmission"
+      description: "Get summary of /ingenico_report when terminal.status=WaitReportEnd. Method /ingenico_report returns 200OK response immediately for some reports like action=manual_batch_then_return. In such case report data is available after some time and can be read only when terminal.status=WaitReportEnd (see examples)"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fulldebug"
+        in: "query"
+        type: "boolean"
+        default: false
+      - name: "resetstate"
+        in: "query"
+        type: "boolean"
+        default: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/PolcardReportEndResponse"
+
+definitions:
+      
+  EserviceAutoTransactionBeginRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionBeginRequest'
+      - $ref: '#/definitions/EserviceTransactionBeginCallbackDef'
+    properties:
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/"
+  
+  EserviceTransactionBeginCallbackDef:
+    type: "object"
+    properties:
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+          clientdata:
+            type: "object"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+              
+  EserviceTransactionBeginRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+         - "purchase"
+         - "preauthorization"
+         - "completion"
+         - "preauthorization_cancel"
+         - "refund"
+         - "reversal"
+         - "giftcard_activation"
+         - "giftcard_balance"
+         - "giftcard_topup"
+         - "reconciliation"
+         - "connection_test"
+         - "tms"
+      amount:
+        type: "integer"
+      title:
+        type: "string"
+      sequenceNb:
+        type: "string"
+      arguments:
+        type: "object"
+        properties:
+          transactionFlags: 
+            type: "array"
+            items:
+              type: "string"
+              enum:
+                - "TokenGeneration"
+                - "ReferenceNumberGeneration"
+                - "TransitTransactionIndicator"
+          blikCode:
+            type: "number"
+          additionalPrintout: 
+            type: "string"
+          hints: 
+            type: "string"
+          rfu: 
+            type: "string"
+          variableSymbol: 
+            type: "string"
+          specificSymbol: 
+            type: "string"
+          saleItemList: 
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                itemId: 
+                  type: "string"
+                productCode: 
+                  type: "string"
+                amount: 
+                  type: "number"
+                  format: "int32"
+                unitMeasure: 
+                  type: "string"
+                unitPrice: 
+                  type: "number"
+                  format: "int32"
+                quantity: 
+                  type: "number"
+                taxCode: 
+                  type: "number"
+
+  EserviceTransactionDataInputRequest:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      sequenceNb:
+        type: "string"
+  
+  ElavonTransactionDataInputRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "receipt_request"
+          - "report_request"
+          - "host_declined_request"
+        example: "receipt_request"
+      receipt_request:
+        type: "object"
+        properties:
+          tearReceiptStatus:
+            type: "string"
+            enum:
+              - "ok"
+              - "reprint"
+              - "omit_customer_copy"
+          printReceiptStatus:
+            type: "string"
+            enum:
+              - "OK"
+              - "KO"
+  
+  EserviceTransactionSetStandbyRequest:
+    type: "object"
+    properties:
+      timeoutSeconds:
+        type: "number"
+        format: "int32"
+        
+  EserviceTransactionSetParameterRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "volatile"
+          - "permanent"
+      parameters:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            key:
+              type: "string"
+            value:
+              type: "string"
+        
+  EserviceTransactionSendKeyRequest:
+    type: "object"
+    properties:
+      keycode:
+        type: "string"
+        enum:
+          - "ok"
+          - "back"
+          - "cancel"
+      sequenceNb:
+        type: "string"
+  
+  
+  ElavonTransactionSendKeyRequest:
+    type: "object"
+    properties:
+      keycode:
+        type: "string"
+        enum:
+          - "cancel"
+        
+  EserviceTransactionCommonGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          firstTransaction:
+            type: "integer"
+            format: "int32"
+          lastTransaction:
+            type: "integer"
+            format: "int32"
+  
+  EserviceReportGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGenerateResponse'
+      
+  EserviceAnalysisGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGenerateResponse'
+  
+  EserviceDCCAnalysisGenerateResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGenerateResponse'
+      
+  EserviceReportDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
+      
+  EserviceAnalysisDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionEndResponse'
+      
+  EserviceDCCAnalysisDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
+      
+  EserviceReportTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
+  
+  EserviceAnalysisTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
+  
+  EserviceDCCAnalysisTotalSummaryResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionCommonGetDetailsResponse'
+      
+  EserviceTransactionCommonGetDetailsResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          summaryTitle:
+            type: "string"
+          reportEntries:
+            type: "array"
+            description: "examples: [\"SPRZEDAŻ|13|13000\",\"ZWROTY|0|0\",\"DOP.PRE-AUT.|0|0\",\"RAZEM|13|13000\",\"WYPŁATA GOTÓWKI|0|0\"] or [\"SPRZEDAŻ|1|1000\", \"UNIEWAŻ.SPRZEDAŻY|0|0\", \"WYPŁATA GOTÓWKI|0|0\", \"W TYM NAPIWKI|0|0\", \"ZWROTY|0|0\", \"DOP.PRE-AUT.|0|0\", \"UNIE.DOP.PRE-AUT.|0|0\", \"RAZEM|1|1000\", \"PRE-AUTORYZACJA|0|0\", \"ZWIĘKSZ. PRE-AUT.|0|0\", \"Anulow. preautory.|0|0\" ]"
+            items:
+              type: "string"
+  
+  EserviceTransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
+  ElavonTransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+  
+  ElavonAppServerIsRunningResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        allOf:
+        - $ref: '#/definitions/ElavonAppServerIsRunningDef'
+            
+  ElavonAppServerIsRunningDef:
+    type: "object"
+    properties:
+      appserver:
+        type: "object"
+        properties:
+          printer:
+            type: "object"
+            properties:
+              running:
+                type: "boolean"
+                example: "false"
+              mode:
+                type: "string"
+                example: "default"
+              checkState:
+                type: "boolean"
+              endOfLinesDetection:
+                type: "string"
+                example: "timeout"
+                enum:
+                  - timeout
+                  - prefix_or_timeout
+              endOfLinesTimeout:
+                type: "number"
+                example: 2000
+              endOfLinesPrefix:
+                type: "string"
+                example: "TC:"
+          interactive:
+            type: "object"
+            properties:
+              running:
+                type: "boolean"
+                example: "false"
+              mode:
+                type: "string"
+                example: "default"
+  
+  ElavonAppServerCloseResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+  
+  ElavonAppServerStartResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        allOf:
+        - $ref: '#/definitions/ElavonAppServerIsRunningDef'
+      
+  EserviceTransactionSetParameterResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionDataInputResponse'
+  
+  EserviceTransactionSetStandbyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionDataInputResponse'
+  
+  EserviceTransactionSendKeyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionDataInputResponse'
+
+  ElavonTransactionSendKeyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ElavonTransactionDataInputResponse'
+      
+  EserviceTransactionReconDataResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionEndResponse'
+  
+  EserviceTransactionLastResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionEndResponse'
+      
+  EserviceTransactionReconInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          error:
+            type: "string"
+          resultsObject:
+            type: "object"
+            properties:
+              totalAmount:
+                type: "string"
+              transactionCount:
+                type: "string"
+              status:
+                description: "0 – success 1 – error 2 – success, but not completed preauthorizations were present in batch – unattended terminals only 4 – success, but TMS connection is required"
+                type: "string"
+              statusText:
+                type: "string"
+                enum:
+                  - "success"
+                  - "error"
+                  - "success_with_not_completed_preauthorizations"
+                  - "success_tms_required"
+                  - "unknown"
+              acquirerIdentifier:
+                type: "string"
+              batchNumber:
+                type: "string"
+              date:
+                type: "string"
+                description: "format: YYYY.MM.DD"
+              time:
+                type: "string"
+                description: "format: hh:mm:ss"
+              printingIndicator:
+                type: "string"
+              tid:
+                type: "string"
+              activationSequenceNb:
+                type: "string"
+              cashierIdentifier:
+                type: "string"
+              eVoucherInfo:
+                type: "string"
+              giftcardInfo:
+                type: "string"
+              fileSize:
+                type: "string"
+              fileCRC:
+                type: "string"
+              paymentDayClose:
+                type: "string"
+          results:
+            type: "array"
+            description: "example: [{\"arg0\":\"-17000\"},{\"arg1\":\"0\"},{\"arg2\":\"1\"},{\"arg3\":\"\"}.....]"
+            items:
+              type: "object"
+            
+  EserviceTransactionEndResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          transactionType:
+            type: "integer"
+          transactionResultCode:
+            type: "integer"
+          transactionResultCodeText:
+            type: "string"
+            enum:
+              - "accepted"
+              - "refused"
+              - "no_connection"
+              - "interrupted"
+              - "card_blacklisted"
+          transactionNumber:
+            type: "integer"
+          transactionDetails:
+            type: "object"
+            properties:
+              authorizationCode:
+                type: "string"
+              serverMessage:
+                type: "string"
+              merchantID:
+                type: "string"
+                description: "example '454500000000000'"
+              maskedCardNumber:
+                type: "string"
+                description: "example '************0211'"
+              date: 
+                type: "string"
+                description: "example format 2021.01.25"
+              time:
+                type: "string"
+                description: "example format 12:59:32"
+              cardsetName:
+                type: "string"
+                description: "example 'VISA'"
+              readerUsed:
+                type: "string"
+                description: "example 'C' - possible values: B Contactless, M Manual, C Magstripe, P ICC, ? Unknown"
+              readerUsedText:
+                type: "string"
+                description: "possible values 'magstripe', 'contactless', 'manual', 'icc', 'unknown'"
+              terminalIdentifier:
+                type: "string"
+                description: "example '45450318'"
+              authorizationMessage:
+                type: "string"
+                description: "example '000180'"
+              authorizationType:
+                type: "string"
+                description: "possible values 1 - online, 3 – offline, 4 – referral"
+              authorizationTypeText:
+                type: "string"
+                description: "possible values 'online', 'offline', 'referral'"
+              transactionAmount:
+                type: "string"
+              cardholderAuthorizationMethod:
+                type: "string"
+                description: "possible values A – PIN, @ - Signature, B – PIN and Signature, ? – no authorization"
+              cardholderAuthorizationMethodText:
+                type: "string"
+                description: "possible values 'pin', 'signature', 'pin_signature', 'no authorization', 'unknown'"
+              atc:
+                type: "string"
+              ac:
+                type: "string"
+              aid:
+                type: "string"
+              tvr:
+                type: "string"
+              tsi:
+                type: "string"
+              title:
+                type: "string"
+              printingIndicator:
+                type: "string"
+              transactionCurrency: 
+                type: "string"
+                description: "example 'PLN'"
+              terminalCurrency:
+                type: "string"
+              exchangeRate:
+                type: "string"
+              dcc1:
+                type: "string"
+              dcc2:
+                type: "string"
+              cashAmount:
+                type: "string"
+              spendingAmount:
+                type: "string"
+              dcc_currencyExp:
+                type: "string"
+              additionalInformation:
+                type: "string"
+                description: "example 'DF060A534E204E722056697361DF0B0400000100' or 'DF0B0400000100' or 'DF060A534E204E722056697361DF0B0400000400DF1318343534353033313830303031323630313231323132383534'"
+              additionalInformationObject:
+                type: "object"
+                properties:
+                  blikReferenceCode:
+                    type: "string"
+                  blikEnteredCode:
+                    type: "string"
+                  cardToken:
+                    type: "string"
+                  emv:
+                    type: "string"
+                  cardExpiryDate:
+                    type: "string"
+                  valueToPrint:
+                    type: "array"
+                    items:
+                      type: "string"
+                  transactionFlagsObject:
+                    type: "array"
+                    items:
+                      type: "string"
+                  transactionFlags:
+                    type: "string"
+                  pan:
+                    type: "string"
+                  voucherTypeName:
+                    type: "string"
+                  discountAmount:
+                    type: "string"
+                  preauthAmountTotal:
+                    type: "string"
+                  preauthAmountTotalTerminalCcy:
+                    type: "string"
+                  printout:
+                    type: "string"
+                  tipAmount:
+                    type: "string"
+                  referenceNumber:
+                    type: "string"
+                  dccValue:
+                    type: "string"
+                  dccText:
+                    type: "string"
+                  dccInfo:
+                    type: "string"
+                  dccRatesText:
+                    type: "string"
+                  variableSymbol:
+                    type: "string"
+                  specificSymbol:
+                    type: "string"
+  
+  
+  PolcardTransactionEndResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          messagePart:
+            type: "integer"
+            description: "If communication with terminal succeeded, messagePart is 0. If messagePart>0 then communication with terminal has been interrupted and response may not be complete." 
+          readerType:
+            type: "string"
+            enum:
+              - "ok_icc_card_contactless"
+              - "ok_magnetic_card_magstripe"
+              - "ok_magnetic_card_contactless"
+              - "ok_emv_card_magstripe"
+              - "ok_emv_card_icc"
+              - "me_card_entered_manually"
+              - "error_read_icc_fallback_allowed"
+              - "error_read_icc_fallback_not_allowed"
+              - "error_read_track2_or_carddata"
+              - "error_nocard_timeout"
+              - "unavailable"
+            description: "Determines overall transaction status. All statuses starting from 'ok_' means transaction succeeded. Check authorizationResult for more more detailed status."
+          authorizationResult:
+            type: "string"
+            enum:
+              - "base_approval"
+              - "base_partial_approval"
+              - "base_refusal"
+              - "base_transaction_not_found"
+              - "base_transaction_settled"
+              - "base_transaction_not_approved"
+              - "base_transaction_and_reversal_amounts_dont_match"
+              - "base_acceptor_unable_to_complete"
+              - "base_multi_merchant_config_incorrect_or_profile_not_supported"
+              - "base_batch_full_upload_required"
+              - "base_rejected_card_system_dont_match_pan"
+              - "base_rejected_card_system_not_set"
+              
+              - "deposit_terminal_daily_limit_exceeded"
+              - "deposit_card_daily_limit_exceeded"
+              - "deposit_card_daily_quantity_exceeded"
+              - "deposit_customer_registration_required"
+              
+              - "loyalty_unable_to_read_card"
+              - "loyalty_not_recognized_card"
+              
+              - "fleet_not_recognized_card"
+              - "fleet_chip_error"
+              - "fleet_card_expired"
+              
+              - "preauthorization_not_found"
+              - "preauthorization_amount_too_small"
+              - "preauthorization_cannot_resolve_token"
+              
+              - "purchaseadj_amount_correction_disabled"
+              - "purchaseadj_missing_last_transaction"
+              - "purchaseadj_incorrect_transaction_or_amount"
+              - "purchaseadj_transaction_not_approved"
+              - "purchaseadj_unable_to_complete"
+              - "purchaseadj_battery_too_low"
+              - "purchaseadj_gsm_signal_too_low"
+              - "unavailable"
+              - "unknown"
+            description: "Authorization status. In typical, successfult scenario 'base_approval' is returned."
+          transactionDetails:
+            type: "object"
+            description: "Value depends on terminal configuration. When terminal is configured to print transaction confirmations automatically, then transactionDetails can be empty. To read transaction details in such case use /polcard/v1/ingenico_transaction_last"
+            allOf:
+            - $ref: '#/definitions/PolcardTransactionDetails'
+      
+  PolcardTransactionLastResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionEndResponse'
+  
+  EserviceTransactionBeginResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceTransactionActionResponse'
+      
+  EserviceTransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  EserviceAutoTransactionStatusCommonResponse:
+    type: "object"
+    properties:
+      state:
+        type: "string"
+        enum:
+        - "success"
+        - "error"
+        - "cancelled"
+        - "processing"
+      ts:
+        type: "integer"
+        format: "int64"
+      req:
+        type: "object"
+        allOf:
+          - $ref: "#/definitions/EserviceTransactionBeginRequest"
+      result:
+        type: "object"
+        allOf:
+          - $ref: "#/definitions/EserviceTransactionEndResponse"
+          - $ref: "#/definitions/EserviceTerminalStatusResponse"
+          
+  EserviceAutoTransactionStatusResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/EserviceAutoTransactionStatusCommonResponse'
+
+  
+  EserviceAutoTransactionStatusesResponse:
+    type: "object"
+    properties:
+      <uuid>:
+        type: "object"
+        allOf:
+          - $ref: '#/definitions/EserviceAutoTransactionStatusCommonResponse'
+      
+  EserviceAutoTransactionCancelResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceAutoTransactionActionResponse'
+      
+  EserviceAutoTransactionBeginResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/EserviceAutoTransactionActionResponse'
+      
+  EserviceAutoTransactionActionResponse:
+    type: "object"
+    required: [ "uuid" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      uuid:
+        type: "string"
+        
+  EserviceTerminalInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          terminalInfoText:
+            type: "string"
+            description: "terminalInfoText is returned only when it cannot be parsed into terminalInfo object"
+          terminalInfo:
+            type: "object"
+            properties:
+              addressLine1:
+                type: "string"
+              addressLine2:
+                type: "string"
+              addressLine3:
+                type: "string"
+              merchantIdentifier:
+                type: "string"
+              terminalIdentifier:
+                type: "string"
+
+
+  ElavonTerminalStatusResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            example: "idle"
+            enum:
+            - "unknown"
+            - "idle"
+            - "busy"
+            - "transaction_running"
+            - "transaction_printing_wait"
+            - "transaction_result_ready"
+            - "receipt_request"
+            - "report_request"
+            - "host_declined_request"
+            - "card_insert"
+            - "pin_first_attempt"
+            - "pin_second_attempt"
+            - "pin_third_attempt"
+            - "pin_entry_failed"
+            - "gratuity_entry"
+            - "authorizing"
+            - "completion"
+            - "cancelled"
+            - "amount_confirmation"
+            - "sending"
+            - "receiving"
+            - "unspecified_input"
+            - "processing"
+            - "card_removal"
+            - "printing_merchant_copy"
+            - "printing_customer_copy"
+            - "no_more_paper"
+            - "loyalty_option_selection"
+            - "phone_entry"
+            - "promo_code_entry"
+            - "loyalty_member_selection"
+            - "reward_offer"
+            - "existing_account"
+            - "invalid_account"
+            - "link_card_payment"
+            - "add_card_payment"
+            - "cashback_entry"
+            - "commercial_code_entry"
+            - "waiting_card"
+            - "waiting_dcc_acceptance"
+            description: "Elavon provides two types of integrations: simple and full (interactive). The full integration allows complete control over terminal behavior directly from the application, whereas the simple integration requires manual actions from the cashier, such as confirming the customer copy by clicking a button on the terminal. In the full integration mode, certain statuses, like receipt_request and report_request, necessitate actions from the application side. For more detailed information, refer to the script located at /ingenicoserver/docs/elavon/transaction_1_interactive.sh."
+          
+  
+  EserviceTerminalStatusResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            enum:
+            - "Idle"
+            - "WaitCard"
+            - "WaitPIN"
+            - "WaitEMVApp"
+            - "WaitHost"
+            - "WaitSign"
+            - "WaitTrEnd"
+            - "WaitNoCard"
+            - "WaitBusy"
+            - "WaitPromptEnd"
+            - "WaitCutoffEnd"
+            - "WaitReportEnd"
+            - "InProgress"
+            - "WaitCopy"
+            - "WaitAuthCode"
+            - "WaitAction"
+            - "BatchCompleted"
+            - "DCCCurrency"
+            - "CashBackAmount"
+            - "UsedInternaly"
+            - "TransactionAccepted"
+            - "TransactionAborted"
+            - "WaitingForAmount"
+            - "WaitingForSelection"
+            - "AskingEcrToPrintData"
+            - "AskingEcrToPrintDataStop"
+            - "PresentingZenCardOffer"
+            - "WaitingForFid"
+            - "AskingEcrToReceiveData"
+            - "ZencardContinue"
+            - "ApplicationInErrorState"
+            - "ReconciliationNeeded"
+          sequenceNb:
+            type: "string"
+          charsMin:
+            type: "number"
+          charsMax:
+            type: "number"
+          charsAllowed:
+            type: "string"
+            enum:
+            - "numeric"
+            - "alphanumeric"
+            - "ascii"
+            - "unknown"
+          specialCharsAllowed:
+            type: "string"
+            enum:
+            - "ok"
+            - "cancel"
+            - "ok_cancel"
+            - "back"
+            - "ok_back"
+            - "back_cancel"
+            - "ok_back_cancel"
+            - "other"
+          promptText:
+            type: "string"
+            
+  PolcardTransportDef:
+    type: "object"
+    properties:
+      transport:
+        type: "object"
+        properties:
+          encryptSession:
+            type: "boolean"
+            default: false
+          encryptAlgorithm:
+            type: "string"
+            enum:
+            - "NONE"
+            - "DES"
+            - "3DES"
+            - "AES"
+          sessionKeyLen:
+            type: "integer"
+          publicKey:
+            type: "string"
+            example: ""
+  
+  PolcardTransportExtrasDef:
+    type: "object"
+    properties:
+      extras:
+        type: "object"
+        properties:
+          responseType:
+            type: "string"
+            enum:
+            - "simple"
+            - "extended_full"
+            - "extended_short"
+            example: "extended_full"
+          date:
+            type: "string"
+            example: "2021/04/28 13:23:15"
+            description: "Last modification date of the ECR system (YYYY/MM/DD hh:mm:ss)"
+          version:
+            type: "string"
+            example: "v2.0"
+            description: "Version of ECR system"
+          manufacturerName:
+            type: "string"
+            example: "Big Dot Software"
+            description: "Name and Manufacturer of ECR system"
+          protocolVersion:
+            type: "string"
+            example: "0046600"
+            description: "Version of used ECR-POS protocol (NNNmmpp, e.g. 0046001 - version 4.60.1, 0046010 - version 4.60.10)"
+  
+  ElavonTransactionExtendedDef:
+    type: "object"
+    properties:
+      extend:
+        type: "object"
+        properties:
+          customLine:
+            type: "string"
+          invoiceNumber:
+            type: "string"
+          cashierId:
+            type: "string"
+          tableId:
+            type: "string"
+          commercialCode:
+            type: "string"
+          authorizationCode:
+            type: "string"
+          preAuthorizationCode:
+            type: "string"
+          isSuspectedFraud:
+            type: "boolean"
+          returnCardResponseValue:
+            type: "boolean"
+          returnSignatureRequiredValue:
+            type: "boolean"
+          enableBLIK:
+            type: "boolean"
+          enableTokenisation:
+            type: "boolean"
+          token:
+            type: "string"
+          tokenExpiryDate:
+            type: "string"
+          currentTokenType:
+            type: "string"
+          requestedTokenType:
+            type: "string"
+          tokenCardBrand:
+            type: "string"
+          returnMarkupText:
+            type: "boolean"
+          returnAPMdata:
+            type: "boolean"
+          returnInstalmentData:
+            type: "boolean"
+        
+        
+  PolcardTransactionExtendedDef:
+    type: "object"
+    properties:
+      extend:
+        type: "object"
+        properties:
+          cardData:
+            type: "string"
+            example: ""
+          cardType:
+            type: "string"
+            enum:
+            - ""
+            - "fleet_card"
+            - "loyalty_card"
+            example: ""
+          cardOrderType:
+            type: "string"
+            example: "amx"
+          commercialCode:
+            type: "string"
+            example: "456"
+          caldholderId:
+            type: "string"
+            example: "PersonX"
+          clerkId:
+            type: "string"
+            example: "Kasjer2"
+          profileId:
+            type: "integer"
+            example: 0
+          maxCashbackAmount:
+            type: "integer"
+          authorizationCode:
+            type: "string"
+            example: ""
+            description: "code must for preauthorization increase/decrease/cancel/completion. Authorization code is retunred by 'preauthorization'"
+          ecrTransactionId:
+            type: "string"
+            example: "123456"
+          privateCardName:
+            type: "string"
+            example: ""
+          externalTransactionId:
+            type: "string"
+            example: "Transaction123"
+          caldholderPhone:
+            type: "string"
+            example: "555-555-555"
+          caldholderEmail:
+            type: "string"
+            example: "user@yahoo.com"
+          partialApprovalFlag:
+            type: "boolean"
+            example: false
+          voidTransactionId:
+            type: "integer"
+          saleItemList:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                itemId:
+                  type: "string"
+                quantity:
+                  type: "number"
+                amount:
+                  type: "number"
+                  format: "int32"
+                settlementIdentifier:
+                  type: "number"
+                  format: "int32"
+              example:
+                itemId: "itemA"
+                quantity: 1
+                amount: 500
+                settlementIdentifier: 1122
+              
+  ElavonTransactionBeginRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ElavonTransactionExtendedDef'
+    properties:
+      type:
+        type: "string"
+        enum:
+        - "purchase"
+        - "purchase_cashback"
+        - "cash_from_pos"   
+        - "preauthorization"
+        - "completion"      
+        - "refund"          
+        - "reversal"        
+        - "card_verification"
+        - "preauthorization_increase"
+        - "preauthorization_reversal"
+        - "cancel"          
+        - "force"           
+        - "moto_sale"       
+        - "moto_refund"     
+        - "duplicata"       
+        - "last_apm_sale_status"
+        - "last_apm_refund_status"
+        - "tokenisation"    
+        - "no_show"         
+        - "delayed_charges"
+      transactionAmount:
+        type: "integer"
+        description: "Total transaction amount (cashback inclusive)"
+        example: 900
+      transactionAmountLabel:
+        type: "string"
+        example: "Kwota"
+        description: "Custom prefix for amount"
+      cashbackAmount:
+        type: "integer"
+        example: 0
+      cashbackAmountLabel:
+        type: "string"
+        example: "Wypłata"
+        description: "Custom prefix for amount"
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+            example: "http://host:777/results"
+          clientdata:
+            type: "object"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+            example: "POST"
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
+  
+  
+  ElavonAppServerStartRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "both"
+        enum:
+        - "printer"
+        - "interactive"
+        - "both"
+        description: "Elavon terminals may initiate a connection with the IngenicoServer in two scenarios: Full Integration Mode (Smartlink Pro also called an Interactive mode): This mode allows the Ingenico Server to instruct the terminal about actions to be taken, such as omitting the customer receipt. Terminals with no internal printer: If the terminal has no internal printer, it will also initiate a connection to IngenicoServer, treating it as a printer. In both situations, to accept communication initiated by the terminal, the IngenicoServer must start listening on additional ports configured in the config.ingenico.connection.eth.port settings."
+      printer:
+        type: "object"
+        properties:
+          mode:
+            type: "string"
+            default: "default"
+            enum:
+              - default
+              - posnetserver
+              - response
+              - posnetserver_and_response
+            description: "All collected printable lines from the terminal are: default - logged into log file only, posnetserver - send to PosnetServer (see the posnetserver section in the config.yml file), response - returned in the response when transaction is ended"
+          checkState:
+            type: "boolean"
+            default: "false"
+            description: "Determine each line type by checking terminal state. Setting to true may cause longer transactions processing."
+          endOfLinesDetection:
+            type: "string"
+            default: "timeout"
+            enum:
+              - timeout
+              - prefix_or_timeout
+            description: "Select how to determine the end of printable lines. By default, if no new incoming lines are detected after 2 seconds, it means that all printable lines have been collected from the terminal. Alternatively, to reduce overall processing time, identifying a specific prefix can also serve as a suggestion to stop listening for new lines. Most transactions (except BLIK and magstripe) end with a line prefixed by the 'TC:' identifier. Be cautious when using the 'prefix_or_timeout' setting while listening for multiple printouts per transaction (such as merchant copy and customer copy). The first line found that starts with the specified prefix will cause the Ingenico server to stop listening for other lines, even if they are still being sent by the terminal."
+          endOfLinesTimeout:
+            type: "number"
+            default: "2000"
+            example: 2000
+          endOfLinesPrefix:
+            type: "string"
+            default: "TC:"
+            example: "TC:"
+            description: "Used only when endOfLinesDetection=prefix_then_timeout"
+      interactive:
+        type: "object"
+        properties:
+          mode:
+            type: "string"
+            default: "default"
+            enum:
+              - default
+              - loggingonly
+
+  ElavonReportRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "summary"
+        enum:
+        - "audit"
+        - "summary"
+        - "offline_auth"
+      shiftNumber:
+        type: "integer"
+        example: 3
+      returnAPMdata:
+        type: "boolean"
+        example: true
+        
+  ElavonSettlementRequest:
+    type: "object"
+    properties:
+      returnAPMdata:
+        type: "boolean"
+        example: true
+  
+  ElavonSettlementDataRequest:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "current"
+        enum:
+        - "current"
+        - "last"
+      returnAPMdata:
+        type: "boolean"
+        example: true
+        
+  PolcardTransactionBeginRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+      - $ref: '#/definitions/PolcardTransportExtrasDef'
+      - $ref: '#/definitions/PolcardTransactionExtendedDef'
+    properties:
+      type:
+        type: "string"
+        enum:
+        - "purchase"
+        - "purchase_cashback"
+        - "cash_from_pos"
+        - "preauthorization"
+        - "completion"
+        - "refund"
+        - "activate_service_mode"
+        - "deactivate_service_mode"
+        - "card_verification"
+        - "preauthorization_increase"
+        - "preauthorization_reduce"
+        - "preauthorization_cancel"
+        - "fleet_card_sale"
+        - "loyalty_card"
+        - "card_activation"
+        - "replenishment"
+        - "balance_inquiry"
+        - "purchase_with_registration"
+        - "card_registration"
+        - "purchase_adjustment"
+        - "cash_deposit"
+        - "no_show"
+        - "delayed_charges"
+      transactionAmount:
+        type: "integer"
+        description: "Total transaction amount (cashback inclusive)"
+        example: 900
+      cashbackAmount:
+        type: "integer"
+        example: 0
+      tipAmount:
+        type: "integer"
+        example: 0
+      surchargeFeeAmount:
+        type: "integer"
+        example: 0
+      foreignGoodsAmount:
+        type: "integer"
+        example: 0
+      currencyCode:
+        type: "integer"
+        default: 985
+        example: 985
+        description: "Must be valid ISO-4217 number (https://en.wikipedia.org/wiki/ISO_4217). PLN is a default value. Value 985 means PLN."
+      reversal:
+        type: "boolean"
+        default: false
+        example: false
+      trackData:
+        type: "string"
+        example: ""
+      callback:
+        type: "object"
+        properties:
+          uri:
+            type: "string"
+            example: "http://host:777/results"
+          method:
+            type: "string"
+            enum:
+              - "POST"
+              - "GET"
+              - "PUT"
+            example: "POST"
+      posnetserver:
+        type: "object"
+        description:  "Sample JSON object: {\"lines\": [{ \"na\": \"Towar 1\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 2350 },{ \"na\": \"Towar 2\", \"il\": 1.0, \"vtp\": \"23,00\", \"pr\": 1150 }], \"summary\": { \"to\": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval"
+      
+  ElavonTransactionActionCommonResponse:
+    type: "object"
+    properties:
+      transactionResultCode:
+        type: "number"
+      transactionResultCodeText:
+        type: "string"
+        example: "base_approval"
+        enum:
+        - "base_approval"
+        - "base_refusal"
+        - "not_processed"
+        - "unable_to_authorise"
+        - "unable_to_process"
+        - "no_connection"
+        - "other_error"
+        - "interrupted"
+        - "invalid_password"
+        - "amount_exceed_maximum_limit"
+        - "connection_failure"
+        - "timeout_reached"
+        - "invoice_not_found"
+        - "cashback_exceed_maximum_limit"
+        - "cashback_not_allowed"
+        - "base_acceptor_unable_to_complete"
+      acquirerResponseCode:
+        type: "number"
+        
+      acquirerResponseCodeText:
+        type: "string"
+        example: "approval"
+        enum:
+        - "approval"
+        - "decline"
+        - "referral"
+        - "partial_auth"
+        - "unknown"
+      transactionDetails:
+        type: "object"
+        properties:
+          merchantID:
+            type: "string"
+            example: "2102135438"
+          merchantName:
+            type: "string"
+            example: "TEST Sp. Z O.O."
+          merchantAddress:
+            type: "string"
+            example: "Mazowiecka 99 00-515 Warsaw"
+          readerUsed:
+            type: "string"
+            enum:
+              - "?"
+              - "K"
+              - "C"
+              - "P"
+              - "B"
+              - "Z"
+              - "F"
+              - "R"
+              - "O"
+              - "T"
+          readerUsedText:
+            type: "string"
+            enum:
+              - "?"
+              - "manual"
+              - "magstripe"
+              - "icc"
+              - "contactless"
+              - "manual_not_present"
+              - "magstripe_fallback"
+              - "pa_ref_num_cnp"
+              - "other"
+              - "tok"
+          authorizationCode:
+            type: "string"
+            example: "410953"
+          date:
+            type: "string"
+            example: "2024-09-17"
+          time:
+            type: "string"
+            example: "13:06:34"
+          cardsetName:
+            type: "string"
+            example: "Visa"
+          maskedCardNumber:
+            type: "string"
+            example: "************4953"
+          cardStartDate:
+            type: "string"
+          cardExpiryDate:
+            type: "string"
+            example: "****"
+          transactionCurrency:
+            type: "string"
+            example: "985"
+          dcc_currencyExp:
+            type: "number"
+            example: 1
+          cardCurrencyCode:
+            type: "string"
+            example: "978"
+          cardCurrencyExponent:
+            type: "number"
+            example: 1
+          emvCardExpiryDate:
+            type: "string"
+          transactionAmount:
+            type: "string"
+            example: "1800"
+          additionalAmount:
+            type: "string"
+            example: "500"
+          appEffectiveDate:
+            type: "string"
+          aid:
+            type: "string"
+            example: "A0000000022010"
+          appPreferredName:
+            type: "string"
+            example: "Revolut"
+          appLabel:
+            type: "string"
+            example: "Visa Debit"
+          terminalIdentifier:
+            type: "string"
+            example: "39394880"
+          terminalCountryCode:
+            type: "string"
+          terminalCurrency:
+            type: "string"
+            example: "985"
+          terminalCurrencyExponent:
+            type: "number"
+            example: 2
+          authorizationMessage:
+            type: "string"
+            example: "AUTORYZACJA"
+          customLines:
+            type: "string"
+            example: "Hello"
+            description: "Additional line with any text printed on the recipe"
+          invoiceNumber:
+            type: "string"
+            example: "29"
+          tokenValue:
+            type: "string"
+          tokenExpiryDate:
+            type: "string"
+          cardholderName:
+            type: "string"
+          isTaxFreeRequired:
+            type: "boolean"
+          isExchRateUpdateRequired:
+            type: "boolean"
+          isDCC:
+            type: "boolean"
+          isSignatureRequired:
+            type: "boolean"
+          spanishOpNumber:
+            type: "string"
+          tableIdentifier:
+            type: "string"
+          cashierIdentifier:
+            type: "string"
+          commission:
+            type: "string"
+          fxMarkUp:
+            type: "string"
+            example: "383"
+          panSequenceNumber:
+            type: "string"
+            example: "00"
+          prepaidBalance:
+            type: "string"
+          hostAVSresponse:
+            type: "string"
+          applicationCryptogram:
+            type: "string"
+            example: "ABA1086D2D518E27"
+          retrievalReferenceNumber:
+            type: "string"
+            example: "426113415266"
+          batchNumber:
+            type: "string"
+            example: "007"
+          donationAmount:
+            type: "string"
+          markupTextIndicator:
+            type: "string"
+          cardSchemeDataResponse:
+            type: "string"
+          cardResponseValue:
+            type: "string"
+          commercialCodeData:
+            type: "string"
+          mealVoucherStatus:
+            type: "string"
+          cardBrandResponse:
+            type: "string"
+          paymentAccountReferenceNumber:
+            type: "string"
+          acquirerName: 
+            type: "string"
+          cardholderCurrencyAmount:
+            type: "string"
+          dccExchangeRate:
+            type: "string"
+            example: "239499"
+          currentTokenType:
+            type: "string"
+          exponentOfAppliedRate:
+            type: "number"
+            example: 6
+          tokenisationStatus:
+            type: "string"
+          partialAuthorizationAmount:
+            type: "string"
+          preauthorizationReferenceNumber:
+            type: "string"
+      
+          additionalInformationObject:
+            type: "object"
+            properties:
+              blikReferenceCode:
+                type: "string"
+              blikEnteredCode:
+                type: "string"
+              emv:
+                type: "string"
+                example: "09"
+              panFourLastDigits:
+                type: "string"
+              unitApplicationId:
+                type: "string"
+                example: "245NIGHT"
+
+          apm:
+            type: "object"
+            properties:
+              transactionIdentifier:
+                type: "string"
+              merchantTransactionIdentifier:
+                type: "string"
+              shortCode:
+                type: "string"
+              transactionStatus:
+                type: "string"
+
+          instalment:
+            type: "object"
+            properties:
+              paymentsCount:
+                type: "string"
+              applicableInterestRate:
+                type: "string"
+              firstAmount:
+                type: "string"
+              totalAmountDue:
+                type: "string"
+
+          gla:
+            type: "object"
+            properties:
+              balanceDetailsRecordNumber:
+                type: "string"
+              balanceAmount:
+                type: "string"
+              balanceDifference:
+                type: "string"
+              promotionCodeAssignmentRecordNumber:
+                type: "string"
+              promotionCode:
+                type: "string"
+              promotionCodeDescription:
+                type: "string"
+              discountAmount:
+                type: "string"
+              loyaltyProgramName:
+                type: "string"
+              loyaltyAccessCodeValue:
+                type: "string"
+              loyaltyMemberStatus:
+                type: "string"
+              loyaltyTransactionInfo:
+                type: "string"
+              fanfareTransactionCode:
+                type: "string"
+              fanfareAuthorizationCode:
+                type: "string"
+              isFanfareTransaction:
+                type: "boolean"
+              fanfareInfoURL:
+                type: "string"
+              fanfareID:
+                type: "string"
+
+
+
+  ElavonTransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
+  ElavonTransactionEndActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/ElavonConfirmationLines'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonTransactionActionCommonResponse'
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          error:
+            type: "string"
+            description: "Error massge from device. Filled when returnCode<>0"
+      stats:
+        type: "object"
+  
+            
+  ElavonTransactionLastActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonTransactionActionCommonResponse'
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          error:
+            type: "string"
+            description: "Error massge from device. Filled when returnCode<>0"
+          transactionRequest:
+            type: "object"
+            properties:
+              messageNumber:
+                type: "string"
+              amount1:
+                type: "number"
+              amount2:
+                type: "number"
+              amount3:
+                type: "number"
+              amount4:
+                type: "number"
+              label1:
+                type: "string"
+              label2:
+                type: "string"
+              label3:
+                type: "string"
+              label4:
+                type: "string"
+              transactionType:
+                type: "string"
+              transactionTypeText:
+                type: "string"
+              isSuspectedFraud:
+                type: "boolean"
+              tokenValue:
+                type: "string"
+              commercialCode:
+                type: "string"
+              tokenExpiryDate:
+                type: "string"
+              currentTokenType:
+                type: "string"
+              requestedTokenType:
+                type: "string"
+              cardBrand:
+                type: "string"
+      
+                  
+  ElavonConfirmationLines:
+    type: "object"
+    properties:
+      confirmation:
+        type: "object"
+        properties:
+          ready:
+            type: "boolean"
+          lines:
+            type: "array"
+            items:
+              properties:
+                line:
+                  type: "string"
+                type:
+                  type: "string"
+                  enum:
+                    - ""
+                    - "merchant_copy"
+                    - "customer_copy"
+                ts:
+                  type: "number"
+                bold:
+                  type: "boolean"
+                doubleWidth:
+                  type: "boolean"
+                doubleHeight:
+                  type: "boolean"
+                doubleSize:
+                  type: "boolean"
+                halfSize:
+                  type: "boolean"
+                center:
+                  type: "boolean"
+                right:
+                  type: "boolean"
+                
+  ElavonSettlementResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonReportCommonResponse'
+
+  ElavonSettlementDataResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonReportCommonResponse'
+  
+  ElavonReportResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        allOf:
+        - $ref: '#/definitions/ElavonReportCommonResponse'
+        
+  ElavonReportCommonResponse:
+    type: "object"
+    properties:
+      messageNumber:
+        type: "integer"
+      settlementStatus:
+        type: "integer"
+      settlementStatusText:
+        type: "string"
+        enum:
+        - authorized
+        - not_authorized
+        - unable_to_connect
+        - cancelled
+        - no_transaction
+        - unknown
+      date:
+        type: "string"
+        example: "2024-09-30"
+      time:
+        type: "string"
+        example: "13:48:52"
+      settleResponse:
+        type: "string"
+        example: "GBOK 01009301234"
+      helpDeskNumber:
+        type: "string"
+        example: "223060316"
+      merchantID:
+        type: "string"
+        example: "2102134567"
+      merchantName:
+        type: "string"
+        example: "TEST SP. Z O.O."
+      merchantAddress:
+        type: "string"
+        example: "Morska 19 02-501 Warsaw"
+      terminalIdentifier:
+        type: "string"
+        example: "39398765"
+      terminalCountryCode:
+        type: "string"
+        example: "616"
+      terminalCurrency:
+        type: "string"
+        example: "985"
+      terminalCurrencyExponent:
+        type: "integer"
+        example: 2
+      batchNumber:
+        type: "string"
+        example: "010"
+      acquirerName:
+        type: "string"
+      cashbackCount:
+        type: "integer"
+        example: 5
+      cashbackAmount:
+        type: "string"
+        example: "00000090500"
+      debitCount:
+        type: "integer"
+        example: 3
+      debitAmount:
+        type: "string"
+        example: "00000175000"
+      creditCount:
+        type: "integer"
+      creditAmount:
+        type: "string"
+      salesVoidCount:
+        type: "integer"
+      salesVoidAmount:
+        type: "string"
+      refundsVoidCount:
+        type: "integer"
+      refundsVoidAmount:
+        type: "string"
+      autoRefundsCount:
+        type: "integer"
+      autoRefundsAmount:
+        type: "string"
+      isGratuityEnabled:
+        type: "boolean"
+      gratuityAmount:
+        type: "string"
+      isShiftProcessingEnabled:
+        type: "boolean"
+      reportType:
+        type: "integer"
+      reportTypeText:
+        type: "string"
+        example: "detailed"
+        enum:
+          - summary
+          - detailed
+          - unknown
+      records:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            date:
+              type: "string"
+              example: "2024-09-30"
+            time:
+              type: "string"
+              example: "13:48:52"
+            invoiceNumber:
+              type: "string"
+            shiftNumber:
+              type: "string"
+              example: "0"
+            transactionType:
+              type: "integer"
+              example: 0
+            transactionTypeText:
+              type: "string"
+              example: "purchase"
+              enum:
+                - purchase
+                - refund
+                - void
+                - duplicata
+                - cash_from_pos
+                - purchase_cashback
+                - preauthorization
+                - completion
+                - card_verification
+                - reversal
+                - force
+                - moto_sale
+                - moto_refund
+                - preauthorization_reversal
+                - cancel
+                - preauthorization_increase
+                - tokenisation
+                - no_show
+                - delayed_charges
+                - last_apm_sale_status
+                - last_apm_refund_status
+            voidedTransactionType:
+              type: "string"
+              example: "0"
+            authorizationCode:
+              type: "string"
+              example: "454150"
+            hostAVSresponse:
+              type: "string"
+            bankType:
+              type: "integer"
+              example: 1
+            bankTypeText:
+              type: "string"
+              example: "bank_funded"
+              enum:
+                - bank_funded
+                - non_bank_funded
+                - unknown
+            cardsetName:
+              type: "string"
+              example: "Visa"
+            cardType:
+              type: "string"
+              example: "VI"
+            maskedCardNumber:
+              type: "string"
+              example: "************9200"
+            readerUsed:
+              type: "string"
+              example: "B"
+              enum:
+              - "?"
+              - "K"
+              - "C"
+              - "P"
+              - "B"
+              - "Z"
+              - "F"
+              - "R"
+              - "O"
+              - "T"
+            readerUsedText:
+              type: "string"
+              example: "contactless"
+              enum:
+              - "?"
+              - "manual"
+              - "magstripe"
+              - "icc"
+              - "contactless"
+              - "manual_not_present"
+              - "magstripe_fallback"
+              - "pa_ref_num_cnp"
+              - "other"
+              - "tok"
+            transactionCurrency:
+              type: "string"
+              example: "985"
+            transactionAmount:
+              type: "string"
+              example: "1900"
+            additionalAmount:
+              type: "string"
+            isDCC:
+              type: "boolean"
+            dccTransactionCurrency:
+              type: "string"
+            isDCCTxnAccepted:
+              type: "boolean"
+            cardholderCurrencyAmount:
+              type: "string"
+            isDCCTxnEligible:
+              type: "boolean"
+            dccTipAmount:
+              type: "string"
+            dccExchangeRate:
+              type: "string"
+            exponentOfAppliedRate:
+              type: "integer"
+                
+    
+    
+  PolcardTransactionActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          error:
+            type: "string"
+            description: "Error massge from device. Filled when returnCode<>0"
+          display:
+            type: "string"
+            enum:
+            - "cardholder_and_clerk"
+            - "cardholder"
+            - "clerk"
+            description: "Determines where message should be displayed"
+          keyboardOptions:
+            type: "string"
+            enum:
+            - "display_only"
+            - "yes_no"
+            - "amount"
+            - "commercial_code"
+            - "authorization_code"
+            - "one_of"
+            - "merchant_profile"
+            - "any_key"
+            - "variable_options"
+          timeout:
+            type: "integer"
+            description: "Timeout for message to be displayed"
+          extras:
+            type: "object"
+            description: "Terminal information, retuned information depends from the 'extras' parameter passed in the request"
+            properties:
+              returnCode:
+                type: "integer"
+                format: "int32"
+                description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+              error:
+                type: "string"
+                description: "Error massge from device. Filled when extras.returnCode<>0"
+              diagnosticStatus:
+                type: "integer"
+                format: "int32"
+              sessionKey:
+                type: "string"
+              terminalIdentifier:
+                type: "string"
+              services:
+                type: "object"
+                description: "services enabled on POS terminal"
+                properties:
+                  purchase:
+                    type: "string"
+                  purchase_cashback:
+                    type: "string"
+                  cash_from_pos:
+                    type: "string"
+                  preauthorization:
+                    type: "string"
+                  completion:
+                    type: "string"
+                  refund:
+                    type: "string"
+                  activate_service_mode:
+                    type: "string"
+                  deactivate_service_mode:
+                    type: "string"
+                  card_verification:
+                    type: "string"
+                  preauthorization_increase:
+                    type: "string"
+                  preauthorization_reduce:
+                    type: "string"
+                  preauthorization_cancel:
+                    type: "string"
+                  fleet_card_sale:
+                    type: "string"
+                  loyalty_card:
+                    type: "string"
+                  card_activation:
+                    type: "string"
+                  replenishment:
+                    type: "string"
+                  balance_inquiry:
+                    type: "string"
+                  purchase_with_registration:
+                    type: "string"
+                  card_registration:
+                    type: "string"
+                  purchase_adjustment:
+                    type: "string"
+                  cash_deposit:
+                    type: "string"
+                  no_show:
+                    type: "string"
+                  delayed_charges:
+                    type: "string"
+              info:
+                type: "object"
+                properties:
+                  acceptorName:
+                    type: "string"
+                  acceptorStreet:
+                    type: "string"
+                  acceptorPostalCityCountry:
+                    type: "string"
+                  mid:
+                    type: "string"
+                  tid:
+                    type: "string"
+                  nip:
+                    type: "string"
+                  initiator:
+                    type: "string"
+
+  PolcardTransactionStatusesResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      statuses:
+        type: "array"
+        items:
+          type: "object"
+          allOf:
+          - $ref: '#/definitions/PolcardTerminalStatusBaseResponse'
+          properties:
+            timestamp:
+              type: "number"
+            timestampText:
+              type: "string"
+            order:
+              type: "number"
+          
+  PolcardTerminalStatusResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PolcardTerminalStatusBaseResponse'
+      
+  PolcardTerminalStatusBaseResponse:
+    type: "object"
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          transactionStatus:
+            type: "integer"
+            format: "int32"
+          transactionStatusText:
+            type: "string"
+            enum:
+            - "Idle"
+            - "WaitCard"
+            - "WaitPIN"
+            - "WaitEMVApp"
+            - "WaitHost"
+            - "WaitSign"
+            - "WaitTrEnd"
+            - "WaitNoCard"
+            - "WaitBusy"
+            - "WaitPromptEnd"
+            - "WaitCutoffEnd"
+            - "WaitReportEnd"
+            - "InProgress"
+            - "WaitCopy"
+            - "WaitAuthCode"
+            - "WaitAction"
+            - "BatchCompleted"
+            - "DCCCurrency"
+            - "CashBackAmount"
+            - "UsedInternaly"
+            - "TransactionAccepted"
+            - "TransactionAborted"
+            - "WaitingForAmount"
+            - "WaitingForSelection"
+            - "AskingEcrToPrintData"
+            - "AskingEcrToPrintDataStop"
+            - "PresentingZenCardOffer"
+            - "WaitingForFid"
+            - "AskingEcrToReceiveData"
+            - "ZencardContinue"
+            - "ApplicationInErrorState"
+            - "ReconciliationNeeded"
+          sequenceNb:
+            type: "string"
+          charsAllowed:
+            type: "string"
+            enum:
+            - "numeric"
+            - "alphanumeric"
+            - "ascii"
+            - "unknown"
+          specialCharsAllowed:
+            type: "string"
+            enum:
+            - "ok"
+            - "cancel"
+            - "ok_cancel"
+            - "back"
+            - "ok_back"
+            - "back_cancel"
+            - "ok_back_cancel"
+            - "other"
+          promptText:
+            type: "string"
+          timeout:
+            type: "integer"
+            description: "Timeout in seconds"
+            
+  PolcardTerminalDisplayInfoResponse:
+    type: "object"
+    required: [ "terminal" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          display:
+            type: "string"
+            enum:
+            - "cardholder"
+            - "clerk"
+            - "cardholder_and_clerk"
+          keyboardOptions:
+            type: "string"
+            enum:
+            - "yes_no"
+            - "amount"
+            - "commercial_code"
+            - "authorization_code"
+            - "choose_options"
+            - "merchant_profile"
+            - "any_key"
+            - "variable_options"
+            - "display_only"
+          timeout:
+            type: "integer"
+          promptText:
+            type: "string"
+
+  PolcardTransactionDataInputRequest:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      type:
+        type: "integer"
+
+
+  PolcardTerminalPrintRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      messageNumber:
+        type: "integer"
+      printout:
+        type: "array"
+        example:
+          - type: "header"
+            align: "center"
+            bold: false
+            high: true
+            expand: false
+            text: "Promo coupon"
+          - type: "logo"
+            align: "center"
+            bold: false
+            high: false
+            expand: false
+            text: "logo123.lgo"
+          - type: "body"
+            align: "left"
+            bold: false
+            high: false
+            expand: false
+            text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        items:
+          type: "object"
+          properties:
+            type:
+              type: "string"
+              description: "Logo must be prepared by FDP before using it. Minimum logo size is 16x16 pixels and maximum 384x240 pixels"
+              enum:
+                - "header"
+                - "body"
+                - "footer"
+                - "date"
+                - "time"
+                - "logo"
+            align:
+              type: "string"
+              enum:
+                - "left"
+                - "right"
+                - "center"
+            bold:
+              type: "boolean"
+              default: false
+            high:
+              type: "boolean"
+              default: false
+            expand:
+              type: "boolean"
+              default: false
+            text:
+              type: "string"
+              description: "Single line contains 42 or 21 characters"
+          
+  PolcardTerminalPrintResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, 1 - Error, 2 - Function code unknown, 3 - Wrong function arguments, 7 - Wrong order of calls, 8 - Requested data not available, 9 -Not enough memory to process request"
+          error:
+            type: "string"
+      
+  PolcardTerminalPromptRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      type:
+        type: "string"
+        enum:
+          - "profiles"
+          - "satisfaction"
+          - "loyalty_auth"
+          - "last_upload_status"
+          - "additional_data_keypad"
+      reqestParams:
+        type: "string"
+        default: ""
+  
+  PolcardTerminalPromptBarcodeRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      barcode:
+        type: "string"
+      headerText:
+        type: "string"
+      bodyText:
+        type: "string"
+      time:
+        type: "number"
+  
+  PolcardBarcodeRequest:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+        enum:
+          - "scan_one"
+          - "scan_many"
+          - "finish"
+        
+  PolcardTransactionSetActionRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      action:
+        type: "string"
+        enum:
+          - "download"
+          - "restart"
+  
+  PolcardCutoffRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+  
+  PolcardCutoffReportRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+      
+  PolcardReportRequest:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransportDef'
+    properties:
+      reportType:
+        type: "string"
+        enum:
+          - "batch_report"
+          - "cumulative_report"
+      action:
+        type: "string"
+        enum:
+          - "batch_return"
+          - "manual_batch_then_return"
+          - "cumulative_return"
+          - "cumulative_return_reset_counters"
+      profileId:
+        type: "number"
+      timeout:
+        type: "number"
+        default: 30
+        description: "Report generation is a time consuming/blocking operation. Use timeout (in seconds) to override default timeout set in the config.yml configuration file."
+      
+      
+  PolcardTransactionSetActionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          status:
+            type: "string"
+            description: "one of: ok/error/missing_version/batch_not_empty"
+
+
+  PolcardCutoffResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+  
+  PolcardTransactionDetails:
+    type: "object"
+    properties:
+      time:
+        type: "string"
+        example: "22:18:38"
+      date:
+        type: "string"
+        example: "2021-05-11"
+      cardsetName:
+        type: "string"
+        example: "VISA"
+      maskedCardNumber:
+        type: "string"
+        example: "**** **** **** 0853"
+      panSequenceNumber:
+        type: "number"
+        example: 0
+      authorizationCodeSource:
+        type: "string"
+        example: "1"
+      authorizationCode:
+        type: "string"
+        example: "191609"
+      authorizationCode2:
+        type: "string"
+      cashbackAmount:
+        type: "number"
+      transactionCurrencyCode:
+        type: "string"
+        example: "PLN"
+      dccExchangeRate:
+        type: "string"
+        example: "0.239360"
+      dccCurrencyCode:
+        type: "string"
+        example: "EUR"
+      dccAmount:
+        type: "number"
+        example: 32
+      aid:
+        type: "string"
+        example: "A000000003"
+        description: "https://blog.ingenico.us/blog/what-is-common-debit-aid-and-why-does-it-matter"
+      aidDfName:
+        type: "string"
+        example: "A000000003"
+        description: "https://blog.ingenico.us/blog/what-is-common-debit-aid-and-why-does-it-matter"
+      transactionAmount:
+        type: "number"
+        example: 10
+      authorizationResponseCode:
+        type: "string"
+        example: "00"
+      transactionType:
+        type: "string"
+        example: "00"
+      transactionTypeText:
+        type: "string"
+        enum:
+          - "sale"
+          - "sale_with_cashback"
+          - "sale_or_preauthorization"
+          - "cash_from_pos"
+          - "refund"
+          - "verification"
+          - "preauthorization"
+          - "preauthorization_completion"
+          - "increase_preauthorization"
+          - "reduce_preauthorization"
+          - "cancel_preauthorization"
+          - "fleet_card_sale"
+          - "loyalty_card"
+          - "reversal"
+          - "card_activation"
+          - "replenishment"
+          - "balance_inquiry"
+          - "sale_with_registration"
+          - "card_registration"
+          - "cash_deposit"
+          - "no_show"
+          - "delayed_charges"
+        example: "sale_or_preauthorization"
+      readerType:
+        type: "string"
+        enum:
+          - "read_magstripe_contactless"
+          - "read_magstripe"
+          - "read_magstripe_fallback"
+          - "card_entered_manually"
+          - "card_icc_contactless"
+          - "card_icc"
+      cardExpiryDate:
+        type: "string"
+        example: "**/**"
+      unmaskedCardNumber:
+        type: "string"
+      unmaskedCardExpiryDate:
+        type: "string"
+      tipAmount:
+        type: "number"
+      surchargeFee:
+        type: "number"
+      dccTransactionAmount:
+        type: "number"
+        example: 32
+      dccTipAmount:
+        type: "number"
+      dccSurchargeFee:
+        type: "number"
+      appTransactionCounter:
+        type: "string"
+      dccDisclaimer:
+        type: "string"
+        example: "I have been offered a choice of currencies to be applied for my payment as specified above. I choose the transaction currency and agree to pay in EUR applying for my payment the rate of exchange presented above. Dynamic Currency Conversion (DCC) is provided by First Data Polska S.A. "
+      currencyConversionStatement:
+        type: "string"
+      messageFromParameter:
+        type: "string"
+        example: "PŁAĆ ZBLIŻENIOWO - WYGODNIE I BEZPIECZNIE! Informacje dotyczące przetwarzania danych osobowych posiadaczy kart przez First Data Polska S.A. znajdują się na: www.polcard.pl/RODO"
+      cashbackMessageFromParameter:
+        type: "string"
+      dccMessageFromParameter:
+        type: "string"
+      cashierId:
+        type: "string"
+      acceptorName:
+        type: "string"
+        example: "BIG DOT SOFTWARE"
+      acceptorStreet:
+        type: "string"
+        example: "UL. STRZELCÓW 42"
+      acceptorPostalCityCountry:
+        type: "string"
+        example: "81-586 GDYNIA PL"
+      mid:
+        type: "string"
+        example: "78336804"
+      tid:
+        type: "string"
+        example: "23891151"
+      nip:
+        type: "string"
+      reportName:
+        type: "string"
+      invoiceNumber:
+        type: "string"
+        example: "80"
+        
+      maskingRulesForPrintouts:
+        type: "string"
+        example: "050100000"
+      transactionDenialFromHost:
+        type: "string"
+      offlinePendingAmount:
+        type: "string"
+      commercialCode:
+        type: "string"
+        
+      cvmList:
+        type: "string"
+        example: "0010000"
+      cryptInfoData:
+        type: "string"
+      dccMarkup:
+        type: "string"
+        example: "8,44"
+      dccExchangeRateSource:
+        type: "string"
+        
+      transactionReferenceNumber:
+        type: "string"
+      otcValue:
+        type: "string"
+      otc:
+        type: "string"
+      pid:
+        type: "string"
+      prepaidBalance:
+        type: "string"
+        
+      ean:
+        type: "string"
+      protocolVersion:
+        type: "string"
+        
+      tokenValue:
+        type: "string"
+      tokenExpiryDate:
+        type: "string"
+        
+      track2Data:
+        type: "string"
+        example: "5900000030144216=61623045011489204390"
+      fleetCardProductCode:
+        type: "string"
+      fleetCardTransactionId:
+        type: "string"
+      authorizationResponseText:
+        type: "string"
+      cdcVerificationText:
+        type: "string"
+      transactionId:
+        type: "string"
+      currencyUnitRelationship:
+        type: "string"
+        example: "2"
+      currencyConversionFactor:
+        type: "string"
+      eReceiptId:
+        type: "string"
+      foreignGoodsAmount:
+        type: "integer"
+      externalTransactionId:
+        type: "string"
+      batteryLevel:
+        type: "string"
+      gsmSignalStrength:
+        type: "string"
+      installmentOfferAcceptedPrintoutText:
+        type: "string"
+      installmentOfferAcceptedAdditionalText:
+        type: "string"
+      remainingAmount:
+        type: "number"
+      originalTransactionAmount:
+        type: "number"
+
+  PolcardCutoffCommonResponse:
+    type: "object"
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          messagePart:
+            type: "number"
+            description: "If communication with terminal succeeded, messagePart is 0. If messagePart>0 then communication with terminal has been interrupted and response may not be complete." 
+          batchFileNb:
+            type: "number"
+          transactionsCount:
+            type: "number"
+          transactions:
+            type: "array"
+            items:
+              type: "object"
+              allOf:
+              - $ref: '#/definitions/PolcardTransactionDetails'
+              
+  
+  PolcardCutoffEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PolcardCutoffCommonResponse'
+      
+      
+  PolcardCutoffReportResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PolcardCutoffCommonResponse'
+  
+  PolcardReportEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardReportResponse'
+      
+  PolcardReportTransactionSummaryItem:
+    type: "object"
+    properties:
+      transactionType:
+        type: "string"
+        description: "Depends from the firmware version, values are like: SPRZEDAŻ, UZNANIE, NAPIWEK, DOPŁATA, CASHBACK, DOPEŁNIENIE PREAUT, GOTÓWKA, WPŁATA GOTÓWKI, UN. SPRZEDAŻ, UN. CASHBACK,UN. GOTÓWKA, UN. UZNANIE, RAZEM lub Sale, Refund, Cashback, Cash withdrawal, Cash deposit, Sale reversal, Refund reversal, Cashback reversal, Cash withdrawal reversal, Total"
+      quantity:
+        type: "number"
+      amount:
+        type: "number"
+        description: "Field is optional. For instance in PolcardReportResponse.summary.uploadReport may contain items with 'transactionType' and 'quantity' only."
+        
+  PolcardReportResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          messagePart:
+            type: "number"
+            description: "If communication with terminal succeeded, messagePart is 0. If messagePart>0 then communication with terminal has been interrupted and response may not be complete." 
+          batchFileNb:
+            type: "number"
+          transactionsCount:
+            type: "number"
+          header:
+            type: "object"
+            properties:
+              acceptorName:
+                type: "string"
+              acceptorStreet:
+                type: "string"
+              acceptorPostalCityCountry:
+                type: "string"
+              mid:
+                type: "string"
+              tid:
+                type: "string"
+              nip:
+                type: "string"
+              reportName:
+                type: "string"
+          transactions:
+            type: "array"
+            items:
+              type: "object"
+          summary:
+            type: "object"
+            properties:
+              uploadReport:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                    - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
+              uploadReportTotals:
+                type: "object"
+                properties:
+                  cardSystem:
+                    type: "string"
+                    description: "card system identifier like POLCARD, VISA etc."
+                  items:
+                    type: "array"
+                    items:
+                      type: "object"
+                      allOf:
+                        - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
+              uploadReportDCC:
+                type: "object"
+                properties:
+                  label:
+                    type: "string"
+                  items:
+                    type: "array"
+                    items:
+                      type: "object"
+                      allOf:
+                        - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
+              cumulativeReportData:
+                type: "string"
+              cumulativeReportSummary:
+                type: "object"
+                properties:
+                  quantity:
+                    type: "number"
+                  amount:
+                    type: "number"
+              cumulativeReportLastReset:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                    - $ref: '#/definitions/PolcardReportTransactionSummaryItem'
+              batchTotals:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    label:
+                      type: "string"
+                    hostTotal:
+                      type: "string"
+                    terminalTotal:
+                      type: "string"
+                    difference:
+                      type: "string"
+
+              outOfSyncMessage:
+                type: "string"
+                  
+  PolcardBarcodeResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          barcode:
+            type: "string"
+            
+  PolcardTerminalPromptResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: "object"
+        properties:
+          returnCode:
+            type: "integer"
+            format: "int32"
+            description: "0 - Success, any other value means error. Attribute 'error' contains human readable error."
+          status:
+            type: "string"
+            description: "When status is InProgress, use /polcard/v1/ingenico_status to determine current status or /polcard/v1/ingenico_statuses to read history of statuses"
+            enum:
+            - "WaitPromptEnd"
+            - "InProgress"
+          replyType:
+            type: "string"
+            enum:
+              - "profiles"
+              - "satisfaction"
+              - "loyalty_auth"
+              - "last_upload_status"
+              - "additional_data_keypad"
+              - "barcode"
+              - "error_data_unavailable"
+              - "unknown"
+          content:
+            type: "string"
+            description: "When requesting for 'satisfaction' then content is one of: negative/neutral/positive"
+          uploadStatus:
+            type: "object"
+            description: "Filled only when 'type'='last_upload_status', otherwise it is null"
+            properties:
+              code:
+                type: "string"
+                description: "Code identifier, like 'OK'"
+              datetime:
+                type: "string"
+              quantity:
+                type: "number"
+      
+  PolcardTerminalPromptEndResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTerminalPromptResponse'
+      
+  PolcardTransactionDataInputResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
+  PolcardTransactionSendKeyRequest:
+    type: "object"
+    properties:
+      keycode:
+        type: "string"
+        enum:
+          - "ok"
+          - "no"
+          - "yes"
+          - "back"
+          - "cancel"
+          - "anykey"
+
+  PolcardTransactionSendCodeRequest:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+      type:
+        type: "string"
+        enum:
+          - "commercial"
+          - "authorization"
+          
+  PolcardTransactionSendAmountRequest:
+    type: "object"
+    properties:
+      amount:
+        type: "integer"
+      type:
+        type: "string"
+        enum:
+          - "cashback"
+          - "other"
+      
+  PolcardTransactionSendOptionRequest:
+    type: "object"
+    properties:
+      option:
+        type: "integer"
+        description: "maximum 1 digit"
+
+  PolcardTransactionSendProfileRequest:
+    type: "object"
+    properties:
+      profile:
+        type: "integer"
+        description: "maximum 2 digits"
+        
+  PolcardTransactionSendKeyResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
+  PolcardTransactionSendCodeResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+      
+  PolcardTransactionSendAmountResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
+  PolcardTransactionSendOptionResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
+  PolcardTransactionSendProfileResponse:
+    type: "object"
+    allOf:
+      - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+  
+  LicenseResponse:
+    type: "object"
+    required: [ "validTo", "licenseTo", "expired" ]
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      validTo:
+        type: "string"
+      licenseTo:
+        type: "string"
+      expired:
+        type: "boolean"
+  ApiResponse:
+    type: "object"
+    required: [ "ok", "watermark" ]
+    properties:
+      ok:
+        type: "boolean"
+        description: "Check the 'error' or 'terminal.error' ields when 'ok' is 'false'"
+      error:
+        type: "string"
+        description: "Error from RESTful API filled only when 'ok' field is 'false'. Errors returned by terminal (in case of successfully established connection) are returned inside the 'terminal.error' struct"
+      text:
+        type: "string"
+      watermark:
+        type: "string"
+        example: "Wersja licencjonowana dla Firma Testowa wazna do 2028-07-07T19:19:51.000Z"
+externalDocs:
+  description: "Find out more about our website"
+  url: "https://bigdotsoftware.pl/ingenicoserver-restful-service-dla-terminali-platniczych/"
