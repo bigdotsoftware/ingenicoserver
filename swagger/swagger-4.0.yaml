@@ -2363,9 +2363,26 @@ definitions:
             format: int32
           transactionStatusText:
             type: string
+            example: idle
+            enum:
               - unknown
               - idle
               - busy
+              - waiting_dialog
+              - transaction_result_ready
+              - busy_starting
+              - busy_waiting_card
+              - busy_waiting_pin
+              - busy_connecting
+              - busy_printing
+              - busy_voice_authorization
+              - busy_remove_card
+              - busy_waiting_client_input
+              - busy_finishing
+              - busy_reserved
+              - busy_closing_day
+              - busy_waiting_blik
+              - busy_diagnostic
             
             
   ElavonTerminalStatusResponse:
