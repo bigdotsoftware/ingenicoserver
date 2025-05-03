@@ -13,6 +13,11 @@ tags:
     externalDocs:
       description: Find out more
       url: https://blog.bigdotsoftware.pl/ingenico-server-licencja/
+  - name: General
+    description: General management
+    externalDocs:
+      description: Find out more
+      url: https://blog.bigdotsoftware.pl/ingenico-server-licencja/
   - name: 'eService: General info'
     description: Terminal operations
     externalDocs:
@@ -45,6 +50,11 @@ tags:
       url: https://bigdotsoftware.pl/short_link/ingenico
   - name: 'PeP: Transactions'
     description: PeP transactions
+    externalDocs:
+      description: Find out more
+      url: https://bigdotsoftware.pl/short_link/ingenico
+  - name: 'PeP: Extras'
+    description: Terminal operations
     externalDocs:
       description: Find out more
       url: https://bigdotsoftware.pl/short_link/ingenico
@@ -90,7 +100,7 @@ paths:
           default: false
       responses:
         '200':
-          description: Invalid input
+          description: successful operation
           schema:
             $ref: '#/definitions/LicenseResponse'
   /license/v1/upgrade:
@@ -113,6 +123,22 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/LicenseResponse'
+  /management/v1/connections/close:
+    post:
+      tags:
+        - General
+      summary: Close any open connections with terminals
+      description: Close any open connections with terminals
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ManagementConnectionsCloseResponse'
+            
   /eservice/v1/ingenico_status:
     get:
       tags:
@@ -837,6 +863,53 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionAbortActionResponse'
+            
+  /pep/v1/ingenico_connection_test:
+    get:
+      tags:
+        - 'PeP: Transactions'
+      summary: Test connection with terminal
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePConnectionTestResponse'
+  
+  /pep/v1/ingenico_settlement:
+    post:
+      tags:
+        - 'PeP: Extras'
+      summary: Send Transactions - closing business day
+      description: Transfer current transactions to the external system (FDP's clearing host). To get result of previous settlement or list current transactions use /pep/v1/ingenico_settlement_data or /pep/v1/ingenico_report_summary
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/PePSettlementRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePSettlementResponse'
+            
             
   /elavon/v1/ingenico_status:
     get:
@@ -2757,7 +2830,6 @@ definitions:
           - report_day          
           - report_transaction
           - report_last_transaction
-          - close_day
       transactionAmount:
         type: integer
         description: Total transaction amount (cashback inclusive)
@@ -2959,6 +3031,14 @@ definitions:
       returnAPMdata:
         type: boolean
         example: true
+        
+  PePSettlementRequest:
+    type: object
+    properties:
+      returnAPMdata:
+        type: boolean
+        example: true
+        
   ElavonSettlementRequest:
     type: object
     properties:
@@ -3358,6 +3438,11 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
       
+  PePConnectionTestResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
   PePTransactionAbortActionResponse:
     type: object
     allOf:
@@ -3663,6 +3748,12 @@ definitions:
                   type: boolean
                 right:
                   type: boolean
+                  
+  PePSettlementResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
   ElavonSettlementResponse:
     type: object
     allOf:
@@ -4846,6 +4937,12 @@ definitions:
     type: object
     allOf:
       - $ref: '#/definitions/PolcardTransactionDataInputResponse'
+      
+  ManagementConnectionsCloseResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
   LicenseResponse:
     type: object
     required:
