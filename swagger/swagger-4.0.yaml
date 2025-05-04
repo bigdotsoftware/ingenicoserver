@@ -900,15 +900,32 @@ paths:
           in: query
           type: boolean
           default: false
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/PePSettlementRequest'
       responses:
         '200':
           description: successful operation
           schema:
             $ref: '#/definitions/PePSettlementResponse'
+            
+  /pep/v1/ingenico_print_last_transaction:
+    get:
+      tags:
+        - 'PeP: Transactions'
+      summary: Print last transaction
+      description: Print last transaction
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePTransactionPrintLastActionResponse'
             
   /pep/v1/ingenico_transaction_last:
     get:
@@ -930,6 +947,33 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionLastActionResponse'
+            
+            
+            
+  /pep/v1/ingenico_transaction_data_input:
+    post:
+      tags:
+        - 'PeP: Transactions'
+      summary: Terminal remote control
+      description: Remotely control terminal
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/PePTransactionDataInputRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePTransactionDataInputResponse'
             
   /elavon/v1/ingenico_status:
     get:
@@ -1855,6 +1899,28 @@ definitions:
         type: string
       sequenceNb:
         type: string
+        
+  PePTransactionDataInputRequest:
+    type: object
+    properties:
+      type:
+        type: string
+        enum:
+          - dcc_cancel
+          - dcc_local_currency
+          - dcc_foreign_currency
+          - partial_authorization_cancel
+          - partial_authorization_decline
+          - partial_authorization_accept
+          - partial_authorization_accept_or_decline
+        example: dcc_foreign_currency
+      dialogId:
+        type: string
+      selectedOption:
+        type: number
+        example: 1
+        description: Pass 0 to cancel, 1..N to simulate key press on the keypad
+        
   ElavonTransactionDataInputRequest:
     type: object
     properties:
@@ -2001,6 +2067,12 @@ definitions:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
+      
+  PePTransactionDataInputResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
   ElavonAppServerIsRunningResponse:
     type: object
     allOf:
@@ -2847,7 +2919,6 @@ definitions:
           - purchase_blik
           - purchase_cashback_blik
           - card_verification
-          - report_day          
           - report_transaction
           - report_last_transaction
       transactionAmount:
@@ -3054,10 +3125,6 @@ definitions:
         
   PePSettlementRequest:
     type: object
-    properties:
-      returnAPMdata:
-        type: boolean
-        example: true
         
   ElavonSettlementRequest:
     type: object
@@ -3677,6 +3744,11 @@ definitions:
       stats:
         type: object
         
+  PePTransactionPrintLastActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      
   PePTransactionLastActionResponse:
     type: object
     allOf:
