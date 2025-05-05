@@ -932,7 +932,7 @@ paths:
       tags:
         - 'PeP: Transactions'
       summary: Read last transaction details from the terminal
-      description: Get result of previous transaction.
+      description: Request for the result of previous transaction. Use /pep/v1/ingenico_report_summary_end to read the result.
       consumes:
         - application/json
       produces:
@@ -947,9 +947,8 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionLastActionResponse'
-            
-            
-            
+          
+
   /pep/v1/ingenico_transaction_data_input:
     post:
       tags:
@@ -979,8 +978,8 @@ paths:
     post:
       tags:
         - 'PeP: Extras'
-      summary: Start reading list of transactions. Use /pep/v1/ingenico_report_summary_end to read the result
-      description: ''
+      summary: Start reading list of transactions
+      description: Start reading list of transactions. Use /pep/v1/ingenico_report_summary_end to read the result
       consumes:
         - application/json
       produces:
@@ -1016,7 +1015,27 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePReportSummaryEndResponse'
-            
+  
+  /pep/v1/ingenico_display:
+    post:
+      tags:
+        - 'PeP: Extras'
+      summary: Return currently displayed dialog options
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePIngenicoDisplayResponse'
             
   /elavon/v1/ingenico_status:
     get:
@@ -2963,7 +2982,6 @@ definitions:
           - purchase_cashback_blik
           - card_verification
           - report_transaction
-          - report_last_transaction
       transactionAmount:
         type: integer
         description: Total transaction amount (cashback inclusive)
@@ -3928,6 +3946,67 @@ definitions:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
+      
+  PePIngenicoDisplayResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: object
+        properties:
+          dialogType:
+            type: string
+            example: "00"
+          dialogTypeText:
+            type: string
+            example: dcc_dialog
+            enum:
+              - dcc_dialog
+              - partial_authorization_dialog
+              - unknown
+          partial_authorization_dialog:
+            type: object
+          dcc_dialog:
+            type: object
+            properties:
+              cardholderCurrencyAmount:
+                type: number
+                example: 586
+              date:
+                type: string
+                example: "2025-05-05"
+              dccExchangeRate:
+                type: string
+                example: "0.2546719"
+              dccExchangeRateDate:
+                type: string
+                example: "2025-05-05"
+              dccSurchargeFee:
+                type: string
+                example: "9,00%"
+              dialogId:
+                type: string
+                example: "6818AD34"
+              dialogTimeout:
+                type: number
+                example: 299
+              terminalCurrencyExponent:
+                type: number
+                example: 2
+              terminalIdentifier:
+                type: string
+                example: "01071000"
+              time:
+                type: string
+                example: "12:21:08"
+              transactionAmount:
+                rtpe: number
+                example: 2301
+              transactionCurrencyCode:
+                type: string
+                example: "EUR"
+
   PePReportSummaryEndResponse:
     type: object
     allOf:
@@ -3938,6 +4017,7 @@ definitions:
         properties:
           numberOfRecords:
             type: number
+            example: 1
           daycloseStatus:
             type: string
             example: balanced
