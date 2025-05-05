@@ -1017,7 +1017,7 @@ paths:
             $ref: '#/definitions/PePReportSummaryEndResponse'
   
   /pep/v1/ingenico_display:
-    post:
+    get:
       tags:
         - 'PeP: Extras'
       summary: Return currently displayed dialog options
