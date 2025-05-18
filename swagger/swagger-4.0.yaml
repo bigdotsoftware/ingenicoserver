@@ -3003,7 +3003,6 @@ definitions:
           - purchase_blik
           - purchase_cashback_blik
           - card_verification
-          - report_transaction
       transactionAmount:
         type: integer
         description: Total transaction amount (cashback inclusive)
