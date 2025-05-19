@@ -812,6 +812,11 @@ paths:
           in: query
           type: boolean
           default: false
+        - name: unbindAfter
+          in: query
+          description: release terminal after transaction to be used by another application
+          type: boolean
+          default: true
         - in: body
           name: body
           schema:
@@ -1057,6 +1062,27 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePIngenicoDisplayResponse'
+  
+  /pep/v1/ingenico_unbind:
+    post:
+      tags:
+        - 'PeP: Extras'
+      summary: Unbind terminal. Terminal is also automatically unbind after a while when not used by app.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePIngenicoUnbindResponse'
             
   /elavon/v1/ingenico_status:
     get:
@@ -3016,7 +3042,7 @@ definitions:
         example: 123456
       stanNumber:
         type: integer
-        example: 123456
+        example: 138
         description: must be filled when type is reversal. For preauthorization_increase filed is optional
       authorizationCode:
         type: string
@@ -3744,8 +3770,8 @@ definitions:
           - magstripe_contactless
           - unknown
       stanNumber: 
-        type: string
-        example: "000082"
+        type: number
+        example: 182
       terminalIdentifier: 
         type: string
         example: "01071000"
@@ -3802,6 +3828,7 @@ definitions:
         type: string
       extraTerminalData:
         type: string
+        example: "INGENICO;PAYAPP;3.27"
       additionalPaymentOptions:
         type: string
   
@@ -3969,6 +3996,11 @@ definitions:
       - $ref: '#/definitions/ApiResponse'
       
   PePReportTransactionsResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+  
+  PePIngenicoUnbindResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
