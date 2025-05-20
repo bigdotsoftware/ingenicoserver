@@ -2026,10 +2026,6 @@ definitions:
       dialogId:
         type: string
         example: "682A42CC"
-      selectedOption:
-        type: number
-        example: 3
-        description: Pass 0 to cancel, 1..N to simulate key press on the keypad
         
   ElavonTransactionDataInputRequest:
     type: object
