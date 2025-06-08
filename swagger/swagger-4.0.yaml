@@ -3020,7 +3020,7 @@ definitions:
           - refund
           - reversal
           - preauthorization
-          - preauthorization_increase
+          - preauthorization_complete
           - purchase_cashback
           - purchase_blik
           - purchase_cashback_blik
@@ -3039,11 +3039,11 @@ definitions:
       stanNumber:
         type: integer
         example: 138
-        description: must be filled when type is reversal. For preauthorization_increase filed is optional
+        description: must be filled when type is reversal. For preauthorization_complete filed is optional
       authorizationCode:
         type: string
         example: "AB1234"
-        description: Must be filled for preauthorization_increase
+        description: Must be filled for preauthorization_complete
       operatorCode:
         type: integer
         example: 9999
@@ -3784,7 +3784,7 @@ definitions:
           - refund
           - reversal
           - preauthorization
-          - preauthorization_increase
+          - preauthorization_complete
           - purchase_cashback
           - purchase_blik
           - purchase_cashback_blik
