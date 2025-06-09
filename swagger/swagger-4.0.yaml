@@ -3820,6 +3820,77 @@ definitions:
         example: 2025-04-29
       partialAuthorizationAmount:
         type: string
+      appCryptogram:
+        type: string
+        example: 2F168FD5AE4F4A41
+      otherAmount:
+        type: number
+        example: 0
+      authorizedAmount:
+        type: number
+        example: 20000
+      appIdentifier:
+        type: string
+        example: "A0000000031010"
+      transactionCurrencyCodeNb:
+        type: string
+      appInterchangeProfile:
+        type: string  
+        example: "0000"
+      transactionVerificationResult:
+        type: string
+      transactionDate:
+        type: string
+        example: 2025-06-09
+      transactionType:
+        type: string
+        example: "00"
+      issuerApplicationData:
+        type: string
+        example: "06010A03A00000"
+      terminalCountryCode:
+        type: string
+        example: "0616"
+      cryptogramInformationData:
+        type: string
+        example: "80"
+      cardholderVerificationMethod:
+        type: string
+        example: "020000"
+      appTransactionCounter:
+        type: string
+        example: "0001"
+      unpredictableNumber:
+        type: string
+        example: 923AC0A8
+      reserved1:
+        type: string
+      issuerActionCodeDefault:
+        type: string
+      issuerActionCodeDenial:
+        type: string
+      issuerActionCodeOnline:
+        type: string
+      terminalActionCodeDefault:
+        type: string
+      terminalActionCodeDenial:
+        type: string
+      terminalActionCodeOnline:
+        type: string
+      transactionStatusInformation:
+        type: string
+      appLabel:
+        type: string
+      availableOfflineSpendAmount:
+        type: string
+      signatureRequestFlag:
+        type: string
+      cardShortCode:
+        type: string
+      blikRefCode:
+        type: string
+      blikType:
+        type: string
       paymentInInstalments:
         type: string
       extraTerminalData:
