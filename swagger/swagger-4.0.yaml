@@ -814,9 +814,13 @@ paths:
           default: false
         - name: unbindAfter
           in: query
-          description: release terminal after transaction to be used by another application
+          description: release terminal after transaction (terminal to be used by another application)
           type: boolean
           default: true
+        - name: exclusiveMode
+          in: query
+          type: boolean
+          default: false
         - in: body
           name: body
           schema:
@@ -884,6 +888,10 @@ paths:
           in: query
           type: boolean
           default: false
+        - name: exclusiveMode
+          in: query
+          type: boolean
+          default: false
       responses:
         '200':
           description: successful operation
@@ -902,6 +910,10 @@ paths:
         - application/json
       parameters:
         - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: exclusiveMode
           in: query
           type: boolean
           default: false
@@ -926,6 +938,10 @@ paths:
           in: query
           type: boolean
           default: false
+        - name: exclusiveMode
+          in: query
+          type: boolean
+          default: false
       responses:
         '200':
           description: successful operation
@@ -944,6 +960,10 @@ paths:
         - application/json
       parameters:
         - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: exclusiveMode
           in: query
           type: boolean
           default: false
@@ -994,6 +1014,10 @@ paths:
           in: query
           type: boolean
           default: false
+        - name: exclusiveMode
+          in: query
+          type: boolean
+          default: false
       responses:
         '200':
           description: successful operation
@@ -1012,6 +1036,10 @@ paths:
         - application/json
       parameters:
         - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: exclusiveMode
           in: query
           type: boolean
           default: false
