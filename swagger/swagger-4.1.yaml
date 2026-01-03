@@ -138,7 +138,31 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/ManagementConnectionsCloseResponse'
-            
+
+  /eservice/v1/device_status:
+    get:
+      tags:
+        - 'eService: General info'
+      summary: Check connection with device
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: cashRegisterNumber
+          in: query
+          type: integer
+          default: 1
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/EserviceDeviceStatusResponse'
+
   /eservice/v1/ingenico_status:
     get:
       tags:
@@ -774,8 +798,28 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/EserviceDCCAnalysisTotalSummaryResponse'
-            
-            
+
+
+  /pep/v1/device_status:
+    get:
+      tags:
+        - 'PeP: Transactions'
+      summary: Check connection with device
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePDeviceStatusResponse'
+
   /pep/v1/ingenico_status:
     get:
       tags:
@@ -796,7 +840,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTerminalStatusResponse'
-  
+
   /pep/v1/ingenico_transaction:
     post:
       tags:
@@ -830,7 +874,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionActionResponse'
-  
+
   /pep/v1/ingenico_transaction_end:
     get:
       tags:
@@ -851,7 +895,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionEndActionResponse'
-  
+
   /pep/v1/ingenico_transaction_abort:
     get:
       tags:
@@ -872,7 +916,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionAbortActionResponse'
-            
+
   /pep/v1/ingenico_connection_test:
     get:
       tags:
@@ -897,7 +941,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePConnectionTestResponse'
-  
+
   /pep/v1/ingenico_settlement:
     post:
       tags:
@@ -922,7 +966,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePSettlementResponse'
-            
+
   /pep/v1/ingenico_print_last_transaction:
     get:
       tags:
@@ -947,7 +991,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionPrintLastActionResponse'
-            
+
   /pep/v1/ingenico_transaction_last:
     get:
       tags:
@@ -972,7 +1016,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionLastActionResponse'
-          
+
 
   /pep/v1/ingenico_transaction_data_input:
     post:
@@ -998,7 +1042,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTransactionDataInputResponse'
-  
+
   /pep/v1/ingenico_report_summary:
     post:
       tags:
@@ -1023,7 +1067,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePReportSummaryResponse'
-  
+
   /pep/v1/ingenico_report_transactions:
     post:
       tags:
@@ -1048,7 +1092,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePReportTransactionsResponse'
-  
+
   /pep/v1/ingenico_report_end:
     get:
       tags:
@@ -1069,7 +1113,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePReportSummaryEndResponse'
-  
+
   /pep/v1/ingenico_display:
     get:
       tags:
@@ -1090,7 +1134,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePIngenicoDisplayResponse'
-  
+
   /pep/v1/ingenico_unbind:
     post:
       tags:
@@ -1111,7 +1155,27 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePIngenicoUnbindResponse'
-            
+
+  /elavon/v1/device_status:
+    get:
+      tags:
+        - 'Elavon: Transactions'
+      summary: Check connection with device
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ElavonDeviceStatusResponse'
+
   /elavon/v1/ingenico_status:
     get:
       tags:
@@ -1467,6 +1531,28 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PolcardTransactionEndResponse'
+
+
+  /polcard/v1/device_status:
+    get:
+      tags:
+        - 'Polcard: Transactions'
+      summary: Check connection with device
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PolcardDeviceStatusResponse'
+
   /polcard/v1/ingenico_statuses:
     get:
       tags:
@@ -1487,6 +1573,7 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PolcardTransactionStatusesResponse'
+
   /polcard/v1/ingenico_status:
     get:
       tags:
@@ -2036,7 +2123,7 @@ definitions:
         type: string
       sequenceNb:
         type: string
-        
+
   PePTransactionDataInputRequest:
     type: object
     properties:
@@ -2054,7 +2141,7 @@ definitions:
       dialogId:
         type: string
         example: "682A42CC"
-        
+
   ElavonTransactionDataInputRequest:
     type: object
     properties:
@@ -2201,12 +2288,12 @@ definitions:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePTransactionDataInputResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   ElavonAppServerIsRunningResponse:
     type: object
     allOf:
@@ -2686,7 +2773,12 @@ definitions:
                 type: string
               terminalIdentifier:
                 type: string
-                
+
+  PePDeviceStatusResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
   PePTerminalStatusResponse:
     type: object
     allOf:
@@ -2724,8 +2816,12 @@ definitions:
               - busy_closing_day
               - busy_waiting_blik
               - busy_diagnostic
-            
-            
+
+  ElavonDeviceStatusResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
   ElavonTerminalStatusResponse:
     type: object
     allOf:
@@ -2786,6 +2882,11 @@ definitions:
               - waiting_card
               - waiting_dcc_acceptance
             description: 'Elavon provides two types of integrations: simple and full (interactive). The full integration allows complete control over terminal behavior directly from the application, whereas the simple integration requires manual actions from the cashier, such as confirming the customer copy by clicking a button on the terminal. In the full integration mode, certain statuses, like receipt_request and report_request, necessitate actions from the application side. For more detailed information, refer to the script located at /ingenicoserver/docs/elavon/transaction_1_interactive.sh.'
+  EserviceDeviceStatusResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
   EserviceTerminalStatusResponse:
     type: object
     required:
@@ -3037,7 +3138,7 @@ definitions:
                 quantity: 1
                 amount: 500
                 settlementIdentifier: 1122
-  
+
   PePTransactionBeginRequest:
     type: object
     properties:
@@ -3104,8 +3205,8 @@ definitions:
           version:
             type: string
             example: "4.0"
-      
-      
+
+
       callback:
         type: object
         properties:
@@ -3124,7 +3225,7 @@ definitions:
       posnetserver:
         type: object
         description: 'Sample JSON object: {"lines": [{ "na": "Towar 1", "il": 1.0, "vtp": "23,00", "pr": 2350 },{ "na": "Towar 2", "il": 1.0, "vtp": "23,00", "pr": 1150 }], "summary": { "to": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval'
-        
+
   ElavonTransactionBeginRequest:
     type: object
     allOf:
@@ -3238,10 +3339,10 @@ definitions:
             enum:
               - default
               - loggingonly
-  
+
   PePReportRequest:
     type: object
-    
+
   ElavonReportRequest:
     type: object
     properties:
@@ -3258,10 +3359,10 @@ definitions:
       returnAPMdata:
         type: boolean
         example: true
-        
+
   PePSettlementRequest:
     type: object
-        
+
   ElavonSettlementRequest:
     type: object
     properties:
@@ -3650,27 +3751,27 @@ definitions:
                 type: string
               fanfareID:
                 type: string
-                
+
   PePTransactionActionResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   ElavonTransactionActionResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePConnectionTestResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePTransactionAbortActionResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePTransactionEndActionResponse:
     type: object
     allOf:
@@ -3682,14 +3783,14 @@ definitions:
         - $ref: '#/definitions/PePTransactionEndCommonActionResponse'
       stats:
         type: object
-  
+
   PePTransactionEndCommonActionResponse:
     type: object
     properties:
-      transactionResultCode: 
+      transactionResultCode:
         type: number
         example: 0
-      transactionResultCodeText: 
+      transactionResultCodeText:
         type: string
         enum:
           - base_approval
@@ -3713,15 +3814,15 @@ definitions:
           - base_refusal_data_format_wrong
           - base_refusal_message_format_wrong
           - unknown
-      authorizationType: 
+      authorizationType:
         type: number
         example: 1
         enum:
           - 1
-          - 3 
+          - 3
           - 4
           - 0
-      authorizationTypeText: 
+      authorizationTypeText:
         type: string
         example: online
         enum:
@@ -3729,7 +3830,7 @@ definitions:
           - offline
           - referral
           - unknown
-      authorizedBy: 
+      authorizedBy:
         type: string
         example: bank
         enum:
@@ -3739,14 +3840,14 @@ definitions:
           - seller
           - other
           - unknown
-      cardholderAuthorizationMethod: 
+      cardholderAuthorizationMethod:
         type: string
         example: A
         enum:
           - '?'
           - 'A'
           - '@'
-      cardholderAuthorizationMethodText: 
+      cardholderAuthorizationMethodText:
         type: string
         example: pin
         enum:
@@ -3754,26 +3855,26 @@ definitions:
           - pin
           - signature
           - unknown
-      cardsetName: 
+      cardsetName:
         type: string
         example: MAESTRO
-      date: 
+      date:
         type: string
         example: 2025-04-28
-      time: 
+      time:
         type: string
         example: 23:07:36
       dateTime:
         type: string
         example: 20250428230736
         description: not parsed date and time, field is optional
-      maskedCardNumber: 
+      maskedCardNumber:
         type: string
         example: XXXXXXXXXXXXXXX0019
-      merchantID: 
+      merchantID:
         type: string
         example: "005565500000362"
-      readerUsed: 
+      readerUsed:
         type: string
         example: C
         enum:
@@ -3783,7 +3884,7 @@ definitions:
           - B
           - D
           - '?'
-      readerUsedText: 
+      readerUsedText:
         type: string
         example: magstripe
         enum:
@@ -3793,13 +3894,13 @@ definitions:
           - contactless
           - magstripe_contactless
           - unknown
-      stanNumber: 
+      stanNumber:
         type: number
         example: 182
-      terminalIdentifier: 
+      terminalIdentifier:
         type: string
         example: "01071000"
-      transactionAmount: 
+      transactionAmount:
         type: number
         example: 2300
       authorizationCode:
@@ -3863,7 +3964,7 @@ definitions:
       transactionCurrencyCodeNb:
         type: string
       appInterchangeProfile:
-        type: string  
+        type: string
         example: "0000"
       transactionVerificationResult:
         type: string
@@ -3926,7 +4027,7 @@ definitions:
         example: "INGENICO;PAYAPP;3.27"
       additionalPaymentOptions:
         type: string
-  
+
       returnCode:
         type: integer
         format: int32
@@ -3935,8 +4036,8 @@ definitions:
         type: string
         description: Error massge from device. Filled when returnCode<>0
 
-      
-      
+
+
   ElavonTransactionEndActionResponse:
     type: object
     allOf:
@@ -3957,17 +4058,17 @@ definitions:
             description: Error massge from device. Filled when returnCode<>0
       stats:
         type: object
-        
+
   PePTransactionPrintLastActionResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePTransactionLastActionResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   ElavonTransactionLastActionResponse:
     type: object
     allOf:
@@ -4060,12 +4161,12 @@ definitions:
                   type: boolean
                 right:
                   type: boolean
-                  
+
   PePSettlementResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   ElavonSettlementResponse:
     type: object
     allOf:
@@ -4084,22 +4185,22 @@ definitions:
         type: object
         allOf:
           - $ref: '#/definitions/ElavonReportCommonResponse'
-  
+
   PePReportSummaryResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePReportTransactionsResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-  
+
   PePIngenicoUnbindResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   PePIngenicoDisplayResponse:
     type: object
     allOf:
@@ -4184,7 +4285,7 @@ definitions:
               type: object
               allOf:
               - $ref: '#/definitions/PePTransactionEndCommonActionResponse'
-          
+
   ElavonReportResponse:
     type: object
     allOf:
@@ -4556,6 +4657,13 @@ definitions:
               type: string
             order:
               type: number
+
+
+  PolcardDeviceStatusResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
   PolcardTerminalStatusResponse:
     type: object
     required:
@@ -5350,12 +5458,12 @@ definitions:
     type: object
     allOf:
       - $ref: '#/definitions/PolcardTransactionDataInputResponse'
-      
+
   ManagementConnectionsCloseResponse:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
-      
+
   LicenseResponse:
     type: object
     required:
