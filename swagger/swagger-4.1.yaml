@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)
-  version: '4.0'
+  version: '4.1'
   title: Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon, PeP)
   contact:
     email: bigdotsoftware@bigdotsoftware.pl
