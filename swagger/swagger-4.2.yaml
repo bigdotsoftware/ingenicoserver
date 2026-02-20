@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)
-  version: '4.1'
+  version: '4.2'
   title: Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon, PeP)
   contact:
     email: bigdotsoftware@bigdotsoftware.pl
@@ -840,6 +840,107 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PePTerminalStatusResponse'
+
+  /pep/v1/ingenico_auto_transaction_process:
+    post:
+      tags:
+        - 'PeP: Transactions'
+      summary: Start new transaction
+      description: Starts new transaction and doesn't wait for transaction message to be consumed by the terminal. Instead of that method returns 'uuid' which is an unique task identifier. Use 'uuid' to cancel or check status of auto transaction. Note that new transaction is possible only when value of transactionStatus retunred by /ingenico_status is 'Idle'. Use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true).
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: unbindAfter
+          in: query
+          description: release terminal after transaction (terminal to be used by another application)
+          type: boolean
+          default: true
+        - name: exclusiveMode
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/PePAutoTransactionBeginRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePAutoTransactionBeginResponse'
+
+  /pep/v1/ingenico_auto_transaction_cancel/{uuid}:
+    post:
+      tags:
+        - 'PeP: Transactions'
+      summary: Cancel auto transaction
+      description: Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to cancel transaction.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: uuid
+          in: path
+          description: ''
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePAutoTransactionCancelResponse'
+  /pep/v1/ingenico_auto_transaction_status/{uuid}:
+    get:
+      tags:
+        - 'PeP: Transactions'
+      summary: Status of automatic transaction
+      description: Use unique task identfier ('uuid') returned by /ingenico_auto_transaction_process to check status of individual automatic transaction.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: uuid
+          in: path
+          description: ''
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePAutoTransactionStatusResponse'
+  /pep/v1/ingenico_auto_transaction_statuses:
+    get:
+      tags:
+        - 'PeP: Transactions'
+      summary: List all auto transactions
+      description: Returns list of all executed automatic transactions with statuses.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PePAutoTransactionStatusesResponse'
+
 
   /pep/v1/ingenico_transaction:
     post:
@@ -2023,6 +2124,28 @@ paths:
           schema:
             $ref: '#/definitions/PolcardReportEndResponse'
 definitions:
+
+
+  PePAutoTransactionBeginRequest:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PePTransactionBeginRequest'
+
+  PePAutoTransactionBeginResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PePAutoTransactionActionResponse'
+
+  PePAutoTransactionActionResponse:
+    type: object
+    required:
+      - uuid
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      uuid:
+        type: string
+
   EserviceAutoTransactionBeginRequest:
     type: object
     allOf:
@@ -2719,6 +2842,39 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
       - $ref: '#/definitions/EserviceAutoTransactionStatusCommonResponse'
+
+
+  PePAutoTransactionStatusCommonResponse:
+    type: object
+    properties:
+      state:
+        type: string
+        enum:
+          - success
+          - error
+          - cancelled
+          - processing
+      ts:
+        type: integer
+        format: int64
+      req:
+        type: object
+        allOf:
+          - $ref: '#/definitions/PePTransactionBeginRequest'
+      result:
+        type: object
+        allOf:
+          - $ref: '#/definitions/PePTransactionEndActionResponse'
+          - $ref: '#/definitions/PePTerminalStatusResponse'
+  PePAutoTransactionStatusResponse:
+    type: object
+    required:
+      - uuid
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+      - $ref: '#/definitions/PePAutoTransactionStatusCommonResponse'
+
+
   EserviceAutoTransactionStatusesResponse:
     type: object
     properties:
@@ -2726,10 +2882,25 @@ definitions:
         type: object
         allOf:
           - $ref: '#/definitions/EserviceAutoTransactionStatusCommonResponse'
+
+  PePAutoTransactionStatusesResponse:
+    type: object
+    properties:
+      <uuid>:
+        type: object
+        allOf:
+          - $ref: '#/definitions/PePAutoTransactionStatusCommonResponse'
+
   EserviceAutoTransactionCancelResponse:
     type: object
     allOf:
       - $ref: '#/definitions/EserviceAutoTransactionActionResponse'
+
+  PePAutoTransactionCancelResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PePAutoTransactionActionResponse'
+
   EserviceAutoTransactionBeginResponse:
     type: object
     allOf:
