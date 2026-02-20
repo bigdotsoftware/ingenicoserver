@@ -2899,7 +2899,7 @@ definitions:
   PePAutoTransactionCancelResponse:
     type: object
     allOf:
-      - $ref: '#/definitions/PePAutoTransactionActionResponse'
+      - $ref: '#/definitions/PePAutoTransactionStatusCommonResponse'
 
   EserviceAutoTransactionBeginResponse:
     type: object
