@@ -3805,11 +3805,13 @@ definitions:
     properties:
       event:
         type: string
+        example: raport_dobowy
         enum:
           - raport_dobowy
       message:
         type: string
-        description: Maintenance message
+        example: "Raport dobowy"
+        description: Event message
 
   ItCardMaintenanceBeginRequest:
     type: object
@@ -3817,8 +3819,10 @@ definitions:
       time:
         type: integer
         description: Time in seconds
+        example: 60
       message:
         type: string
+        example: "Przerwa techniczna"
         description: Maintenance message
 
   ItCardFirmwareUpdateBeginRequest:
@@ -4995,6 +4999,21 @@ definitions:
     properties:
       terminal:
         type: object
+        properties:
+          transactionResultCode:
+            type: number
+            example: 0
+          transactionResultCodeText:
+            type: string
+            enum:
+              - base_approval
+              - base_refusal
+          authorizationResultText:
+            type: string
+            example: "PROSZĘ CZEKAĆ, TRWA INSTALACJA"
+          resultText:
+            type: string
+            example: "RESTART PINPADA"
 
   ItCardSettlementEndActionResponse:
     type: object
