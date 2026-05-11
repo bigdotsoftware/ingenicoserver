@@ -3295,23 +3295,31 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
     properties:
-      type:
-          type: string
-          example: "T2"
-      protoVersion:
-          type: string
-          example: "160"
-      manufacturer:
-          type: string
-          example: "INGENICO"
-      deviceType:
-          type: string
-          example: "LANE3600"
-      deviceId:
-          type: string
-          example: "12345678:00000012"
-      attributes:
-          type: string
+      terminal:
+        type: object
+        properties:
+          type:
+            type: string
+            example: "T2"
+          protoVersion:
+            type: string
+            example: "160"
+          manufacturer:
+            type: string
+            example: "INGENICO"
+          deviceType:
+            type: string
+            example: "LANE3600"
+          deviceId:
+            type: string
+            example: "12345678:00000012"
+          attributes:
+            type: string
+            example: ""
+          returnCode:
+            type: integer
+            example: 0
+
 
   ItCardTerminalStatusResponse:
     type: object
@@ -3330,16 +3338,22 @@ definitions:
             format: int32
           message:
             type: string
+            example: "DRUKOWAĆ KOPIĘ DLA KLIENTA?"
           option1:
             type: string
+            example: "NIE"
           option2:
             type: string
+            example: "TAK"
           timeout:
             type: integer
             format: int32
+            example: 30
+            description: "Time in seconds to make a decision"
           token:
             type: integer
             format: int32
+            example: 29691
           transactionStatusText:
             type: string
             example: Idle
