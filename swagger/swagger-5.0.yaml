@@ -3838,6 +3838,7 @@ definitions:
         type: string
         enum:
           - purchase
+          - last_transaction
           - reversal
           - refund
           - preauthorization
@@ -3846,7 +3847,9 @@ definitions:
           - purchase_tip
           - bills
           - card_token
+          - print_copy
           - mifare
+        description: Note that not all transaction types return the same response fields. For example, last_transaction does not return the full transaction details — only basic information such as transactionResultCode, transactionResultCodeText, cashbackAmount, invoiceNumber, and authorizedAmount. To retrieve the full transaction details, call print_copy and provide a valid documentIdentifier.
       transactionAmount:
         type: integer
         description: Total transaction amount (cashback inclusive)
