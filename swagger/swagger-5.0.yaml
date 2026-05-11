@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
   description: This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)
-  version: '4.2'
-  title: Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon, PeP)
+  version: '5.0'
+  title: Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon, PeP, ItCard Planet Pay)
   contact:
     email: bigdotsoftware@bigdotsoftware.pl
 host: localhost:3020
@@ -64,6 +64,16 @@ tags:
       description: Find out more
       url: https://bigdotsoftware.pl/short_link/ingenico
   - name: 'Elavon: Extras'
+    description: Terminal operations
+    externalDocs:
+      description: Find out more
+      url: https://bigdotsoftware.pl/short_link/ingenico
+  - name: 'ItCard: Transactions'
+    description: ItCard transactions
+    externalDocs:
+      description: Find out more
+      url: https://bigdotsoftware.pl/short_link/ingenico
+  - name: 'ItCard: Extras'
     description: Terminal operations
     externalDocs:
       description: Find out more
@@ -1545,6 +1555,280 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/ElavonTransactionSendKeyResponse'
+
+
+  /itcard/v1/device_status:
+    get:
+      tags:
+        - 'ItCard: Transactions'
+      summary: Check connection with device
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardDeviceStatusResponse'
+
+  /itcard/v1/ingenico_status:
+    get:
+      tags:
+        - 'ItCard: Transactions'
+      summary: Terminal status
+      description: The most used method. Depends from transactionStatus application need to act differently. When transactionStatusText is different than 'idle' then new transaction cannot be started, becuase terminal is processing another request.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardTerminalStatusResponse'
+  /itcard/v1/ingenico_transaction:
+    post:
+      tags:
+        - 'ItCard: Transactions'
+      summary: Start new transaction
+      description: Starts new transaction. Method returns response immediately. To read transaction status use /itcard/v1/ingenico_status. Once status back to 'Idle', read transaction result by /itcard/v1/ingenico_transaction_end. Alternatively use 'posnetserver' structure to integrate with Posnet fiscal printers (enable integration first in config.yaml file by setting config.posnetserver.active=true).
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ItCardTransactionBeginRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardTransactionActionResponse'
+  /itcard/v1/ingenico_transaction_end:
+    get:
+      tags:
+        - 'ItCard: Transactions'
+      summary: Get result of transaction
+      description: Get result of previous transaction. Method returns cached response. To read last transaction details directly from the terminal, use /itcard/v1/ingenico_transaction_last
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardTransactionEndActionResponse'
+
+  /itcard/v1/ingenico_transaction_data_input:
+    post:
+      tags:
+        - 'ItCard: Transactions'
+      summary: Terminal remote control
+      description: Remotely control terminal
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ItCardTransactionDataInputRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardTransactionDataInputResponse'
+
+
+  /itcard/v1/ingenico_settlement:
+    post:
+      tags:
+        - 'ItCard: Extras'
+      summary: Start settlement
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ItCardSettlementBeginRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardSettlementActionResponse'
+
+  /itcard/v1/ingenico_settlement_end:
+    get:
+      tags:
+        - 'ItCard: Extras'
+      summary: Get result of settlement
+      description: Get result of previous settlement.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardSettlementEndActionResponse'
+
+  /itcard/v1/ingenico_maintenance:
+    post:
+      tags:
+        - 'ItCard: Extras'
+      summary: Start maintenance
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ItCardMaintenanceBeginRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardMaintenanceActionResponse'
+
+  /itcard/v1/ingenico_transaction_abort:
+    get:
+      tags:
+        - 'ItCard: Transactions'
+      summary: Abort transaction
+      description: Abort current transaction
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardAbortTransactionActionResponse'
+
+  /itcard/v1/ingenico_event:
+    post:
+      tags:
+        - 'ItCard: Extras'
+      summary: Send event to the terminal
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ItCardEventBeginRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardEventActionResponse'
+
+  /itcard/v1/ingenico_firmware_update:
+    post:
+      tags:
+        - 'ItCard: Extras'
+      summary: Start firmware update
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/ItCardFirmwareUpdateBeginRequest'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardFirmwareUpdateActionResponse'
+
+  /itcard/v1/ingenico_firmware_update_end:
+    get:
+      tags:
+        - 'ItCard: Extras'
+      summary: Get result of firmware update
+      description: Get result of firmware update.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ItCardFirmwareUpdateEndActionResponse'
+
+
+
   /polcard/v1/ingenico_transaction:
     post:
       tags:
@@ -2265,6 +2549,12 @@ definitions:
         type: string
         example: "682A42CC"
 
+  ItCardTransactionDataInputRequest:
+    type: object
+    properties:
+      option:
+        type: number
+
   ElavonTransactionDataInputRequest:
     type: object
     properties:
@@ -2407,6 +2697,13 @@ definitions:
     type: object
     allOf:
       - $ref: '#/definitions/ApiResponse'
+
+
+  ItCardTransactionDataInputResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
   ElavonTransactionDataInputResponse:
     type: object
     allOf:
@@ -2993,6 +3290,96 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
 
+  ItCardDeviceStatusResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      type:
+          type: string
+          example: "T2"
+      protoVersion:
+          type: string
+          example: "160"
+      manufacturer:
+          type: string
+          example: "INGENICO"
+      deviceType:
+          type: string
+          example: "LANE3600"
+      deviceId:
+          type: string
+          example: "12345678:00000012"
+      attributes:
+          type: string
+
+  ItCardTerminalStatusResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: object
+        properties:
+          returnCode:
+            type: integer
+            format: int32
+            description: 0 - Success, >0 - Errors
+          transactionStatus:
+            type: integer
+            format: int32
+          message:
+            type: string
+          option1:
+            type: string
+          option2:
+            type: string
+          timeout:
+            type: integer
+            format: int32
+          token:
+            type: integer
+            format: int32
+          transactionStatusText:
+            type: string
+            example: Idle
+            enum:
+              - Idle
+              - WaitCard
+              - CardVerification
+              - WaitCashierId
+              - WaitManagerPassword
+              - WaitingForAmount
+              - CashBackAmount
+              - WaitPrevAmount
+              - WaitPrevAuthCode
+              - WaitPIN
+              - WaitHost
+              - WaitHost2
+              - WaitHost3
+              - WaitVoiceAuth
+              - WaitSign
+              - WaitIdentity
+              - PrintingTransactionAccepted
+              - PrintingCopy
+              - PrintingTransactionDeclined
+              - Reversal
+              - PrintingReversal
+              - CardError
+              - RemoveCard
+              - CardOk
+              - UseSingleCardOnly
+              - UseDifferentCard
+              - UseChip
+              - RemovingPrevState
+              - FollowMobileInstruction
+              - UseCardAgain
+              - Unknown
+              - WaitAction
+              - WaitSettlement
+              - WaitTrEnd
+              - Undefined
+
   ElavonTerminalStatusResponse:
     type: object
     allOf:
@@ -3397,6 +3784,108 @@ definitions:
         type: object
         description: 'Sample JSON object: {"lines": [{ "na": "Towar 1", "il": 1.0, "vtp": "23,00", "pr": 2350 },{ "na": "Towar 2", "il": 1.0, "vtp": "23,00", "pr": 1150 }], "summary": { "to": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval'
 
+  ItCardEventBeginRequest:
+    type: object
+    properties:
+      event:
+        type: string
+        enum:
+          - raport_dobowy
+      message:
+        type: string
+        description: Maintenance message
+
+  ItCardMaintenanceBeginRequest:
+    type: object
+    properties:
+      time:
+        type: integer
+        description: Time in seconds
+      message:
+        type: string
+        description: Maintenance message
+
+  ItCardFirmwareUpdateBeginRequest:
+    type: object
+
+  ItCardSettlementBeginRequest:
+    type: object
+
+  ItCardTransactionBeginRequest:
+    type: object
+    properties:
+      type:
+        type: string
+        enum:
+          - purchase
+          - reversal
+          - refund
+          - preauthorization
+          - preauthorization_increase
+          - preauthorization_reversal
+          - purchase_tip
+          - bills
+          - card_token
+          - mifare
+      transactionAmount:
+        type: integer
+        description: Total transaction amount (cashback inclusive)
+        example: 100
+      transactionAmountNet:
+        type: integer
+        description: Net amount (cashback inclusive). Use 0 to ignore.
+        example: 8130
+      transactionAmountVat:
+        type: integer
+        description: VAT amount (cashback inclusive). Use 0 to ignore.
+        example: 1870
+      blikCode:
+        type: integer
+        description: Transaction with BLIK
+        example: 777123
+      cashbackAmount:
+        type: integer
+        description: Cashback amount
+        example: 5000
+      cashbackAmountMaximum:
+        type: integer
+        description: Maximum cashback amount
+        example: 40000
+      currency:
+        type: string
+        example: "PLN"
+      cashierIdentifier:
+        type: string
+        example: "PLN"
+      documentIdentifier:
+        type: string
+        description: Use unique document identifiers. Document identifier is used to make a refund, reversal or preauthorization operations
+        example: "AABBCC123"
+      authorizationCode:
+        type: string
+        description: Use with preauthorization_increase and preauthorization_reversal
+      rrn:
+        type: string
+        description: Use with preauthorization_increase and preauthorization_reversal
+      callback:
+        type: object
+        properties:
+          uri:
+            type: string
+            example: http://host:777/results
+          clientdata:
+            type: object
+          method:
+            type: string
+            enum:
+              - POST
+              - GET
+              - PUT
+            example: POST
+      posnetserver:
+        type: object
+        description: 'Sample JSON object: {"lines": [{ "na": "Towar 1", "il": 1.0, "vtp": "23,00", "pr": 2350 },{ "na": "Towar 2", "il": 1.0, "vtp": "23,00", "pr": 1150 }], "summary": { "to": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval'
+
   ElavonTransactionBeginRequest:
     type: object
     allOf:
@@ -3629,6 +4118,251 @@ definitions:
       posnetserver:
         type: object
         description: 'Sample JSON object: {"lines": [{ "na": "Towar 1", "il": 1.0, "vtp": "23,00", "pr": 2350 },{ "na": "Towar 2", "il": 1.0, "vtp": "23,00", "pr": 1150 }], "summary": { "to": 3500 } }. PosnetServer documentation can be found here: https://blog.bigdotsoftware.pl/posnet-server-wydruk-paragonu/. Fiscal printout is peformed when transaction authorizationResult=base_approval'
+
+  ItCardSettlementActionCommonResponse:
+    type: object
+    properties:
+      transactionResultCode:
+        type: number
+      transactionResultCodeText:
+        type: string
+        example: base_approval
+        enum:
+          - base_approval
+          - base_decline
+      terminalIdentifier:
+        type: string
+        example: '39394880'
+      merchantID:
+        type: string
+        example: '2102135438'
+      date:
+        type: string
+        example: '2026-05-06'
+      time:
+        type: string
+        example: '09:08:20'
+      dateTime:
+        type: string
+        example: '06-05-2026 09:08:20'
+      merchantName:
+        type: string
+        example: TEST Sp. Z O.O.
+      merchantAddr1:
+        type: string
+        example: Mazowiecka 99
+      merchantAddr2:
+        type: string
+        example: 00-515 Warsaw
+      header:
+        type: string
+        example: "ROZLICZENIE"
+      resultText:
+        type: string
+        example: "ZGODNOŚĆ Z HOSTEM"
+      exgFlag:
+        type: string
+        example: "set"
+      batch:
+        type: string
+        example: "9"
+      summaryFlag:
+        type: string
+        example: "set"
+      summaryName:
+        type: string
+        example: "SUMARYCZNIE"
+      sectionsName:
+        type: string
+        example: "W TYM:"
+      blikFlag:
+        type: string
+        example: "set"
+      blikName:
+        type: string
+        example: "TRANSAKCJE BLIK"
+      dccFlag:
+        type: string
+        example: "set"
+      dccName:
+        type: string
+        example: "TRANSAKCJE DCC"
+      summaryList:
+        type: string
+        example: "SALDO~~5.00 PLN"
+      blikList:
+        type: string
+        example: "Gotówka~0 tr.~0.00 PLN"
+      dccList:
+        type: string
+        example: "Zwrot~0 tr.~0.00 PLN"
+      authorizationResultText:
+        type: string
+        example: "ROZLICZENIE WYKONANE\\nKWOTA: 0.00 PLN\\nLICZBA TRANSAKCJI: 0"
+
+
+
+  ItCardTransactionActionCommonResponse:
+    type: object
+    properties:
+      transactionResultCode:
+        type: number
+      transactionResultCodeText:
+        type: string
+        example: base_approval
+        enum:
+          - base_approval
+          - base_decline
+      cardsetName:
+        type: string
+        example: Visa
+      date:
+        type: string
+        example: '2026-05-06'
+      time:
+        type: string
+        example: '09:08:20'
+      dateTime:
+        type: string
+        example: '06-05-2026 09:08:20'
+      maskedCardNumber:
+          type: string
+          example: '************4953'
+      invoiceNumber:
+          type: string
+          example: '29'
+      documentIdentifier:
+        type: string
+        description: Use unique document identifiers. Document identifier is used to make a refund, reversal or preauthorization operations
+        example: "AABBCC123"
+      merchantID:
+        type: string
+        example: '2102135438'
+      terminalIdentifier:
+        type: string
+        example: '39394880'
+      authorizationCode:
+        type: string
+        example: '410953'
+      merchantName:
+        type: string
+        example: TEST Sp. Z O.O.
+      merchantAddr1:
+        type: string
+        example: Mazowiecka 99
+      merchantAddr2:
+        type: string
+        example: 00-515 Warsaw
+      pan:
+        type: string
+      pin:
+        type: string
+      readerUsed:
+        type: string
+        enum:
+          - '?'
+          - B
+          - C
+          - P
+      readerUsedText:
+        type: string
+        enum:
+          - '?'
+          - contactless
+          - magstripe
+          - chip
+      authorizationSigLabel:
+        type: string
+      authorizationPinLabel:
+        type: string
+        example: "KOD PIN ZGODNY"
+      authorizationCcvLabel:
+        type: string
+      invoiceText:
+        type: string
+        example: "KOPIA KLIENTA"
+      cashbackAmount:
+        type: number
+        example: 5000
+      dccTransactionAmountLabel:
+        type: string
+        example: "TRANSACTION AMOUNT"
+      transactionCurrencyCode:
+        type: string
+        example: PLN
+      dccTransactionAmount:
+        type: string
+        example: "3.06 USD"
+      dccCurrencyCode:
+        type: string
+        example: USD
+      dccExchangeRateLabel:
+        type: string
+        example: "Exchange rate"
+      dccExchangeRate:
+        type: string
+        example: "0.2547826"
+      dccFeeLabel:
+        type: string
+        example: "Mark-up"
+      dccSurchargeFee:
+        type: string
+        example: "9,00%"
+      dccFlag:
+        type: string
+        example: "set"
+      dccDisclaimer:
+        type: string
+        example: "I accept that I have been given a choice of currencies, including PLN, for the payment and that this choice is final. I accept the conversion rate and the transaction amount in USD."
+      dccExchangeRateSource:
+        type: string
+        example: "This Currency Conversion is provided by BPS"
+      authorizedAmount:
+        type: number
+        example: 10000
+      totalAmountLabel:
+        type: string
+        example: "12.30 PLN"
+      totalAmountNameLabel:
+        type: string
+        example: "SPRZEDAZ"
+      appIdentifier:
+        type: string
+        example: "A0000000031010"
+      rrn:
+        type: string
+        example: "612808616400"
+      authorizationResultText:
+        type: string
+        example: "TRANSAKCJA ZAAKCEPTOWANA"
+      authorizationResultText2:
+        type: string
+        example: "BRAK POŁĄCZENIA: TCP 3 -1"
+      authorizationResultText3:
+        type: string
+        example: "DZIĘKUJEMY, PROSIMY ZACHOWAĆ RACHUNEK"
+      verifiedBy:
+        type: string
+      installmentDisclaimer:
+        type: string
+      blikCode:
+        type: string
+      blik:
+        type: string
+        example: "***123"
+      referenceNumber:
+        type: string
+        example: "90888174537"
+      hostText:
+        type: string
+        example: "Brak polaczenia z systemem"
+      failFlag:
+        type: string
+        example: "set"
+      extraTerminalData:
+        type: string
+        example: "CORCAD ITCARD"
+
   ElavonTransactionActionCommonResponse:
     type: object
     properties:
@@ -3928,6 +4662,31 @@ definitions:
     allOf:
       - $ref: '#/definitions/ApiResponse'
 
+  ItCardEventActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  ItCardMaintenanceActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  ItCardFirmwareUpdateActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  ItCardSettlementActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  ItCardTransactionActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
   ElavonTransactionActionResponse:
     type: object
     allOf:
@@ -4208,6 +4967,58 @@ definitions:
         description: Error massge from device. Filled when returnCode<>0
 
 
+  ItCardAbortTransactionActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+
+  ItCardFirmwareUpdateEndActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: object
+
+  ItCardSettlementEndActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: object
+        allOf:
+          - $ref: '#/definitions/ItCardSettlementActionCommonResponse'
+        properties:
+          returnCode:
+            type: integer
+            format: int32
+            description: 0 - Success, any other value means error. Attribute 'error' contains human readable error.
+          error:
+            type: string
+            description: Error massge from device. Filled when returnCode<>0
+      stats:
+        type: object
+
+  ItCardTransactionEndActionResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ApiResponse'
+    properties:
+      terminal:
+        type: object
+        allOf:
+          - $ref: '#/definitions/ItCardTransactionActionCommonResponse'
+        properties:
+          returnCode:
+            type: integer
+            format: int32
+            description: 0 - Success, any other value means error. Attribute 'error' contains human readable error.
+          error:
+            type: string
+            description: Error massge from device. Filled when returnCode<>0
+      stats:
+        type: object
 
   ElavonTransactionEndActionResponse:
     type: object
