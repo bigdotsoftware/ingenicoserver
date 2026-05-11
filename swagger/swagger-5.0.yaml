@@ -2554,6 +2554,8 @@ definitions:
     properties:
       option:
         type: number
+        example: 1
+        description: "When `/itcard/v1/ingenico_status` returns the `option1` and `option2` fields (and optionally `timeout`), set the `option` attribute accordingly: `1` for `option1` or `2` for `option2`. Make sure that `/itcard/v1/ingenico_status` is called before the timeout value expires. Otherwise, the terminal will automatically select the default option."
 
   ElavonTransactionDataInputRequest:
     type: object
