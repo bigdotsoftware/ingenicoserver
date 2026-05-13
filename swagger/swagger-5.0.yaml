@@ -4307,6 +4307,9 @@ definitions:
       cashbackAmount:
         type: number
         example: 5000
+      aosa:
+        type: string
+        example: "0.00 PLN"
       dccTransactionAmountLabel:
         type: string
         example: "TRANSACTION AMOUNT"
