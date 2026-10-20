@@ -2654,6 +2654,9 @@ definitions:
         minimum: 0
         description: Amount in minor currency units (for example 1250 means 12.50 PLN).
         example: 1250
+      transactionReference:
+        type: string
+        example: ""
 
 
 
