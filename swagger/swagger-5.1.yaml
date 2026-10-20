@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
-  description: This is an Ingenico Server interface. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)
-  version: '5.0'
-  title: Ingenico Server API (eService, Fiserv/Polcard First Data, Elavon, PeP, ItCard Planet Pay)
+  description: This is an Ingenico Server API for eService, Fiserv/Polcard First Data, Elavon, PeP, ItCard Planet Pay. How to start [https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/](https://blog.bigdotsoftware.pl/ingenico-server-pierwsze-uzycie/)
+  version: '5.1'
+  title: Ingenico Server API
   contact:
     email: bigdotsoftware@bigdotsoftware.pl
 host: localhost:3020
@@ -2407,7 +2407,199 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/PolcardReportEndResponse'
+
+  /terminal/v1/device_status:
+    get:
+      tags:
+        - Terminal Universal API
+      summary: Check connection with terminal device
+      description: Provider-independent facade. The selected provider is specified by query parameter or server configuration.
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: cashRegisterNumber
+          in: query
+          type: integer
+          minimum: 1
+          description: Optional provider-specific cash register number.
+      responses:
+        '200':
+          description: Provider response wrapped in a common envelope.
+          schema:
+            $ref: '#/definitions/TerminalCommonResponse'
+        '400':
+          description: Missing or unsupported provider.
+        '501':
+          description: Provider adapter is not configured or operation is not supported.
+        '502':
+          description: Provider operation failed.
+  /terminal/v1/status:
+    get:
+      tags:
+        - Terminal Universal API
+      summary: Get normalized terminal status
+      description: Returns a common status and preserves the original provider response in providerData. canStartTransaction is true only when the normalized status is Idle.
+      produces:
+        - application/json
+      parameters:
+        - name: provider
+          in: query
+          type: string
+          enum: [eservice, pep, elavon, itcard, polcard]
+          description: Provider identifier; optional when a default provider is configured.
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: cashRegisterNumber
+          in: query
+          type: integer
+          minimum: 1
+          description: Optional provider-specific cash register number.
+      responses:
+        '200':
+          description: Normalized terminal status.
+          schema:
+            $ref: '#/definitions/TerminalStatusResponse'
+        '400':
+          description: Missing or unsupported provider.
+        '501':
+          description: Provider adapter is not configured or operation is not supported.
+        '502':
+          description: Provider operation failed.
+  /terminal/v1/transaction:
+    post:
+      tags:
+        - Terminal Universal API
+      summary: Start a terminal transaction
+      description: Common request envelope. The adapter must map type, amount and currency to the selected provider's native request schema. Provider-specific options may be passed in providerData.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: cashRegisterNumber
+          in: query
+          type: integer
+          minimum: 1
+          description: Optional provider-specific cash register number.
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/TerminalTransactionRequest'
+      responses:
+        '200':
+          description: Provider transaction response wrapped in a common envelope.
+          schema:
+            $ref: '#/definitions/TerminalCommonResponse'
+        '400':
+          description: Missing or unsupported provider, or invalid request.
+        '501':
+          description: Provider adapter is not configured or operation is not supported.
+        '502':
+          description: Provider operation failed.
+  /terminal/v1/transaction_end:
+    get:
+      tags:
+        - Terminal Universal API
+      summary: Get the result of the previous transaction
+      description: Returns the provider's transaction result. Provider-specific response fields are retained in providerData.
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+        - name: cashRegisterNumber
+          in: query
+          type: integer
+          minimum: 1
+          description: Optional provider-specific cash register number.
+      responses:
+        '200':
+          description: Transaction result wrapped in a common envelope.
+          schema:
+            $ref: '#/definitions/TerminalCommonResponse'
+        '400':
+          description: Missing or unsupported provider.
+        '501':
+          description: Provider adapter is not configured or operation is not supported.
+        '502':
+          description: Provider operation failed.
+
 definitions:
+  TerminalCommonResponse:
+    type: object
+    required:
+      - provider
+      - success
+    properties:
+      provider:
+        type: string
+        enum: [eservice, pep, elavon, itcard, polcard]
+      ok:
+        type: boolean
+        description: Indicates whether the provider response reports success.
+        example: true
+      error:
+        type: string
+        example: ""
+      watermark:
+        type: string
+        example: Wersja licencjonowana dla Firma Testowa wazna do 2028-07-07T19:19:51.000Z
+  TerminalStatusResponse:
+    allOf:
+      - $ref: '#/definitions/TerminalCommonResponse'
+      - type: object
+        properties:
+          connected:
+            type: boolean
+          transactionStatus:
+            type: string
+            enum:
+              - Idle
+              - Processing
+              - WaitingForEnd
+              - ReconciliationNeeded
+              - BatchCompleted
+              - Unknown
+          providerTransactionStatus:
+            type: string
+            description: Original provider-specific transaction status text.
+          canStartTransaction:
+            type: boolean
+            description: True only when the normalized transactionStatus is Idle.
+  TerminalTransactionRequest:
+    type: object
+    required:
+      - type
+    properties:
+      type:
+        type: string
+        description: Provider-independent transaction type; exact supported values depend on the provider adapter.
+        enum:
+          - purchase
+          - refund
+          - reversal
+          - completion
+          - preauthorization
+      amount:
+        type: integer
+        format: int64
+        minimum: 0
+        description: Amount in minor currency units (for example 1250 means 12.50 PLN).
+        example: 1250
+
 
 
   PePAutoTransactionBeginRequest:
