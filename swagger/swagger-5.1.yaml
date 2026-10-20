@@ -2437,7 +2437,7 @@ paths:
           description: Provider adapter is not configured or operation is not supported.
         '502':
           description: Provider operation failed.
-  /terminal/v1/status:
+  /terminal/v1/transaction_status:
     get:
       tags:
         - Terminal Universal API
@@ -2446,11 +2446,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: provider
-          in: query
-          type: string
-          enum: [eservice, pep, elavon, itcard, polcard]
-          description: Provider identifier; optional when a default provider is configured.
         - name: fulldebug
           in: query
           type: boolean
@@ -2471,7 +2466,7 @@ paths:
           description: Provider adapter is not configured or operation is not supported.
         '502':
           description: Provider operation failed.
-  /terminal/v1/transaction:
+  /terminal/v1/transaction_start:
     post:
       tags:
         - Terminal Universal API
@@ -2529,7 +2524,7 @@ paths:
         '200':
           description: Transaction result wrapped in a common envelope.
           schema:
-            $ref: '#/definitions/TerminalCommonResponse'
+            $ref: '#/definitions/TerminalTransactionEndResponse'
         '400':
           description: Missing or unsupported provider.
         '501':
@@ -2557,28 +2552,88 @@ definitions:
       watermark:
         type: string
         example: Wersja licencjonowana dla Firma Testowa wazna do 2028-07-07T19:19:51.000Z
+      raw:
+        type: object
+        description: Provider specific, full detailed response
   TerminalStatusResponse:
     allOf:
       - $ref: '#/definitions/TerminalCommonResponse'
       - type: object
         properties:
-          connected:
-            type: boolean
-          transactionStatus:
-            type: string
-            enum:
-              - Idle
-              - Processing
-              - WaitingForEnd
-              - ReconciliationNeeded
-              - BatchCompleted
-              - Unknown
-          providerTransactionStatus:
-            type: string
-            description: Original provider-specific transaction status text.
-          canStartTransaction:
-            type: boolean
-            description: True only when the normalized transactionStatus is Idle.
+          terminal:
+            type: object
+            properties:
+              returnCode:
+                type: number
+              transactionStatusText:
+                type: string
+                enum:
+                  - idle
+                  - processing
+                  - waitingforaction
+                  - waitingforcard
+                  - processed
+                  - unknown
+  TerminalTransactionEndResponse:
+    allOf:
+      - $ref: '#/definitions/TerminalCommonResponse'
+      - type: object
+        properties:
+          terminal:
+            type: object
+            properties:
+              returnCode:
+                type: number
+                example: 0
+              transactionStatus:
+                type: string
+                example: approved
+                enum:
+                  - approved
+                  - declined
+                  - other
+                  - unknown
+              authorizationCode:
+                type: string
+                example: 412427
+              date:
+                type: string
+                example: "2026-10-20"
+              time:
+                type: string
+                example: "21:24:27"
+              merchantID:
+                type: string
+                example: "2992339086"
+              readerUsed:
+                type: string
+                example: "contactless"
+                enum:
+                  - unknown
+                  - chip
+                  - magnetic
+                  - contactless
+                  - manual
+              cardsetName:
+                type: string
+                example: "Visa"
+              maskedCardNumber:
+                type: string
+                example: "416598******4953"
+              transactionCurrency:
+                type: string
+                example: "985"
+              aid:
+                type: string
+                example: "A0000000031010"
+              isDCC:
+                type: boolean
+                example: false
+              number:
+                type: string
+                example: 43
+
+
   TerminalTransactionRequest:
     type: object
     required:
