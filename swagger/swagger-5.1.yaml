@@ -2421,11 +2421,6 @@ paths:
           in: query
           type: boolean
           default: false
-        - name: cashRegisterNumber
-          in: query
-          type: integer
-          minimum: 1
-          description: Optional provider-specific cash register number.
       responses:
         '200':
           description: Provider response wrapped in a common envelope.
@@ -2450,11 +2445,6 @@ paths:
           in: query
           type: boolean
           default: false
-        - name: cashRegisterNumber
-          in: query
-          type: integer
-          minimum: 1
-          description: Optional provider-specific cash register number.
       responses:
         '200':
           description: Normalized terminal status.
@@ -2481,11 +2471,6 @@ paths:
           in: query
           type: boolean
           default: false
-        - name: cashRegisterNumber
-          in: query
-          type: integer
-          minimum: 1
-          description: Optional provider-specific cash register number.
         - in: body
           name: body
           required: true
@@ -2515,11 +2500,6 @@ paths:
           in: query
           type: boolean
           default: false
-        - name: cashRegisterNumber
-          in: query
-          type: integer
-          minimum: 1
-          description: Optional provider-specific cash register number.
       responses:
         '200':
           description: Transaction result wrapped in a common envelope.
