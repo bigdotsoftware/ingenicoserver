@@ -2532,6 +2532,27 @@ paths:
         '502':
           description: Provider operation failed.
 
+  /terminal/v1/settlement_start:
+    post:
+      tags:
+        - Terminal Universal API
+      summary: Send Transactions - closing business day
+      description: Transfer current transactions to the external system (FDP's clearing host).
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: fulldebug
+          in: query
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/TerminalSettlementResponse'
+
 definitions:
   TerminalCommonResponse:
     type: object
@@ -2574,6 +2595,11 @@ definitions:
                   - waitingforcard
                   - processed
                   - unknown
+  TerminalSettlementResponse:
+    type: object
+    allOf:
+      - $ref: '#/definitions/TerminalCommonResponse'
+
   TerminalTransactionEndResponse:
     allOf:
       - $ref: '#/definitions/TerminalCommonResponse'
@@ -2629,6 +2655,9 @@ definitions:
               number:
                 type: string
                 example: 43
+              authorizedAmount:
+                type: number
+                example: 2000
 
 
   TerminalTransactionRequest:
