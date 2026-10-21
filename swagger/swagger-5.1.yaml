@@ -2628,6 +2628,9 @@ definitions:
               merchantID:
                 type: string
                 example: "2992339086"
+              terminalID:
+                type: string
+                example: "00005332"
               readerUsed:
                 type: string
                 example: "contactless"
@@ -2655,7 +2658,7 @@ definitions:
               number:
                 type: string
                 example: 43
-              authorizedAmount:
+              amount:
                 type: number
                 example: 2000
 
