@@ -2582,9 +2582,6 @@ definitions:
           terminal:
             type: object
             properties:
-              returnCode:
-                type: number
-                example: 0
               transactionStatus:
                 type: string
                 example: approved
